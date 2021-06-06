@@ -1,4 +1,10 @@
-public class ClientThread extends Chatserver implements Runnable{
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
+
+public class ClientThread extends ChatServer implements Runnable{
 	
 	private Socket socket;
 	private BufferedReader in;
@@ -7,8 +13,8 @@ public class ClientThread extends Chatserver implements Runnable{
 	public ClientThread(Socket socket){
 			this.socket=socket;
 	}
-	
-	@override
+
+	@Override
 	public void run(){
 		try{
 			out = new PrintWriter(socket.getOutputSteam(), true);
@@ -16,7 +22,7 @@ public class ClientThread extends Chatserver implements Runnable{
 			
 			//While the socket is still connected, alive and not fucking over my soul
 			while(!socket.isClosed()){
-					String inpuy = in.ReadLine();
+					String input = in.ReadLine();
 					if(input != null){
 						for(ClientThread client : clients){
 							client.getWriter().write(inputs);
