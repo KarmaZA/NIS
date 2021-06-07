@@ -3,31 +3,41 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.Scanner;
 
-public class ClientThread extends ChatServer implements Runnable{
+public class ClientThread implements Runnable{
 	
 	private Socket socket;
-	private BufferedReader in;
+	private Scanner in;
+	private ChatServer server;
+
 	private PrintWriter out;
+
 	
-	public ClientThread(Socket socket){
+	public ClientThread(ChatServer cs,Socket socket){
 			this.socket=socket;
+			this.server = cs;
 	}
 
 	@Override
 	public void run(){
 		try{
-			out = new PrintWriter(socket.getOutputSteam(), true);
-			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			out = new PrintWriter(socket.getOutputStream(), false);//true?
+			in = new Scanner(socket.getInputStream());
 			
 			//While the socket is still connected, alive and not fucking over my soul
 			while(!socket.isClosed()){
-					String input = in.ReadLine();
-					if(input != null){
-						for(ClientThread client : clients){
-							client.getWriter().write(inputs);
+				if(in.hasNextLine()) {
+					String input = in.nextLine();
+					// NOTE: if you want to check server can read input, uncomment next line and check server file console.
+					for (ClientThread client : server.getClients()) {
+						PrintWriter clientOut = client.getWriter();
+						if(clientOut != null){
+							clientOut.write(input + "\r\n");
+							clientOut.flush();
 						}
 					}
+				}
 			}
 		}catch (IOException e){
 			e.printStackTrace();

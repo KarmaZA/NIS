@@ -1,8 +1,14 @@
 import java.io.IOException;
 import java.net.Socket;
+import java.util.Scanner;
 
 
 public class Client{
+	private String userName;
+	private String serverHost;
+	private int serverPort = 4444;
+	private Scanner userInputScanner;
+
 	public static void main(String[] args){
 		Socket socket = null;
 		int portNumber = 4444; //We Make sure it's connecting to the port with the listener on it

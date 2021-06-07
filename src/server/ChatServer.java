@@ -42,7 +42,7 @@ public class ChatServer{
 		while(true){
 			try{		//infinite loop
 				Socket socket = serverSocket.accept();
-				ClientThread client = new ClientThread(socket);
+				ClientThread client = new ClientThread(this, socket);
 				Thread thread = new Thread(client);
 				thread.start(); //Please don't give concurrency issues
 				clients.add(client);
@@ -51,4 +51,6 @@ public class ChatServer{
 			}
 		}
 	}
+
+	public List<ClientThread> getClients(){  return clients; }
 }

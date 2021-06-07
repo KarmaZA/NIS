@@ -1,8 +1,5 @@
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.net.Socket;
-import java.io.IOException;
+import java.io.*;
 
 public class ServerThread implements Runnable{
 	private Socket socket;
@@ -22,7 +19,7 @@ public class ServerThread implements Runnable{
 			serverIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			userIn = new BufferedReader(new InputStreamReader(System.in));
 			
-			//Run whiole the server is alove
+			//Run while the server is alive
 			while(!socket.isClosed()){
 				if(serverIn.ready()){
 					String input = serverIn.readLine();
