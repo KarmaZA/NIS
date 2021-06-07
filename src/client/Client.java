@@ -4,7 +4,7 @@ import java.util.Scanner;
 
 
 public class Client{
-	private String userName;
+	private static String userName = "Jonno";
 	private String serverHost;
 	private int serverPort = 4444;
 	private Scanner userInputScanner;
@@ -15,7 +15,7 @@ public class Client{
 		try{
 			socket = new Socket("localhost",portNumber);
 			Thread.sleep(1000);
-			Thread server = new Thread(new ServerThread(socket));
+			Thread server = new Thread(new ServerThread(socket, userName));
 			server.start();
 		} catch (IOException e) {
 			System.err.println("Client.java;;No connection made on port: " + portNumber);

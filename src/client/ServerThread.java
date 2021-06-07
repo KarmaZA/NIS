@@ -1,5 +1,7 @@
 import java.net.Socket;
 import java.io.*;
+import java.util.LinkedList;
+import java.util.Scanner;
 
 public class ServerThread implements Runnable{
 	private Socket socket;
@@ -7,28 +9,51 @@ public class ServerThread implements Runnable{
 	private BufferedReader serverIn;
 	private BufferedReader userIn;
 	private PrintWriter out;
+	private final LinkedList<String> messagesToSend;
+	private boolean hasMessage = false;
 	
-	public ServerThread(Socket socket){
-			this.socket = socket;
+	public ServerThread(Socket socket, String username){
+
+		this.socket = socket;
+		name = username;
+		messagesToSend = new LinkedList<String>();
+	}
+
+	public void addNextMessage(String message){
+		synchronized (messagesToSend){
+			hasMessage = true;
+			messagesToSend.push(message);
+		}
 	}
 
 	@Override
 	public void run(){
+
+		System.out.println("Welcome: " + name);
+		System.out.println("Local port: " + socket.getLocalPort());
+		System.out.println("Server= " + socket.getRemoteSocketAddress() + ":" + socket.getPort());
+
 		try{
-			out = new PrintWriter(socket.getOutputStream(), true);
-			serverIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-			userIn = new BufferedReader(new InputStreamReader(System.in));
-			
-			//Run while the server is alive
+			PrintWriter serverOut = new PrintWriter(socket.getOutputStream(), false);
+			InputStream serverInStream = socket.getInputStream();
+			Scanner serverIn = new Scanner(serverInStream);
+			// BufferedReader userBr = new BufferedReader(new InputStreamReader(userInStream));
+			// Scanner userIn = new Scanner(userInStream);
+
 			while(!socket.isClosed()){
-				if(serverIn.ready()){
-					String input = serverIn.readLine();
-					if(input != null){
-							System.out.println(input);
+				if(serverInStream.available() > 0){
+					if(serverIn.hasNextLine()){
+						System.out.println(serverIn.nextLine());
 					}
 				}
-				if(userIn.ready()) {
-					out.println(name + " > " + userIn.readLine());
+				if(hasMessage){
+					String nextSend = "";
+					synchronized(messagesToSend){
+						nextSend = messagesToSend.pop();
+						hasMessage = !messagesToSend.isEmpty();
+					}
+					serverOut.println(name + " > " + nextSend);
+					serverOut.flush();
 				}
 			}
 		} catch (IOException e){
