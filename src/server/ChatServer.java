@@ -9,7 +9,7 @@ import java.util.List;
 public class ChatServer{
 
 	private ServerSocket serverSocket;
-	private static int portNumber = 4444;
+	private static int portNumber = 4446;
 	private int serverPort;
 	private List<ClientThread> clients;
 
@@ -30,8 +30,10 @@ public class ChatServer{
 			acceptClients(serverSocket); //This will need to be changed to only deal with Alice and Bob
 		} catch (IOException e){
 			System.err.println("Could not set up listener on: " + portNumber);
+			e.printStackTrace();
 			System.exit(1);
 		}
+		System.out.println("The server has started.");
 	}
 
 	public void acceptClients(ServerSocket serverSocket){
@@ -48,6 +50,7 @@ public class ChatServer{
 				clients.add(client);
 			} catch (IOException e) {
 				System.out.println("Accept Failure on port: " + portNumber);
+				e.printStackTrace();
 			}
 		}
 	}
