@@ -1,18 +1,22 @@
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.security.*;
+import org.bouncycastle.openssl;
 
 //A function to generate a public/private RSA key set
 	/* This function will take in two file names as input and save the keys
 	to those files.
 	 */
-public class KeyGenerator{
+class KeyGenerator{
+    public static void main(String[] args) throws NoSuchAlgorithmException {
+        generateKeyPair("public.txt","private.txt");
+    }
 
-    private void generateKeyPair(String publicFile, String privateFile) throws NoSuchAlgorithmException {
+    private static void generateKeyPair(String publicFile, String privateFile) throws NoSuchAlgorithmException {
         try {
             // fix line below too
-            // Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-            KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");//,"BC);
+            Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+            KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA","BC");
             //BASE64Encoder
 
             SecureRandom rand = secureRandomGen();

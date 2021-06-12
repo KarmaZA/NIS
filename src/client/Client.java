@@ -1,8 +1,8 @@
 import java.io.IOException;
 import java.net.Socket;
 import java.util.Scanner;
-import java.security.*;
-import sun.misc.BASE64Encoder;
+//import java.security.*;
+//import sun.misc.BASE64Encoder;
 
 
 

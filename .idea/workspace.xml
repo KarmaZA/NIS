@@ -2,7 +2,14 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="dc3e1ea2-3b77-47f8-91ba-81d1e6514c54" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/NIS/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/NIS/ChatServer.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/NIS/ChatServer.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/NIS/Client.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/NIS/Client.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/NIS/ClientThread.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/NIS/ClientThread.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/NIS/ServerThread.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/NIS/ServerThread.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/client/Client.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/Client.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/Keygenerator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/Keygenerator.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -31,12 +38,24 @@
     <property name="last_opened_file_path" value="$PROJECT_DIR$/out/production/NIS/ChatServer.class" />
   </component>
   <component name="RunManager">
+    <configuration name="KeyGenerator" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="KeyGenerator" />
+      <module name="NIS" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration default="true" type="Java Scratch" singleton="false">
       <option name="MAIN_CLASS_NAME" value="ChatServer" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Application.KeyGenerator" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
