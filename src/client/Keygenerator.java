@@ -1,9 +1,17 @@
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.security.*;
-import org.bouncycastle.openssl;
+import java.util.Base64;
+//import org.bouncycastle.openssl;
 
-//A function to generate a public/private RSA key set
+
+/*TODO
+        Get bouncycastle to work to test properly
+        get correct version of .getInstance() as per project specs
+        Implement Base64 in key storage
+        Find a better way to store and deal with the keys.
+ */
+
 	/* This function will take in two file names as input and save the keys
 	to those files.
 	 */
@@ -12,11 +20,17 @@ class KeyGenerator{
         generateKeyPair("public.txt","private.txt");
     }
 
+        /**
+         *
+         * @param publicFile name of the file for the private key.
+         * @param privateFile name of the file for the public key.
+         * @throws NoSuchAlgorithmException
+         */
     private static void generateKeyPair(String publicFile, String privateFile) throws NoSuchAlgorithmException {
         try {
             // fix line below too
-            Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-            KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA","BC");
+            //Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+            KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");//,"BC");
             //BASE64Encoder
 
             SecureRandom rand = secureRandomGen();
@@ -26,35 +40,35 @@ class KeyGenerator{
             Key pubKey = keys.getPublic();
             Key privKey = keys.getPrivate();
 
-            System.out.println("publicKey : " + pubKey.getEncoded());
-            System.out.println("privateKey : " +privKey.getEncoded());
+            System.out.println("publicKey : " + Base64.getEncoder().encodeToString(pubKey.getEncoded()));
+            System.out.println("privateKey : " +Base64.getEncoder().encodeToString(privKey.getEncoded()));
 
             //write to files
             BufferedWriter BWout = new BufferedWriter(new FileWriter(publicFile));
-            BWout.write(pubKey.getEncoded() + "");
+            BWout.write("" + Base64.getEncoder().encodeToString(pubKey.getEncoded()));
             BWout.close();
 
             BWout = new BufferedWriter(new FileWriter(privateFile));
-            BWout.write("" + privKey);
+            BWout.write("" + Base64.getEncoder().encodeToString(privKey.getEncoded()));
             BWout.close();
 
-            // We should write these in some form of encryption like Base64. I'm doing this in a break and don't have time
-            // to work it out now. I'll test this and get it running on monday
+
         } catch (Exception e){
             e.printStackTrace();
         }
 
     }
 
-    public static SecureRandom secureRandomGen(){ return new FixedRand();}
+    private static SecureRandom secureRandomGen(){ return new FixedRand();}
 
     private static class FixedRand extends SecureRandom{
         MessageDigest sha;
         byte[] state;
 
-        /*
-        Class constructor
+        /**
+         * Constructor that set up the SHA encryption level and the state,
          */
+
         FixedRand(){
             try{
                 this.sha = MessageDigest.getInstance("SHA-1"); //Placeholder please can we use better encryption
@@ -64,6 +78,10 @@ class KeyGenerator{
             }
         }
 
+        /**
+         *
+         * @param bytes
+         */
         public void nextBytes(byte[] bytes){
             int offset = 0;
             sha.update(state);
