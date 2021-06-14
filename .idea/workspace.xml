@@ -2,14 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="dc3e1ea2-3b77-47f8-91ba-81d1e6514c54" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/src/authenticationServer/AuthenticationServer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/client/Alice.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/client/Bob.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.name" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.name" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/NIS/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/NIS/ChatServer.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/NIS/ChatServer.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/NIS/Client.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/NIS/Client.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/NIS/ClientThread.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/NIS/ClientThread.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/NIS/ServerThread.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/NIS/ServerThread.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/client/Client.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/Client.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/client/Keygenerator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/Keygenerator.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/server/ChatServer.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/server/ClientThread.java" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -36,6 +35,12 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/out/production/NIS/ChatServer.class" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\Karma\Desktop\NIS\src\client" />
+      <recent name="C:\Users\Karma\Desktop\NIS\src" />
+    </key>
   </component>
   <component name="RunManager">
     <configuration name="KeyGenerator" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
@@ -67,5 +72,16 @@
       <updated>1623011809299</updated>
     </task>
     <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
 </project>
