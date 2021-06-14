@@ -1,0 +1,72 @@
+Relevent Excepts from brief.
+
+Implement(ing) a small Pretty Good Privacy (PGP) cryptosystem that combines shared key encryption, public-key encryption and certificates.
+
+Thus, the system should focus on validating key authenticity and simulating / replicating message confidentiality and authentication aspects of PGP (see course slides for Topic 4, Slide 101 “PGP Cryptographic Functions” as a guide). 
+The Certification Authority role required is more X.509-like than PGP-like.
+
+
+Create two Client applications named “Alice” and “Bob” that initially exchange and validate each other’s public keys issued by a Certification Authority that they both trust. 
+Thereafter, messages should be transmitted to each other, using the shared key, private key, public key, hashing and compression functions, in the same manner as PGP.
+
+session, the sender should be able to load an image and encode it into a string format that will serve as part of the message. 
+In addition, a text caption of the image will serve as the other part of the message
+
+The emphasis is on image transmission
+
+a two-way communication session, earns full marks.
+
+Moreover, a Client application may represent a class or separate instance of the system running, as long as there are two entities that may communicate
+
+It is important to note that the trusted third-party interaction (obtaining certificates from the Certification Authority) does not have to exist as a third Client in your final submission. However, certificates must be generated and exchanged for public-key authentication
+
+
+The sending and receiving applications are expected to have:
+ A private and public key pair of their own
+ The public key of the Certification Authority
+ A certificate (containing the client’s own public key) signed by the Certification Authority
+
+The sending and receiving applications are expected to:
+ Setup a connection for communication
+ Exchange certificates
+ Load / encode image files and read in captions
+ Save decoded strings as a file and display captions
+ Encrypt, compress, hash messages (and the reverse)
+ Exchange encrypted messages
+
+please include debugging statements,
+
+Communications implementation
+ Security implementation
+ Overall system design and functionality to achieve stated goal
+ Evidence of testing
+
+A short write-up (no more than 5 pages) is required to explain and document your cryptosystem implementation, communication connectivity model, key management, choice of cryptographic algorithms, testing procedure and assumptions made.
+
+------------------------------------------------------------------------------------------------
+Project
+------------------------------------------------------------------------------------------------
+Set up a shared key communication session between Alice and Bob used their Priv and Pub keys and the Auth server.
+
+To start we're going to set up Alice as the sender and Bob as the receiver.
+	Later we'll turn these two into the difference instances of the same class.
+
+We need to get bouncycastle or whichever encryption library we use set up.
+
+The key gen class needs to be updated to use “AES/CBC/PKCS5Padding”, which should be fine once bouncycastle is set up.
+	The keys also need to be stored in some form of encrpytion.
+
+Does every know how to format comments so that they can gen docs?
+
+First we need to set up a connection betwee Alice and the Auth Server and Bob.
+	Then implement the 6 step auth program
+	Send string from Alice to bob
+	Encode String with PGP
+	Add image to string
+	all encoded with PGP
+		End of Phase 1. Next make Alice and Bob the same class and redo.
+
+
+WRITE A DOC COMMENT ON EVERY FUNCTION!
+
+

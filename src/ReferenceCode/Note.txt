@@ -1,0 +1,5 @@
+This is the code from my chat program. 
+
+I tried to get Chelsea's into the git repo but git was being Whiny and didn't want to.
+Refer to the code and the link in the program but please don't think its a solution
+	especially not the best solution.
