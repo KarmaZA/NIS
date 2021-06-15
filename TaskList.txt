@@ -69,4 +69,8 @@ First we need to set up a connection betwee Alice and the Auth Server and Bob.
 
 WRITE A DOC COMMENT ON EVERY FUNCTION!
 
+Authentication server (key distribution center)
+	Has two master keys for alice and bob
+	Alice and bob each share a different master key iwth the kdc
+
 

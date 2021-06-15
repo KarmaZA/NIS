@@ -4,7 +4,7 @@ import java.net.Socket;
 import java.util.Scanner;
 
 class Alice{
-    private Socket socket;
+    private static Socket socket;
     private String username = "Alice";
     private Scanner scanner = new Scanner(System.in);
     private int portUpload = 45554;
@@ -16,7 +16,24 @@ class Alice{
      * @param args
      */
     public static void main(String[] args){
+        try{
+            socket = new Socket("localhost", 45554);
+            System.out.println("Socket on Alice set up");
+        } catch (Exception e){
+            System.out.println("I have nothing to connect to :'(");
+            e.printStackTrace();
+        }
 
+        try {
+            String toSend = "This is a test";
+            PrintStream out = new PrintStream(socket.getOutputStream());
+            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            out.println(toSend);
+            System.out.println("Sent?");
+        } catch (IOException e){
+            System.out.println("No message, you've been ghosted");
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -27,11 +44,35 @@ class Alice{
     private void SendFile(String file, String caption) throws IOException{
         try{
             socket = new Socket(IP, portUpload);
+            System.out.println("Socket on Alice set up");
         } catch (Exception e){
             e.printStackTrace();
         }
 
-        Scanner in = new Scanner(socket.getInputStream());
+        String toSend = "This is a test";
+        PrintStream out = new PrintStream( socket.getOutputStream() );
+        BufferedReader in = new BufferedReader( new InputStreamReader( socket.getInputStream() ) );
+        out.println(toSend);
+        System.out.println("Sent?");
+        // Follow the HTTP protocol of GET <path> HTTP/1.0 followed by an empty line
+        //out.println( "GET " + path + " HTTP/1.0" );
+        //out.println();
+
+        // Read data from the server until we finish reading the document
+        //String line = in.readLine();
+        //while( line != null )
+        //{
+           // System.out.println( line );
+           // line = in.readLine();
+       // }
+
+
+        // Close our streams
+        in.close();
+        out.close();
+        socket.close();
+
+        /*Scanner in = new Scanner(socket.getInputStream());
         String fileName = JOptionPane.showInputDialog("Enter the filename you wish to upload:");
         File f = new File(file);
 
@@ -62,9 +103,6 @@ class Alice{
             }
         } catch (IOException e){
             e.printStackTrace();
-        }
-
-
-
+        }*/
     }
 }
