@@ -72,7 +72,9 @@ class RequestHandler extends Thread
 
 			String line = in.readLine();
 			System.out.println(line);
-
+			//Bob's reply
+			out.write("Hi Alice I'm Bob. Don't we need to authenticate to talk");
+			out.flush();
 			// Close our connection
 			in.close();
 			out.close();

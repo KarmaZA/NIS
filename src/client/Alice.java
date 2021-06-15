@@ -30,6 +30,8 @@ class Alice{
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             out.println(toSend);
             System.out.println("Sent?");
+            toSend = in.readLine();
+            System.out.println(toSend);
         } catch (IOException e){
             System.out.println("No message, you've been ghosted");
             e.printStackTrace();
