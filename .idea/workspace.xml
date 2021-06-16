@@ -3,11 +3,10 @@
   <component name="ChangeListManager">
     <list default="true" id="dc3e1ea2-3b77-47f8-91ba-81d1e6514c54" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/NIS/Alice.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/NIS/Alice.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/NIS/Bob.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/NIS/Bob.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/NIS/KeyGenerator$FixedRand.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/NIS/KeyGenerator$FixedRand.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/NIS/KeyGenerator.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/NIS/KeyGenerator.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/NIS.iml" beforeDir="false" afterPath="$PROJECT_DIR$/NIS.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/Alice.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/Alice.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/client/Bob.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/Bob.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/Keygenerator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/Keygenerator.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/client/SecurityFunctions.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/SecurityFunctions.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -187,6 +186,10 @@
     <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.2" />
+    <property name="last_opened_file_path" value="D:/Software/jre1.8.0_144/lib/ext/bcprov-jdk15on-169.jar" />
+    <property name="project.structure.last.edited" value="Modules" />
+    <property name="project.structure.proportion" value="0.0" />
+    <property name="project.structure.side.proportion" value="0.0" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">

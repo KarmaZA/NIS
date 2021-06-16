@@ -4,17 +4,25 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.Key;
+import java.security.NoSuchAlgorithmException;
 
 class Bob{
 	private static ServerSocket serverSocket;
 	private String IP = "localhost";
 	private static int portNumber = 45554;
+	public static Key publicKey;
+	private static Key privateKey;
 
 
 	public static void main(String[] args){
-		/*Key[] keypair = KeyGenerator.generateKeyPair();
-		publicKey = keypair[0];
-		privateKey = keypair[1];
+		try {
+			Key[] keypair = KeyGenerator.generateKeyPair();
+			publicKey = keypair[0];
+			privateKey = keypair[1];
+		} catch (NoSuchAlgorithmException e){
+			System.out.println("Could not generate key pair");
+			e.printStackTrace();
+		}
 		startServer();
 		System.out.println("Bob is bobbing");
 		try {
