@@ -169,17 +169,7 @@ public class SecurityFunctions {
         return new String(decryptedText);
     }
 
-    public static byte[] concatenateArrays(byte[] arr1, byte[] arr2){
-        byte[] finByteArr = new byte[arr1.length+arr2.length];
-        for(int i = 0; i < arr1.length; i++){
-            finByteArr[i]=arr1[i];
-        }
-        for(int j = arr1.length; j < arr2.length; j++) {
-            finByteArr[j]=arr2[j-arr1.length];
 
-        }
-        return finByteArr;
-    }
 
     public static byte[] encryptWithPublicKey (String message, Key PublicKey){
         try {
