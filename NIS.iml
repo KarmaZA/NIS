@@ -21,6 +21,7 @@
       <library>
         <CLASSES>
           <root url="jar://C:/Program Files (x86)/Java/jre1.8.0_261/lib/ext/bcpg-jdk15on-169.jar!/" />
+          <root url="jar:///usr/share/java/bcprov.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
