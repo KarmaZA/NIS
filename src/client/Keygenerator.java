@@ -2,7 +2,6 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.security.*;
 import java.util.Base64;
-import org.bouncycastle.*;  
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.crypto.*;
 import org.bouncycastle.*;
@@ -20,46 +19,49 @@ import org.bouncycastle.*;
 	 */
 class KeyGenerator{
     public static void main(String[] args) throws NoSuchAlgorithmException {
-        generateKeyPair("public.txt","private.txt");
+//        generateKeyPair("public.txt","private.txt");
     }
 
-        /**
-         *
-         * @param publicFile name of the file for the private key.
-         * @param privateFile name of the file for the public key.
-         * @throws NoSuchAlgorithmException
-         */
-    private static void generateKeyPair(String publicFile, String privateFile) throws NoSuchAlgorithmException {
+
+    //private static Key[] generateKeyPair(String publicFile, String privateFile) throws NoSuchAlgorithmException {
+    public static Key[] generateKeyPair() throws NoSuchAlgorithmException {
         try {
             // fix line below too
             Security.addProvider(new BouncyCastleProvider());
-            KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");//,"BC");
+            KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA","BC");
             //BASE64Encoder
-
             SecureRandom rand = secureRandomGen();
-            generator.initialize(1024, rand); //Keysize and fixed rand
+//            generator.initialize(1024, rand); //Keysize and fixed rand
+            generator.initialize(1024); //Keysize and fixed rand
 
             KeyPair keys = generator.generateKeyPair();
             Key pubKey = keys.getPublic();
             Key privKey = keys.getPrivate();
 
-
             System.out.println("publicKey : " + Base64.getEncoder().encodeToString(pubKey.getEncoded()));
             System.out.println("privateKey : " +Base64.getEncoder().encodeToString(privKey.getEncoded()));
+            System.out.println();
 
-            //write to files
-            BufferedWriter BWout = new BufferedWriter(new FileWriter(publicFile));
-            BWout.write("" + Base64.getEncoder().encodeToString(pubKey.getEncoded()));
-            BWout.close();
+            Key[] toReturn= new Key[2];
+            toReturn[0] = pubKey;
+            toReturn[1] = privKey;
+            return toReturn;
 
-            BWout = new BufferedWriter(new FileWriter(privateFile));
-            BWout.write("" + Base64.getEncoder().encodeToString(privKey.getEncoded()));
-            BWout.close();
+
+//            //write to files
+//            BufferedWriter BWout = new BufferedWriter(new FileWriter(publicFile));
+//            BWout.write("" + Base64.getEncoder().encodeToString(pubKey.getEncoded()));
+//            BWout.close();
+//
+//            BWout = new BufferedWriter(new FileWriter(privateFile));
+//            BWout.write("" + Base64.getEncoder().encodeToString(privKey.getEncoded()));
+//            BWout.close();
 
 
         } catch (Exception e){
             e.printStackTrace();
         }
+        return null; //if it didnt work
 
     }
 

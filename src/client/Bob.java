@@ -11,6 +11,9 @@ class Bob{
 
 
 	public static void main(String[] args){
+		Key[] keypair = KeyGenerator.generateKeyPair();
+		publicKey = keypair[0];
+		privateKey = keypair[1];
 		startServer();
 		System.out.println("Bob is bobbing");
 		try {
