@@ -1,12 +1,18 @@
+import javax.crypto.SecretKey;
 import javax.swing.*;
 import java.io.*;
 import java.net.Socket;
+import java.security.Key;
+import java.security.NoSuchAlgorithmException;
 import java.util.Scanner;
 
 class Alice{
     private String username = "Alice";
     private Scanner scanner = new Scanner(System.in);
     private static int portUpload = 45554;
+
+    public static Key publicKey;
+    public static Key privateKey; //Change back to private
 
     final String IP = "localhost";
 
@@ -15,7 +21,30 @@ class Alice{
      * @param args
      */
     public static void main(String[] args){
-        //Socket socket = Connect(portUpload);
+        //get keys
+        try {
+            Key[] keypair = KeyGenerator.generateKeyPair();
+            publicKey = keypair[0];
+            privateKey = keypair[1];
+            SecretKey sharedkey = KeyGenerator.genSharedKey();
+            try {
+                byte[] encryptedonPGP = SecurityFunctions.PGPConfidentialityEncrypt("hello world", KeyGenerator.genSharedKey(), Alice.publicKey);
+                String returned = SecurityFunctions.PGPConfidentialityDecrypt(encryptedonPGP, Alice.privateKey);
+                System.out.println(returned);
+
+                //this shows that the functions do work independently
+                System.out.println(SecurityFunctions.decryptWithSharedKey(SecurityFunctions.encryptWithSharedKey("Hello world".getBytes(), sharedkey), sharedkey));
+            } catch (Exception e){
+                System.out.println("PGPConfidentialityEncrypt IO error || decryptWithSharedKey exception");
+                e.printStackTrace();
+            }
+        } catch (NoSuchAlgorithmException e){
+            System.out.println("Could not generate Key Pair");
+            e.printStackTrace();
+        }
+
+
+
         if(AuthenticateCommunication(Connect(portUpload))){
             //Write code for communication here
         } else {

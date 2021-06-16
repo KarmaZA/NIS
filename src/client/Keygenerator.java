@@ -6,6 +6,18 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.crypto.*;
 import org.bouncycastle.*;
 
+import javax.crypto.SecretKey;
+//package com.javainterviewpoint;
+
+import java.security.SecureRandom;
+import java.util.Base64;
+
+import javax.crypto.Cipher;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
+
+import javax.crypto.spec.SecretKeySpec;
+
 
 /*TODO
         Get bouncycastle to work to test properly
@@ -14,9 +26,9 @@ import org.bouncycastle.*;
         Find a better way to store and deal with the keys.
  */
 
-	/* This function will take in two file names as input and save the keys
-	to those files.
-	 */
+/* This function will take in two file names as input and save the keys
+to those files.
+ */
 class KeyGenerator{
     public static void main(String[] args) throws NoSuchAlgorithmException {
 //        generateKeyPair("public.txt","private.txt");
@@ -38,6 +50,7 @@ class KeyGenerator{
             Key pubKey = keys.getPublic();
             Key privKey = keys.getPrivate();
 
+            System.out.println("here 4");
             System.out.println("publicKey : " + Base64.getEncoder().encodeToString(pubKey.getEncoded()));
             System.out.println("privateKey : " +Base64.getEncoder().encodeToString(privKey.getEncoded()));
             System.out.println();
@@ -63,6 +76,28 @@ class KeyGenerator{
         }
         return null; //if it didnt work
 
+    }
+
+    public static byte[] genIV(){
+        // Generating IV.
+        byte[] IV = new byte[16];
+        SecureRandom random = new SecureRandom();
+        random.nextBytes(IV);
+        return IV;
+
+    }
+
+    public static SecretKey genSharedKey(){
+
+        // SecureRandom is expensive to initialize (takes several milliseconds) –
+        // consider keeping the instance around if you are generating many keys.
+        SecureRandom random = new SecureRandom();
+        byte[] keyBytes = new byte[16];
+        random.nextBytes(keyBytes);
+        SecretKeySpec sharedKey = new SecretKeySpec(keyBytes, "AES");
+
+        System.out.println("sharedKey : " + Base64.getEncoder().encodeToString(sharedKey.getEncoded()));
+        return sharedKey;
     }
 
     private static SecureRandom secureRandomGen(){ return new FixedRand();}
