@@ -8,12 +8,15 @@ import java.security.NoSuchAlgorithmException;
 
 class Bob{
 	private static ServerSocket serverSocket;
-	private String IP = "localhost";
-	private static int portNumber = 45554;
+	//private static final String IP = "localhost";
+	private static final int portNumber = 45554;
 	public static Key publicKey;
 	private static Key privateKey;
 
-
+	/**
+	 *
+	 * @param args String array to take input into the main method
+	 */
 	public static void main(String[] args){
 		try {
 			Key[] keypair = KeyGenerator.generateKeyPair();
@@ -36,6 +39,9 @@ class Bob{
 		}*/
 	}
 
+	/**
+	 * starts the ServerSocket in an try catch block in case of an IO Exception
+	 */
 	private static void startServer(){
 		try{
 			serverSocket = new ServerSocket(portNumber);
@@ -46,14 +52,23 @@ class Bob{
 
 }
 
+/**
+ *
+ */
 class RequestHandler extends Thread
 {
+	/**
+	 *
+	 */
 	private Socket socket;
 	RequestHandler( Socket socket )
 	{
 		this.socket = socket;
 	}
 
+	/**
+	 *
+	 */
 	@Override
 	public void run()
 	{

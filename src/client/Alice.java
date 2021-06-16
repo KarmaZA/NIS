@@ -1,5 +1,4 @@
 import javax.crypto.SecretKey;
-import javax.swing.*;
 import java.io.*;
 import java.net.Socket;
 import java.security.Key;
@@ -18,7 +17,7 @@ class Alice{
 
     /**
      *
-     * @param args
+     * @param args String array to take input into the main method
      */
     public static void main(String[] args){
         //get keys
@@ -42,9 +41,6 @@ class Alice{
             System.out.println("Could not generate Key Pair");
             e.printStackTrace();
         }
-
-
-
         if(AuthenticateCommunication(Connect(portUpload))){
             //Write code for communication here
         } else {
@@ -55,9 +51,12 @@ class Alice{
     }
 
     /**
-     This method will return true or false when authenticating communication with a user on a given port
-
-     For the sake of this prac e're only connecting to one client port and not using threads
+     *      *
+     * This method will return true or false when authenticating communication with a user on a given port
+     *
+     * For the sake of this prac we're only connecting to one client port and not using threads
+     * @param socket Socket for the port that the communication is authenticating from
+     * @return return true if the authentication was successfull
      */
     private static boolean AuthenticateCommunication(Socket socket){
         try {
@@ -75,7 +74,6 @@ class Alice{
             System.out.println("Step 2");
 
             toSend = inBob.readLine();
-
             System.out.println("The Nonce from Bob is " + toSend);
 
             //STEP 3 send nonce to Auth Server

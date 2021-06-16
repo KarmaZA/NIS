@@ -19,14 +19,7 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 
-/*TODO
-        Get bouncycastle to work to test properly
-        get correct version of .getInstance() as per project specs
-        Implement Base64 in key storage
-        Find a better way to store and deal with the keys.
- */
-
-/* This function will take in two file names as input and save the keys
+/** This function will take in two file names as input and save the keys
 to those files.
  */
 class KeyGenerator{
@@ -78,6 +71,10 @@ class KeyGenerator{
 
     }
 
+    /**
+     *
+     * @return
+     */
     public static byte[] genIV(){
         // Generating IV.
         byte[] IV = new byte[16];
@@ -87,6 +84,10 @@ class KeyGenerator{
 
     }
 
+    /**
+     *
+     * @return
+     */
     public static SecretKey genSharedKey(){
 
         // SecureRandom is expensive to initialize (takes several milliseconds) –
@@ -100,8 +101,15 @@ class KeyGenerator{
         return sharedKey;
     }
 
+    /**
+     *
+     * @return
+     */
     private static SecureRandom secureRandomGen(){ return new FixedRand();}
 
+    /**
+     *
+     */
     private static class FixedRand extends SecureRandom{
         MessageDigest sha;
         byte[] state;

@@ -21,6 +21,11 @@ public class SecurityFunctions {
 
     private static byte[] IV;
 
+    /**
+     *
+     * @param args
+     * @throws IOException
+     */
     public static void main(String[] args) throws IOException {
         //put this where use shared
 //        if (IV==null){
@@ -31,6 +36,14 @@ public class SecurityFunctions {
         System.out.println(returned);
     }
 
+    /**
+     *
+     * @param message
+     * @param sharedKey
+     * @param publicKey
+     * @return
+     * @throws IOException
+     */
     public static byte[] PGPConfidentialityEncrypt(String message, SecretKey sharedKey, Key publicKey) throws IOException {
         try {
             //zip
@@ -54,6 +67,13 @@ public class SecurityFunctions {
 
     }
 
+    /**
+     *
+     * @param encrypted
+     * @param privateKey
+     * @return
+     * @throws IOException
+     */
     public static String PGPConfidentialityDecrypt(byte[] encrypted, Key privateKey) throws IOException {
         try {
             //get thw two parts of the message
@@ -102,6 +122,12 @@ public class SecurityFunctions {
 
     }
 
+    /**
+     *
+     * @param arr1
+     * @param arr2
+     * @return
+     */
     public static byte[] concatenateArrays(byte[] arr1, byte[] arr2){
         byte[] finByteArr = new byte[arr1.length+arr2.length];
         for(int i = 0; i < arr1.length; i++){
@@ -117,6 +143,12 @@ public class SecurityFunctions {
         return finByteArr;
     }
 
+    /**
+     *
+     * @param message
+     * @param sharedKey
+     * @return
+     */
     public static byte[] encryptWithSharedKey(byte[] message, SecretKey sharedKey)// part of AES thing
     {
         try{
@@ -147,6 +179,13 @@ public class SecurityFunctions {
         return null;
     }
 
+    /**
+     *
+     * @param cipherText
+     * @param sharedKey
+     * @return
+     * @throws Exception
+     */
     public static String decryptWithSharedKey (byte[] cipherText, SecretKey sharedKey) throws Exception
     {
         //Get Cipher Instance
@@ -170,7 +209,12 @@ public class SecurityFunctions {
     }
 
 
-
+    /**
+     *
+     * @param message
+     * @param PublicKey
+     * @return
+     */
     public static byte[] encryptWithPublicKey (String message, Key PublicKey){
         try {
             Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
@@ -193,6 +237,15 @@ public class SecurityFunctions {
         return null;
     }
 
+    /**
+     *
+     * @param cipherText
+     * @param key
+     * @return
+     * @throws InvalidKeyException
+     * @throws NoSuchPaddingException
+     * @throws NoSuchAlgorithmException
+     */
     public static String decryptWithPrivateKey(byte[] cipherText, Key key) throws InvalidKeyException, NoSuchPaddingException, NoSuchAlgorithmException {
         try {
             byte[] dectyptedText = null; // decrypt the text using the private key
@@ -208,20 +261,45 @@ public class SecurityFunctions {
         return "";
     }
 
+    /**
+     *
+     * @param message
+     * @param publickey
+     * @param privatekey
+     * @param sharedkey
+     * @return
+     */
     public static String decrypt (String message,Key publickey, Key privatekey, Key sharedkey){
         return "";
     }
 
+    /**
+     *
+     * @param message
+     * @return
+     */
     public static byte[] convertToByteArr(String message){
         return message.getBytes();
     }
 
+    /**
+     *
+     * @param message
+     * @return
+     * @throws NoSuchAlgorithmException
+     */
     public static String hash(String message) throws NoSuchAlgorithmException {
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
         byte[] hash = digest.digest(message.getBytes(StandardCharsets.UTF_8));
         return  new String(Hex.encode(hash));
     }
 
+    /**
+     *
+     * @param message
+     * @return
+     * @throws IOException
+     */
     public static String compress(String message) throws IOException { //assuming message is not null
         ByteArrayOutputStream out = new ByteArrayOutputStream(); //the output stream
         GZIPOutputStream gzip = new GZIPOutputStream(out); //another stream
@@ -229,6 +307,13 @@ public class SecurityFunctions {
         gzip.close(); //so it is no longer open
         return out.toString("ISO-8859-1");
     }
+
+    /**
+     *
+     * @param message
+     * @return
+     * @throws IOException
+     */
     public static String deCompress (String message) throws IOException {
         GZIPInputStream gis = new GZIPInputStream(new ByteArrayInputStream(message.getBytes("ISO-8859-1")));
         BufferedReader bf = new BufferedReader(new InputStreamReader(gis, "ISO-8859-1"));
