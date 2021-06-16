@@ -2,20 +2,25 @@ import org.bouncycastle.crypto.AsymmetricBlockCipher;
 import org.bouncycastle.crypto.engines.RSAEngine;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.util.PublicKeyFactory;
+import org.bouncycastle.util.encoders.Hex;
 
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 import java.io.*;
-import java.security.InvalidKeyException;
-import java.security.Key;
-import java.security.NoSuchAlgorithmException;
-import java.security.Security;
+import java.nio.charset.StandardCharsets;
+import java.security.*;
+import java.util.Arrays;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import java.util.Base64;
 
 public class SecurityFunctions {
     public static void main(String[] args) {
+        byte[] arr = new byte[]{1, 6, 3};
+        byte[] arr2 = new byte[]{1,4,6};
+
+        System.out.println( concatenateArrays(arr,arr2));
+
     }
 
     public String PGPConfidentiality(String message, Key theirPublickey){
@@ -50,6 +55,18 @@ public class SecurityFunctions {
 
         return encryptedData;
 //        return "";
+    }
+
+    public static byte[] concatenateArrays(byte[] arr1, byte[] arr2){
+        byte[] finByteArr = new byte[arr1.length+arr2.length];
+        for(int i = 0; i < arr1.length; i++){
+            finByteArr[i]=arr1[i];
+        }
+        for(int j = arr1.length; j < arr2.length; j++) {
+            finByteArr[j]=arr2[j-arr1.length];
+
+        }
+        return finByteArr;
     }
 
     public static byte[] encryptWithPublicKey (String message, Key PublicKey){
@@ -93,8 +110,14 @@ public class SecurityFunctions {
         return "";
     }
 
-    public static int hash (String message){
-        return message.hashCode();
+    public static byte[] convertToByteArr(String message){
+        return message.getBytes();
+    }
+
+    public static String hash(String message) throws NoSuchAlgorithmException {
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        byte[] hash = digest.digest(message.getBytes(StandardCharsets.UTF_8));
+        return  new String(Hex.encode(hash));
     }
 
     public static String compress(String message) throws IOException { //assuming message is not null
@@ -114,4 +137,6 @@ public class SecurityFunctions {
         }
         return outStr;
     }
+
+
 }

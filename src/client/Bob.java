@@ -3,6 +3,7 @@
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.security.Key;
 
 class Bob{
 	private static ServerSocket serverSocket;
@@ -11,7 +12,7 @@ class Bob{
 
 
 	public static void main(String[] args){
-		Key[] keypair = KeyGenerator.generateKeyPair();
+		/*Key[] keypair = KeyGenerator.generateKeyPair();
 		publicKey = keypair[0];
 		privateKey = keypair[1];
 		startServer();
@@ -24,7 +25,7 @@ class Bob{
 		} catch (IOException e){
 			System.out.println("Bob's bobbing did not bob up anything");
 			e.printStackTrace();
-		}
+		}*/
 	}
 
 	private static void startServer(){
