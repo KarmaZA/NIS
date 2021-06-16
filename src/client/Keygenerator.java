@@ -2,7 +2,9 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.security.*;
 import java.util.Base64;
-//import org.bouncycastle.openssl;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.crypto.*;
+import org.bouncycastle.*;
 
 
 /*TODO
@@ -29,7 +31,7 @@ class KeyGenerator{
     private static void generateKeyPair(String publicFile, String privateFile) throws NoSuchAlgorithmException {
         try {
             // fix line below too
-            //Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+            Security.addProvider(new BouncyCastleProvider());
             KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");//,"BC");
             //BASE64Encoder
 
