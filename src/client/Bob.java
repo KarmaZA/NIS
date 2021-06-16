@@ -1,54 +1,37 @@
+
+
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 
 class Bob{
-    private static ServerSocket serverSocket;
-    private String IP = "localhost";
-    private static int portNumber = 45554;
+	private static ServerSocket serverSocket;
+	private String IP = "localhost";
+	private static int portNumber = 45554;
 
 
-    public static void main(String[] args){
-        startServer();
-        System.out.println("Bob is bobbing");
-        try {
+	public static void main(String[] args){
+		startServer();
+		System.out.println("Bob is bobbing");
+		try {
 			Socket socket = serverSocket.accept();
 
 			RequestHandler requestHandler = new RequestHandler(socket);
 			requestHandler.start();
 		} catch (IOException e){
-        	System.out.println("Bob's bobbing did not bob up anything");
+			System.out.println("Bob's bobbing did not bob up anything");
 			e.printStackTrace();
 		}
-    }
+	}
 
-    private static void startServer(){
-        try{
-            serverSocket = new ServerSocket(portNumber);
-        } catch (IOException e){
+	private static void startServer(){
+		try{
+			serverSocket = new ServerSocket(portNumber);
+		} catch (IOException e){
 			e.printStackTrace();
-        }
-    }
-	
-	/*private void saveFile(Socket clientSocket, String[] tempArr) throws Exception{
-			DataInputStream datainputstream = new DataInputStream(clientSocket.getInputStream());
-			FileOutputStream fileoutputstream = new FileOutputStream(tempArr[0]);
-			
-			byte[] buffer = new byte[4096];
-			
-			int read = 0;
-			int totalRead = 0;
-			int remaining = Integer.parseInt(tempArr[1]);
-			read = datainputstream.read(buffer, 0, Math.min(buffer.length, remaining));
-			while(read >0){
-				totalRead += read;
-				remaining -= read;
-				fileoutputstream.write(buffer, 0, read);
-			read = datainputstream.read(buffer, 0, Math.min(buffer.length, remaining);
+		}
+	}
 
-			}
-	}*/
-	
 }
 
 class RequestHandler extends Thread
@@ -69,9 +52,18 @@ class RequestHandler extends Thread
 			// Get input and output streams
 			BufferedReader in = new BufferedReader( new InputStreamReader( socket.getInputStream() ) );
 			PrintWriter out = new PrintWriter( socket.getOutputStream() );
-
+			//Step 1 and 2
 			String line = in.readLine();
-			System.out.println(line);
+			System.out.println("The message from Alice is" + line);
+			//Bob's reply
+			line = "Hi Alice, I'm Bob. Don't we need to authenticate to talk";
+			out.write(line);
+			out.println(line);
+			out.flush();
+
+			//Step 5 and 6
+			line = in.readLine();
+			System.out.println("The message from Alice is" + line);
 			//Bob's reply
 			out.write("Hi Alice I'm Bob. Don't we need to authenticate to talk");
 			out.flush();
