@@ -76,16 +76,21 @@ public class SecurityFunctions {
      */
     public static String PGPConfidentialityDecrypt(byte[] encrypted, Key privateKey) throws IOException {
         try {
+            System.out.println("THe encrypted message"+encrypted);
             //get thw two parts of the message
-            System.out.println(encrypted);
+            System.out.println(new String(encrypted));
+            System.out.println(encrypted.length);
             byte[] sharedKeyEncrypted = new byte[128];
             byte[] encryptedMessageOnly = new byte[encrypted.length-128];
             for(int i=0; i< 128; i++) {
                 sharedKeyEncrypted[i] = encrypted[i];
+
             }
             for(int j=128; j<encrypted.length; j++){
                 encryptedMessageOnly[j-128]= encrypted[j];
+                //System.out.println(encryptedMessageOnly[j-128]);
             }
+
 
 
 
@@ -133,7 +138,7 @@ public class SecurityFunctions {
         for(int i = 0; i < arr1.length; i++){
             finByteArr[i]=arr1[i];
         }
-        for(int j = arr1.length; j < arr2.length; j++) {
+        for(int j = arr1.length; j < arr2.length+arr1.length; j++) {
             finByteArr[j]=arr2[j-arr1.length];
 
         }
