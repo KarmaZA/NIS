@@ -2,32 +2,42 @@ import javax.crypto.SecretKey;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-/*
-Haven't done or even started here yet
- */
+import java.util.Base64;
+
 class AuthenticationServer{
 
     private static ServerSocket serverSocket;
     private static int portNumber = 45555;
     //Preset master key with Alice
-    private static final SecretKey masterAlice = null;
+    private static SecretKey masterAlice = null;
     //Preset master key with Bob
-    private static final SecretKey masterBob = null;
+    private static SecretKey masterBob = null;
 
-
+    /**
+     * The main method of the class. Sets up the keys and starts the server listening. then when a connection comes in
+     * it authenticates the keys of the session and sets up a session key
+     */
     public static void main(String[] args){
+        //Generating Master Keys from Strings
+        masterAlice = KeyGenerator.genMasterKeyFromString("w10PtdhELmt/ZPzcZjxFdg==");
+        masterBob = KeyGenerator.genMasterKeyFromString("055WVjVBB95Yaw6ZhRAWug==");
         startServer();
         System.out.println("The server has started");
-        try{
-            Socket socket = serverSocket.accept();
-            System.out.println("Connection accepted");
-            AcceptConnections(socket);
-        }catch (IOException e){
-            e.printStackTrace();
+        while(true){
+            try{
+                Socket socket = serverSocket.accept();
+                System.out.println("Connection accepted");
+                AcceptConnections(socket);
+            }catch (IOException e){
+                e.printStackTrace();
+            }
         }
 
     }
 
+    /**
+     * starts the ServerSocket in an try catch block in case of an IO Exception
+     */
     private static void startServer(){
         try{
             serverSocket = new ServerSocket(portNumber);
@@ -37,6 +47,10 @@ class AuthenticationServer{
         }
     }
 
+    /**
+     * Undergoes the KDC part of the authentication.
+     * @param sckt the socket the connection is coming through
+     */
     private static void AcceptConnections(Socket sckt){
         try
         {
@@ -46,10 +60,20 @@ class AuthenticationServer{
             BufferedReader in = new BufferedReader( new InputStreamReader( sckt.getInputStream() ) );
             PrintWriter out = new PrintWriter( sckt.getOutputStream() );
 
-            String line = in.readLine();
-            System.out.println(line);
+            String nonce = in.readLine();
+            System.out.println(nonce);
+            //generate session key and encrypt (session key|request|nonce with Alice Master Key
+            SecretKey sessionKey = KeyGenerator.genSharedKey();
+            String AliceEncrypt = Base64.getEncoder().encodeToString(sessionKey.getEncoded()) + "|" + nonce;
+            //AliceEncrypt.encrypt with master key
+
+            //Encrypt ticket Session|"Alice"|nonce with bob master key for Bob
+            String BobEncrypt = Base64.getEncoder().encodeToString(sessionKey.getEncoded()) + "|Alice|" + nonce;
+            //BobEncrypt with master key for bob
+
+            AliceEncrypt += "|" + BobEncrypt;
             //Bob's reply
-            out.write("Step 4 here is the encryption returned");
+            out.write(AliceEncrypt);
             out.flush();
             // Close our connection
             in.close();

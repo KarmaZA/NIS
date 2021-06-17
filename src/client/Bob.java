@@ -3,7 +3,6 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.Key;
-import java.security.KeyPairGenerator;
 import java.util.Hashtable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -13,7 +12,7 @@ class Bob {
 	//private static final String IP = "localhost";
 
 	//Preset master key with Bob
-	private static final SecretKey masterBob = null;
+	private static SecretKey masterBob = null;
 
 	// server password (client must authenticate before accessing server)
 	final private static String password = "1234";
@@ -32,6 +31,7 @@ class Bob {
 	 * @param args String array to take input into the main method
 	 */
 	public static void main(String[] args) {
+		masterBob = KeyGenerator.genMasterKeyFromString("055WVjVBB95Yaw6ZhRAWug==");
 		try {
 			Key[] keypair = KeyGenerator.generateKeyPair();
 			publicKey = keypair[0];
@@ -77,13 +77,6 @@ class Bob {
 					// when a client connects to server socket, the new socket is run in a seperate thread
 					pool.execute(new Handler(serverSocket.accept()));
 				}
-
-				// Close our connection
-				//in.close();
-				//out.close();
-				//socket.close();
-
-				//System.out.println( "Connection closed" );
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -160,16 +153,6 @@ class Bob {
 
 							// record filename and password from  client HEADER
 							String fileName = clientHeader[2];
-							// System.out.print(fileName);
-							//String password = clientHeader[2];
-
-							// if(fileNames.containsKey(fileName)){ //already exists. cannot upload
-							//     System.out.println("File "+fileName+" already exists");
-							//     out.writeUTF("CTR,null,null,null,fileexists");
-							// }
-							//if (!fileNames.containsKey(fileName)){ //file name not exist{
-							//out.writeUTF("CTR,null,null,null,success"); //send signal to uplaod
-							// outputstream to write file uploaded from client onto server PC
 							OutputStream output = new FileOutputStream("output/" + fileName);
 							// >> HEADER received from client containing length of byte array to upload
 							long size = in.readLong();
@@ -213,80 +196,5 @@ class Bob {
 			}
 		}
 
-
-		/**
-		 * checks if string is a digit
-		 *
-		 * @param strNum
-		 * @return
-		 */
-		public static boolean isInteger(String strNum) {
-			if (strNum == null) {
-				return false;
-			}
-			try {
-				int num = Integer.parseInt(strNum);
-			} catch (NumberFormatException nfe) {
-				return false;
-			}
-			return true;
-		}
-
 	}
 }
-/* Commenting this out to test something will re implement later or use Piero's version
-/**
- *
- * /
-class RequestHandler extends Thread
-{
-	/**
-	 *
-	 * /
-	private Socket socket;
-	RequestHandler( Socket socket )
-	{
-		this.socket = socket;
-	}
-
-	/**
-	 *
-	 * /
-	@Override
-	public void run()
-	{
-		try
-		{
-			System.out.println( "Received a connection" );
-
-			// Get input and output streams
-			BufferedReader in = new BufferedReader( new InputStreamReader( socket.getInputStream() ) );
-			PrintWriter out = new PrintWriter( socket.getOutputStream() );
-			//Step 1 and 2
-			String line = in.readLine();
-			System.out.println("The message from Alice is" + line);
-			//Bob's reply
-			line = "Hi Alice, I'm Bob. Don't we need to authenticate to talk";
-			out.write(line);
-			out.println(line);
-			out.flush();
-
-			//Step 5 and 6
-			line = in.readLine();
-			System.out.println("The message from Alice is" + line);
-			//Bob's reply
-			out.write("Hi Alice I'm Bob. Don't we need to authenticate to talk");
-			out.flush();
-			// Close our connection
-			in.close();
-			out.close();
-			socket.close();
-
-			System.out.println( "Connection closed" );
-		}
-		catch( Exception e )
-		{
-			e.printStackTrace();
-		}
-	}
-}*/

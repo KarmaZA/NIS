@@ -93,8 +93,8 @@ class KeyGenerator{
     }
 
     /**
-     *
-     * @return
+     * Generates a shared key.
+     * @return a SecretKey that is a usable shared key
      */
     public static SecretKey genSharedKey(){
 
@@ -107,6 +107,16 @@ class KeyGenerator{
 
         System.out.println("sharedKey : " + Base64.getEncoder().encodeToString(sharedKey.getEncoded()));
         return sharedKey;
+    }
+
+    /**
+     * This method takes in a string that should come from a Base64 encoded Key using .encodeToString(key.getEncoded())
+     * @param key The string of the encoded key
+     * @return the Secret Key generated from the String
+     */
+    public static SecretKey genMasterKeyFromString(String key){
+        byte[] decodedKey = Base64.getDecoder().decode(key);
+        return new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
     }
 
     /**

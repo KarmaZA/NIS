@@ -1,13 +1,15 @@
 import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.security.Key;
+import java.util.Base64;
 import java.util.Scanner;
 
 class Alice{
     //Preset master key with Alice
-    private static final SecretKey masterAlice = null;
+    private static SecretKey masterAlice = null;
 
     private final String username = "Alice";
     private final static Scanner scanner = new Scanner(System.in);
@@ -19,10 +21,14 @@ class Alice{
     final String IP = "localhost";
 
     /**
+     * The main function for the class Alice. Sets up the variables and keys to be used in the program
+     * Creates a connection to Bob or requests a new port number if connection fails
+     * Calls AuthenticateCommunication() to authenticate the communication with Bob using the AuthenticationServer
+     * If authenticated starts the messaging.
      *
-     * @param args
      */
     public static void main(String[] args) throws Exception {
+        masterAlice = KeyGenerator.genMasterKeyFromString("w10PtdhELmt/ZPzcZjxFdg==");
         //get keys
         try {
             Key[] keypair = KeyGenerator.generateKeyPair();
@@ -64,6 +70,11 @@ class Alice{
         */
     }
 
+    /**
+     * method to connect a socket with the port specified in parameters
+     * @param portConnectionNumber the port number the socket will connect through
+     * @return returns the connected socket or null if no connection made
+     */
     private static Socket Connect(int portConnectionNumber) {
         try {
             Socket socket = new Socket("localhost", portConnectionNumber);
@@ -75,6 +86,13 @@ class Alice{
         return null;
     }
 
+    /**
+     * Executes the authentication steps with the KDC using master keys and nonces to authenticate the
+     * communication session between Alice and Bob and generate a session key. As well as validate that the
+     * conversation is indeed between Alice and Bob.
+     * @param socket The socket that is connected to Bob
+     * @return true if the authentication is validated
+     */
     private static boolean AuthenticateCommunication(Socket socket){
         try {
 
@@ -102,6 +120,7 @@ class Alice{
             Socket authServerSocket = Connect(45555);
             PrintStream outAuthServ = new PrintStream(authServerSocket.getOutputStream());
             BufferedReader inAuthServ = new BufferedReader(new InputStreamReader(authServerSocket.getInputStream()));
+
             //Write some encryption here
             outAuthServ.println(toSend);
 
@@ -130,6 +149,11 @@ class Alice{
         }
     }
 
+    /**
+     * Passes the socket for the communication with Bob. This method will only be called once the communication
+     * session has been authenticated.
+     * @param socket The socket connected to Bob
+     */
     private static void startMessaging(Socket socket){
         // scanner used for all client input
         Scanner scanner = new Scanner(System.in);
@@ -218,8 +242,11 @@ class Alice{
     }
 
     /**
-     * upload file
-     * @param clientCommand
+     * Sends a file through the connection to bob
+     * @param clientCommand the name of the file
+     * @param in the DataInputStream
+     * @param out the DataOutputStream
+     * @param scanner for user input
      */
     public static void upload(String clientCommand,DataInputStream in, DataOutputStream out, Scanner scanner){
 
