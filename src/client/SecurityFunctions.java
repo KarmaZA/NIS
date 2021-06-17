@@ -36,6 +36,37 @@ public class SecurityFunctions {
         System.out.println(returned);
     }
 
+    public static byte[] PGPAuthenticationEncrypt(String message, SecretKey privateKey) throws NoSuchAlgorithmException {
+           //hash the message
+           String hashedMessage = hashString(message);
+           //encrypt the hash with Alice's private key
+           byte[] encryptedHash = encryptWithPublicKey(hashedMessage,privateKey); //encrypt with private key not public
+        //concatenate the encryptedHash and the original message
+           byte[] encryptionAndMessage = concatenateArrays(encryptedHash, message.getBytes());
+           return encryptionAndMessage;
+
+
+    }
+
+    public static String PGPAuthenticationDecrypt(byte[] encrypted, SecretKey publicKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException {
+        byte[] sharedKeyEncrypted = getKeyFromArray(encrypted);
+        byte[] encryptedMessageOnly = getMessageFromArray(encrypted);
+
+        //decrypt the hash with the public key
+        String decryptedHash = decryptWithPrivateKey(sharedKeyEncrypted,publicKey); //decrypt with  public key not private
+        String hashMessageForComparison = hashString(new String(encryptedMessageOnly));
+       //compare the hash that was encrypted and the original message with the new hash if they match then we ensure confidentiality
+        if(decryptedHash.equals(hashMessageForComparison))
+        {
+            return new String(encryptedMessageOnly);
+        }
+
+
+        return "Failed";
+
+
+    }
+
     /**
      *
      * @param message
@@ -48,7 +79,6 @@ public class SecurityFunctions {
         try {
             //zip
             String compressedMessage = compress(message);
-
 
             //encrypt this message with the shared key
 
@@ -78,21 +108,9 @@ public class SecurityFunctions {
         try {
             System.out.println("THe encrypted message"+encrypted);
             //get thw two parts of the message
-            System.out.println(new String(encrypted));
-            System.out.println(encrypted.length);
-            byte[] sharedKeyEncrypted = new byte[128];
-            byte[] encryptedMessageOnly = new byte[encrypted.length-128];
-            for(int i=0; i< 128; i++) {
-                sharedKeyEncrypted[i] = encrypted[i];
 
-            }
-            for(int j=128; j<encrypted.length; j++){
-                encryptedMessageOnly[j-128]= encrypted[j];
-                //System.out.println(encryptedMessageOnly[j-128]);
-            }
-
-
-
+            byte[] sharedKeyEncrypted = getKeyFromArray(encrypted);
+            byte[] encryptedMessageOnly = getMessageFromArray(encrypted);
 
             String decryptedSharedKeyString = decryptWithPrivateKey(sharedKeyEncrypted,privateKey);
             byte[] keyTEST = Base64.getDecoder().decode(decryptedSharedKeyString);
@@ -146,6 +164,26 @@ public class SecurityFunctions {
 //        System.out.println("arr2: " + arr2);
 //        System.out.println("makes" + finByteArr);
         return finByteArr;
+    }
+
+    public static byte[] getKeyFromArray(byte[] arr) {
+        byte[] sharedKeyEncrypted = new byte[128];
+        for(int i=0; i< 128; i++) {
+            sharedKeyEncrypted[i] = arr[i];
+
+        }
+        return sharedKeyEncrypted;
+
+    }
+
+    public static byte[] getMessageFromArray(byte[] arr){
+        byte[] encryptedMessageOnly = new byte[arr.length-128];
+
+        for(int j=128; j<arr.length; j++){
+            encryptedMessageOnly[j-128]= arr[j];
+
+        }
+        return encryptedMessageOnly;
     }
 
     /**
@@ -293,7 +331,7 @@ public class SecurityFunctions {
      * @return
      * @throws NoSuchAlgorithmException
      */
-    public static String hash(String message) throws NoSuchAlgorithmException {
+    public static String hashString(String message) throws NoSuchAlgorithmException {
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
         byte[] hash = digest.digest(message.getBytes(StandardCharsets.UTF_8));
         return  new String(Hex.encode(hash));
