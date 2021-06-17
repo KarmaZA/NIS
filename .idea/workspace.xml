@@ -207,7 +207,7 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration default="true" type="Java Scratch" singleton="false">
+    <configuration default="true" type="Java Scratch" factoryName="Java Scratch" singleton="false">
       <option name="MAIN_CLASS_NAME" value="ChatServer" />
       <method v="2">
         <option name="Make" enabled="true" />
