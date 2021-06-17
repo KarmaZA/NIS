@@ -36,7 +36,7 @@ class Bob{
 		} catch (IOException e){
 			System.out.println("Bob's bobbing did not bob up anything");
 			e.printStackTrace();
-		}*/
+		}
 	}
 
 	/**
