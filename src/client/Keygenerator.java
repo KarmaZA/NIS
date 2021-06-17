@@ -26,6 +26,15 @@ class KeyGenerator{
     public static void main(String[] args) throws NoSuchAlgorithmException {
 //        generateKeyPair("public.txt","private.txt");
     }
+    public static String nonceGenerator(int size){
+        SecureRandom secureRandom = new SecureRandom();
+        StringBuilder stringBuilder = new StringBuilder();
+        for (int i = 0; i < size; i++) {
+            stringBuilder.append(secureRandom.nextInt(10));
+        }
+        String randomNumber = stringBuilder.toString();
+        return randomNumber;
+    }
 
 
     //private static Key[] generateKeyPair(String publicFile, String privateFile) throws NoSuchAlgorithmException {
@@ -81,7 +90,6 @@ class KeyGenerator{
         SecureRandom random = new SecureRandom();
         random.nextBytes(IV);
         return IV;
-
     }
 
     /**
@@ -106,6 +114,7 @@ class KeyGenerator{
      * @return
      */
     private static SecureRandom secureRandomGen(){ return new FixedRand();}
+
 
     /**
      *

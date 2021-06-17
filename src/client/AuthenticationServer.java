@@ -1,3 +1,4 @@
+import javax.crypto.SecretKey;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -8,6 +9,11 @@ class AuthenticationServer{
 
     private static ServerSocket serverSocket;
     private static int portNumber = 45555;
+    //Preset master key with Alice
+    private static final SecretKey masterAlice = null;
+    //Preset master key with Bob
+    private static final SecretKey masterBob = null;
+
 
     public static void main(String[] args){
         startServer();
