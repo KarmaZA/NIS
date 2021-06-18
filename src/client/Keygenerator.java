@@ -52,7 +52,6 @@ class KeyGenerator{
             Key pubKey = keys.getPublic();
             Key privKey = keys.getPrivate();
 
-            System.out.println("here 4");
             System.out.println("publicKey : " + Base64.getEncoder().encodeToString(pubKey.getEncoded()));
             System.out.println("privateKey : " +Base64.getEncoder().encodeToString(privKey.getEncoded()));
             System.out.println();

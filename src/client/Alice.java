@@ -40,26 +40,34 @@ class Alice{
         }
 
         SecretKey sharedkey= KeyGenerator.genSharedKey();
+        System.out.println("encrypting with Chels function ");
+        byte[] encryptedForAuth = SecurityFunctions.PGPAuthenticationEncrypt("Hello World", Alice.privateKey);
+        System.out.println(new String(SecurityFunctions.PGPAuthenticationDecrypt(encryptedForAuth, Alice.publicKey)));
 
-        //Connect to socket
-        Socket socket = Connect(portUpload);
-        //Socket connection failed try new port or quit
-
-        while(socket == null){
-            System.out.println("Port Connection failed please input a new port number (0 to exit):");
-            portUpload = Integer.parseInt(scanner.nextLine());
-            if(portUpload == 0){ System.exit(0);}
-            socket = Connect(portUpload);
-        }
-        //Authenticate communication
-        boolean authenticated = AuthenticateCommunication(socket);
-        if(authenticated){
-            startMessaging(socket);
-        } else {
-            //Authentication failed. Assume it's malicious and end program
-            System.out.println("Authentication Failed");
-            System.exit(0);
-        }
+        System.out.println("Full PGP function - testing with ChelLynn is the best");
+        byte[] fullEncrypted = SecurityFunctions.PGPFullEncrypt("ChelLynn is the best".getBytes(), sharedkey, Alice.privateKey, Alice.publicKey);
+        String fullDecrypted = new String (SecurityFunctions.PGPFullDecrypt(fullEncrypted, Alice.privateKey, Alice.publicKey));
+        System.out.println(fullDecrypted);
+//
+//        //Connect to socket
+//        Socket socket = Connect(portUpload);
+//        //Socket connection failed try new port or quit
+//
+//        while(socket == null){
+//            System.out.println("Port Connection failed please input a new port number (0 to exit):");
+//            portUpload = Integer.parseInt(scanner.nextLine());
+//            if(portUpload == 0){ System.exit(0);}
+//            socket = Connect(portUpload);
+//        }
+//        //Authenticate communication
+//        boolean authenticated = AuthenticateCommunication(socket);
+//        if(authenticated){
+//            startMessaging(socket);
+//        } else {
+//            //Authentication failed. Assume it's malicious and end program
+//            System.out.println("Authentication Failed");
+//            System.exit(0);
+//        }
 
         /* I don't know if this is needed
         byte[] encryptedonPGP = SecurityFunctions.PGPConfidentialityEncrypt("hello world", KeyGenerator.genSharedKey(), Alice.publicKey);
