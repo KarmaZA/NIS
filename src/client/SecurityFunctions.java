@@ -1,7 +1,3 @@
-import org.bouncycastle.crypto.AsymmetricBlockCipher;
-import org.bouncycastle.crypto.engines.RSAEngine;
-import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
-import org.bouncycastle.crypto.util.PublicKeyFactory;
 import org.bouncycastle.util.encoders.Hex;
 
 import javax.crypto.Cipher;
@@ -12,7 +8,6 @@ import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
-import java.util.Arrays;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import java.util.Base64;
@@ -21,72 +16,78 @@ public class SecurityFunctions {
 
     private static byte[] IV;
 
+
     /**
-     *
-     * @param args
-     * @throws IOException
+     * PGP encryption to authenticate the sender.
+     * @param message Message to send
+     * @param privateKey Private key of sender
+     * @return A signed hash and the original message, concatenated together
+     * @throws NoSuchAlgorithmException
      */
-    public static void main(String[] args) throws IOException {
-        //put this where use shared
-//        if (IV==null){
-//            IV=KeyGenerator.genIV();
-//        }
-        byte[] encryptedonPGP = PGPConfidentialityEncrypt("hello world", KeyGenerator.genSharedKey(), Alice.publicKey);
-        String returned = PGPConfidentialityDecrypt(encryptedonPGP, Alice.privateKey);
-        System.out.println(returned);
-    }
-
     public static byte[] PGPAuthenticationEncrypt(String message, SecretKey privateKey) throws NoSuchAlgorithmException {
-           //hash the message
-           String hashedMessage = hashString(message);
-           //encrypt the hash with Alice's private key
-           byte[] encryptedHash = encryptWithPublicKey(hashedMessage,privateKey); //encrypt with private key not public
+        //commented examples assume Alice is sending to Bob
+        //hash the message
+        String hashedMessage = hashString(message);
+        //encrypt the hash with Alice's private key
+        byte[] encryptedHash = encryptWithAsymmetricKey(hashedMessage,privateKey); //encrypt with private key
         //concatenate the encryptedHash and the original message
-           byte[] encryptionAndMessage = concatenateArrays(encryptedHash, message.getBytes());
-           return encryptionAndMessage;
-
-
+        byte[] encryptionAndMessage = concatenateArrays(encryptedHash, message.getBytes());
+        return encryptionAndMessage;
     }
 
-    public static String PGPAuthenticationDecrypt(byte[] encrypted, SecretKey publicKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException {
-        byte[] sharedKeyEncrypted = getKeyFromArray(encrypted);
-        byte[] encryptedMessageOnly = getMessageFromArray(encrypted);
+    /**
+     * PGP decryption to authenticate sender.
+     * @param concatMessage The signed hash and the message
+     * @param publicKey The public key of the sender
+     * @return The message only
+     * @throws NoSuchAlgorithmException
+     * @throws NoSuchPaddingException
+     * @throws InvalidKeyException
+     */
+    public static String PGPAuthenticationDecrypt(byte[] concatMessage, SecretKey publicKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException {
+        //commented examples assume Alice is sending to Bob
+        //get two parts of message
+        byte[] sharedKeyEncrypted = getKeyFromArray(concatMessage);
+        byte[] messageOnly = getMessageFromArray(concatMessage);
 
-        //decrypt the hash with the public key
-        String decryptedHash = decryptWithPrivateKey(sharedKeyEncrypted,publicKey); //decrypt with  public key not private
-        String hashMessageForComparison = hashString(new String(encryptedMessageOnly));
-       //compare the hash that was encrypted and the original message with the new hash if they match then we ensure confidentiality
+        //decrypt the hash with Alice's public key
+        String decryptedHash = decryptWithAsymmetriceKey(sharedKeyEncrypted,publicKey); //decrypt with  public key
+        String hashMessageForComparison = hashString(new String(messageOnly));
+        //compare the hash that was encrypted and the original message with the new hash if they match then we ensure confidentiality
         if(decryptedHash.equals(hashMessageForComparison))
         {
-            return new String(encryptedMessageOnly);
+            System.out.println("Message received is from expected user (authentication successful).");
+            return new String(messageOnly);
         }
-
-
+        else{
+            System.out.println("Failed to authenticate. Message may not be from expected user.");
+        }
         return "Failed";
-
-
     }
 
     /**
-     *
-     * @param message
-     * @param sharedKey
-     * @param publicKey
-     * @return
+     * PGP encryption for confidentiality
+     * The message is compressed and encrypted with the shared key
+     * Then the shared key is encrypted with the public key of the reciever, and concatenated to the message
+     * @param message The message to encrypt
+     * @param sharedKey The shared key between Alice and Bob
+     * @param publicKey The receiver's public key
+     * @return A compressed and encrypted (with shared key) version of the message, concatenated to the shared key (encrypted with the public key)
      * @throws IOException
      */
     public static byte[] PGPConfidentialityEncrypt(String message, SecretKey sharedKey, Key publicKey) throws IOException {
         try {
-            //zip
+            //compress
             String compressedMessage = compress(message);
 
             //encrypt this message with the shared key
-
             byte[] encryptedCompressedMessage = encryptWithSharedKey(compressedMessage.getBytes(), sharedKey);
 
+            //make key a string and encrypt with receiver's public Key
             String keyString =  new String(Base64.getEncoder().encode(sharedKey.getEncoded()));
-            byte[] encryptedSharedKey = encryptWithPublicKey(keyString, publicKey);
+            byte[] encryptedSharedKey = encryptWithAsymmetricKey(keyString, publicKey);
 
+            System.out.println("Encrypted message with PGP");
             //send concatenation
             return concatenateArrays(encryptedSharedKey, encryptedCompressedMessage);
         }
@@ -94,46 +95,31 @@ public class SecurityFunctions {
             System.out.println(e);
         }
         return null;
-
     }
 
     /**
-     *
-     * @param encrypted
-     * @param privateKey
-     * @return
+     * PGP decryption for confidentiality
+     * @param encrypted The shared key and encrypted compressed message
+     * @param privateKey The private key of the receiver
+     * @return the decrypted message
      * @throws IOException
      */
     public static String PGPConfidentialityDecrypt(byte[] encrypted, Key privateKey) throws IOException {
         try {
-            System.out.println("THe encrypted message"+encrypted);
-            //get thw two parts of the message
-
+            //get the two parts of the message:
             byte[] sharedKeyEncrypted = getKeyFromArray(encrypted);
             byte[] encryptedMessageOnly = getMessageFromArray(encrypted);
 
-            String decryptedSharedKeyString = decryptWithPrivateKey(sharedKeyEncrypted,privateKey);
-            byte[] keyTEST = Base64.getDecoder().decode(decryptedSharedKeyString);
+            //get shared key
+            String decryptedSharedKeyString = decryptWithAsymmetriceKey(sharedKeyEncrypted,privateKey);
+            byte[] keyAsBytes = Base64.getDecoder().decode(decryptedSharedKeyString);
+            SecretKey sharedKey = new SecretKeySpec(keyAsBytes,0,keyAsBytes.length, "AES");
 
-            SecretKey sharedKey = new SecretKeySpec(keyTEST,0,keyTEST.length, "AES");
-            System.out.println("Extracted key");
-            System.out.println(Base64.getEncoder().encodeToString(sharedKey.getEncoded()));
+            System.out.println("Extracted shared key: " + Base64.getEncoder().encodeToString(sharedKey.getEncoded())); //debug statement
 
             String decryptedCompressedMessage = decryptWithSharedKey(encryptedMessageOnly,sharedKey);
 
             String finalOutput = deCompress(decryptedCompressedMessage);
-
-            //this shows that the key to and from a string works
-//        System.out.println("key:");
-//        System.out.println(Base64.getEncoder().encodeToString(sharedKey.getEncoded()));
-//        String keyString =  new String(Base64.getEncoder().encode(sharedKey.getEncoded()));
-//        System.out.println("Key String");
-//        System.out.println(keyString);
-//        System.out.println("back to key");
-//        byte[] encodedKey = Base64.getDecoder().decode(keyString);
-//        Key key = new SecretKeySpec(encodedKey,0,encodedKey.length, "AES");
-//        System.out.println(Base64.getEncoder().encodeToString(key.getEncoded()));
-
 
             return finalOutput;
 
@@ -146,10 +132,10 @@ public class SecurityFunctions {
     }
 
     /**
-     *
-     * @param arr1
-     * @param arr2
-     * @return
+     * Concatenates two byte arrays
+     * @param arr1 first array
+     * @param arr2 second array
+     * @return a single array containing both arrays
      */
     public static byte[] concatenateArrays(byte[] arr1, byte[] arr2){
         byte[] finByteArr = new byte[arr1.length+arr2.length];
@@ -160,12 +146,14 @@ public class SecurityFunctions {
             finByteArr[j]=arr2[j-arr1.length];
 
         }
-//        System.out.println("arr1: " + new String(arr1));
-//        System.out.println("arr2: " + arr2);
-//        System.out.println("makes" + finByteArr);
         return finByteArr;
     }
 
+    /**
+     * Returns the key part of the confidentiality message
+     * @param arr Full array
+     * @return just the key
+     */
     public static byte[] getKeyFromArray(byte[] arr) {
         byte[] sharedKeyEncrypted = new byte[128];
         for(int i=0; i< 128; i++) {
@@ -176,6 +164,11 @@ public class SecurityFunctions {
 
     }
 
+    /**
+     * Returns the message part of the confidentiality message
+     * @param arr Full array
+     * @return just the message
+     */
     public static byte[] getMessageFromArray(byte[] arr){
         byte[] encryptedMessageOnly = new byte[arr.length-128];
 
@@ -186,114 +179,84 @@ public class SecurityFunctions {
         return encryptedMessageOnly;
     }
 
+
     /**
-     *
-     * @param message
-     * @param sharedKey
-     * @return
+     * Encryption using a shared key
+     * @param message Message to encrypt
+     * @param sharedKey The shared key
+     * @return an encrypted version of the message
      */
-    public static byte[] encryptWithSharedKey(byte[] message, SecretKey sharedKey)// part of AES thing
+    public static byte[] encryptWithSharedKey(byte[] message, SecretKey sharedKey)
     {
         try{
-            if (IV==null){
+            if (IV==null){ //If IV does not exist, make one here
                 IV=KeyGenerator.genIV();
             }
-            //Get Cipher Instance
-            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-
-            //Create SecretKeySpec
-            SecretKeySpec keySpec = new SecretKeySpec(sharedKey.getEncoded(), "AES");
-
-            //Create IvParameterSpec
-            IvParameterSpec ivSpec = new IvParameterSpec(IV);
-
-            //Initialize Cipher for ENCRYPT_MODE
-            cipher.init(Cipher.ENCRYPT_MODE, keySpec, ivSpec);
-
-            //Perform Encryption
-            byte[] cipherText = cipher.doFinal(message);
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding"); //cipher instance
+            SecretKeySpec keySpecification = new SecretKeySpec(sharedKey.getEncoded(), "AES"); //using AES akgorithm
+            IvParameterSpec ivSpecification = new IvParameterSpec(IV); //make IvParameterSpec based on IV
+            cipher.init(Cipher.ENCRYPT_MODE, keySpecification, ivSpecification); //we want to encrypt
+            byte[] cipherText = cipher.doFinal(message); //perform encryption
 
             return cipherText;
         }
         catch (Exception e) {
             System.out.println(e);
         }
-
         return null;
     }
 
+
     /**
-     *
-     * @param cipherText
-     * @param sharedKey
-     * @return
+     * Decrypts a message with a shared key
+     * @param cipherText Message to decrypt
+     * @param sharedKey The shared key
+     * @return the decrypted message
      * @throws Exception
      */
     public static String decryptWithSharedKey (byte[] cipherText, SecretKey sharedKey) throws Exception
     {
-        //Get Cipher Instance
-        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-
-        //Create SecretKeySpec
-        SecretKeySpec keySpec = new SecretKeySpec(sharedKey.getEncoded(), "AES");
-
-        //Create IvParameterSpec
-        IvParameterSpec ivSpec = new IvParameterSpec(IV);
-
-        //Initialize Cipher for DECRYPT_MODE
-        cipher.init(Cipher.DECRYPT_MODE, keySpec, ivSpec);
-
-        System.out.println("here");
-        //Perform Decryption
-        byte[] decryptedText = cipher.doFinal(cipherText); //issue here for some reason
-
-        System.out.println("here2"); //does not get here
+        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding"); //cipher instance
+        SecretKeySpec keySpecification = new SecretKeySpec(sharedKey.getEncoded(), "AES"); //using AES algorithm
+        IvParameterSpec ivSpecification = new IvParameterSpec(IV); //based on same IV as used in encryption
+        cipher.init(Cipher.DECRYPT_MODE, keySpecification, ivSpecification); //we want to decrypt
+        byte[] decryptedText = cipher.doFinal(cipherText); //decrypt the message
         return new String(decryptedText);
     }
 
 
     /**
-     *
-     * @param message
-     * @param PublicKey
-     * @return
+     * Encrypts with either sender's private key, or receiver's public key - depending on whether encrypt for authentication or for confidentiality
+     * @param message Message to encrypt
+     * @param asymmetricKey Key to encrypt with
+     * @return Encrypted message
      */
-    public static byte[] encryptWithPublicKey (String message, Key PublicKey){
+    public static byte[] encryptWithAsymmetricKey(String message, Key asymmetricKey){
         try {
             Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-
-            byte[] cipherText = null;
-            // get an RSA cipher object and print the provider
-            Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
-            System.out.println("The provider is: " + cipher.getProvider().getInfo());
-            //encrypt the plaintext using the public key
-            cipher.init(Cipher.ENCRYPT_MODE, PublicKey);
-            cipherText = cipher.doFinal(message.getBytes());
-//            return new String (cipherText);
+            Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding"); //RSA cipher object
+            System.out.println("The security provider is: " + cipher.getProvider().getInfo());
+            cipher.init(Cipher.ENCRYPT_MODE, asymmetricKey); //encrypting mode
+            byte[] cipherText = cipher.doFinal(message.getBytes()); //encrypt
             return cipherText;
         }
-
         catch (Exception e) {
             System.out.println(e);
         }
-        //else
-        return null;
+        return null; //if failed
     }
 
     /**
-     *
-     * @param cipherText
-     * @param key
-     * @return
-     * @throws InvalidKeyException
-     * @throws NoSuchPaddingException
-     * @throws NoSuchAlgorithmException
+     * Decrypts with either receiver's private key, or sender's public key - depending on whether encrypt for authentication or for confidentiality
+     * @param cipherText Message to decrypt
+     * @param asymmetricKey Key to decrypt with
+     * @return Decrypted version of message
      */
-    public static String decryptWithPrivateKey(byte[] cipherText, Key key) throws InvalidKeyException, NoSuchPaddingException, NoSuchAlgorithmException {
+    public static String decryptWithAsymmetriceKey(byte[] cipherText, Key asymmetricKey) {
         try {
             byte[] dectyptedText = null; // decrypt the text using the private key
             Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
-            cipher.init(Cipher.DECRYPT_MODE, key);
+            cipher.init(Cipher.DECRYPT_MODE, asymmetricKey);
             dectyptedText = cipher.doFinal(cipherText);
             System.out.println("String decrypted");
             return new String (dectyptedText);
@@ -301,71 +264,57 @@ public class SecurityFunctions {
         catch (Exception e) {
             System.out.println(e);
         }
-        return "";
+        return null; //if failed
     }
 
-    /**
-     *
-     * @param message
-     * @param publickey
-     * @param privatekey
-     * @param sharedkey
-     * @return
-     */
-    public static String decrypt (String message,Key publickey, Key privatekey, Key sharedkey){
-        return "";
-    }
+
 
     /**
-     *
-     * @param message
-     * @return
-     */
-    public static byte[] convertToByteArr(String message){
-        return message.getBytes();
-    }
-
-    /**
-     *
-     * @param message
+     * Hashing algorithm used to hash a message.
+     * @param message message to hash
      * @return
      * @throws NoSuchAlgorithmException
      */
     public static String hashString(String message) throws NoSuchAlgorithmException {
-        MessageDigest digest = MessageDigest.getInstance("SHA-256");
-        byte[] hash = digest.digest(message.getBytes(StandardCharsets.UTF_8));
+        MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
+        byte[] hash = messageDigest.digest(message.getBytes(StandardCharsets.UTF_8));
         return  new String(Hex.encode(hash));
     }
 
     /**
-     *
-     * @param message
-     * @return
+     * Compress a given message
+     * @param message Message to compress
+     * @return A compressed version of the message
      * @throws IOException
      */
     public static String compress(String message) throws IOException { //assuming message is not null
-        ByteArrayOutputStream out = new ByteArrayOutputStream(); //the output stream
-        GZIPOutputStream gzip = new GZIPOutputStream(out); //another stream
+        //set up streams
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        GZIPOutputStream gzip = new GZIPOutputStream(out);
+        //create compressed version
         gzip.write(message.getBytes()); //write the message to the output stream
-        gzip.close(); //so it is no longer open
+        gzip.close();
         return out.toString("ISO-8859-1");
     }
 
     /**
-     *
-     * @param message
-     * @return
+     * Decompress a given message
+     * @param compressed Compressed message
+     * @return Decompressed version of the message
      * @throws IOException
      */
-    public static String deCompress (String message) throws IOException {
-        GZIPInputStream gis = new GZIPInputStream(new ByteArrayInputStream(message.getBytes("ISO-8859-1")));
-        BufferedReader bf = new BufferedReader(new InputStreamReader(gis, "ISO-8859-1"));
-        String outStr = "";
+    public static String deCompress (String compressed) throws IOException {
+        //set up stream and reader
+        GZIPInputStream gzipInputStream = new GZIPInputStream(new ByteArrayInputStream(compressed.getBytes("ISO-8859-1")));
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(gzipInputStream, "ISO-8859-1"));
+
+        //create message
+        String toReturn = "";
         String line;
-        while ((line=bf.readLine())!=null) {
-            outStr += line;
+        while ((line=bufferedReader.readLine())!=null) { //per line of reader
+            toReturn += line;
         }
-        return outStr;
+        return toReturn;
     }
 
 

@@ -40,6 +40,7 @@ class Alice{
         }
 
         SecretKey sharedkey= KeyGenerator.genSharedKey();
+
         //Connect to socket
         Socket socket = Connect(portUpload);
         //Socket connection failed try new port or quit
@@ -129,7 +130,7 @@ class Alice{
             toSend = inAuthServ.readLine();
             System.out.println(toSend);
             String[] checkEncryption = toSend.split("|");
-            checkString(checkEncryption[0]);
+           // checkString(checkEncryption[0]); //Lynn commented this out since it was causing errors.
 
             //STEP 5 send semi-decrypted auth server to Bob
             System.out.println("Step 5 /n Data sent to Bob");
