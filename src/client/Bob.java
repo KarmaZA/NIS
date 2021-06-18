@@ -4,6 +4,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
+import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
@@ -71,9 +72,6 @@ class Bob {
 		}
 	}
 
-	private static boolean verifyConnection(byte[] encoded, String nonce){
-		return true;
-	}
 
 
 	private static class Handler implements Runnable {
@@ -81,6 +79,28 @@ class Bob {
 		private final Socket socket;
 		Handler(Socket socket) {
 			this.socket = socket;
+		}
+
+		private static byte[] verifyConnection(byte[] encoded, String nonce) throws Exception {
+			//This is working without encryption/decryption
+			//The right amount of data is getting here
+			try {
+				System.out.println(new String(encoded));
+				byte[] sessionkey = Arrays.copyOfRange(encoded, 0, encoded.length - 23);
+				System.out.println("Session key: " + new String(sessionkey));
+				String aliceCheck = new String(Arrays.copyOfRange(encoded, encoded.length - 23, encoded.length-16));
+				System.out.println(aliceCheck);
+				String nonceCheck = new String(Arrays.copyOfRange(encoded, encoded.length - 16, encoded.length));
+				System.out.println(nonce);
+				if (nonce.equals(nonceCheck) && aliceCheck.equals("|Alice|")) {
+					return sessionkey;
+				} else {
+					return null;
+				}
+			} catch (Exception e){
+				//Any form of exception constitutes authentication failure
+				return null;
+			}
 		}
 
 		@Override
@@ -107,8 +127,9 @@ class Bob {
 				System.out.println("Here");
 				byte[] buffer = in.readNBytes((int)bufferSize);
 				System.out.println("The message from Alice is" + buffer.toString());
-				boolean authenticate = verifyConnection(buffer, nonce);
-				if(!authenticate){
+
+				byte[] sessionKey = verifyConnection(buffer, nonce);
+				if(sessionKey == null){
 					System.out.println("Authentication Failure");
 					System.out.println("Program Exiting to avoid malicious connection");
 					System.exit(1);

@@ -3,6 +3,7 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Objects;
@@ -23,7 +24,7 @@ class AuthenticationServer {
     public static void main(String[] args) {
         //Generating Master Keys from Strings
         masterAlice = KeyGenerator.genMasterKeyFromString("w10PtdhELmt/ZPzcZjxFdg==");
-        masterBob = KeyGenerator.genMasterKeyFromString("055WVjVBB95Yaw6ZhRAWug==");
+        masterBob   = KeyGenerator.genMasterKeyFromString("055WVjVBB95Yaw6ZhRAWug==");
         startServer();
         System.out.println("The server has started");
         try {
@@ -61,6 +62,7 @@ class AuthenticationServer {
             // Get input and output streams
             DataInputStream in = new DataInputStream(socket.getInputStream());
             DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+
             String header = in.readUTF();
             String[] headerArray = header.split(",");
             String nonce = headerArray[3];
@@ -71,14 +73,14 @@ class AuthenticationServer {
             String AliceEncrypt = Arrays.toString(sessionKey.getEncoded()) + "," + nonce;
             System.out.println(AliceEncrypt);
             //AliceEncrypt.encrypt with master key
-            byte[] aliceToSend = Objects.requireNonNull(SecurityFunctions.encryptWithSharedKey(AliceEncrypt.getBytes(), masterAlice));
+            byte[] aliceToSend = AliceEncrypt.getBytes();//Objects.requireNonNull(SecurityFunctions.encryptWithSharedKey(AliceEncrypt.getBytes(), masterAlice));
             //System.out.println("Alice encrypt is : " + AliceEncrypt);
             //System.out.println(SecurityFunctions.decryptWithSharedKey(AliceEncrypt.getBytes(),masterAlice));
 
             //Encrypt ticket Session|"Alice"|nonce with bob master key for Bob
             String BobEncrypt = Base64.getEncoder().encodeToString(sessionKey.getEncoded()) + "|Alice|" + nonce;
             //BobEncrypt with master key for bob
-            byte[] bobToSend = Objects.requireNonNull(SecurityFunctions.encryptWithSharedKey(BobEncrypt.getBytes(), masterBob));
+            byte[] bobToSend = BobEncrypt.getBytes(StandardCharsets.UTF_8);//Objects.requireNonNull(SecurityFunctions.encryptWithSharedKey(BobEncrypt.getBytes(), masterBob));
 
             //Generate payload to send
             byte[] payload = joinByteArray(aliceToSend,bobToSend);

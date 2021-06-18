@@ -121,8 +121,19 @@ class Alice{
             byte[] payload = inAuthServ.readAllBytes();
             byte[] aliceBuffer = Arrays.copyOfRange(payload, 0, (int)aliceSize);
             byte[] bobBuffer = Arrays.copyOfRange(payload, (int)aliceSize,payload.length);
-            boolean authenticate = checkString(aliceBuffer, nonce);
 
+            byte[] sessionKey = checkString(aliceBuffer, nonce);
+            //If the nonce does not match the session key returns null
+            if (sessionKey == null){
+                //Terminate connection first for safety
+                inBob.close();
+                outBob.close();
+                //inform user
+                System.out.println("Authentication Failure");
+                System.out.println("Program Exiting to avoid malicious connection");
+                //return false
+                return false;
+            }
 
 
             //STEP 5 send semi-decrypted auth server to Bob
@@ -139,16 +150,6 @@ class Alice{
 
             inAuthServ.close();
             outAuthServ.close();
-            if(!authenticate){
-                //Terminate connection first for safety
-                inBob.close();
-                outBob.close();
-                //inform user
-                System.out.println("Authentication Failure");
-                System.out.println("Program Exiting to avoid malicious connection");
-                //return false
-                return false;
-            }
             return true;
 
         } catch (Exception e){
@@ -158,23 +159,24 @@ class Alice{
         }
     }
 
-    private static boolean checkString(byte[] encoded, String nonce) throws Exception {
-
-        //String decoded = SecurityFunctions.decryptWithSharedKey(encoded, masterAlice);
-        //if(masterAlice == null)System.out.println("null");
-        //System.out.println(masterAlice +  "   the decode is  " + encoded);
-        //String[] arr = encoded.split("|");
-        //if (arr[1] == nonce){
-            //SecretKey sessionKey = arr[0];
-        //    return true;
-        //}
-        return true;
-        /*
-        Decode the string
-        split off |
-        the 1st element is the encoded sessions key
-        the second element is the nonce we sent
-        return true;*/
+    private static byte[] checkString(byte[] encoded, String nonce) throws Exception {
+        //This is working without encryption/decryption
+        //The right amount of data is getting here
+        try {
+            System.out.println(new String(encoded));
+            byte[] sessionkey = Arrays.copyOfRange(encoded, 0, encoded.length - 17);
+            System.out.println("Session key: " + new String(sessionkey));
+            String nonceCheck = new String(Arrays.copyOfRange(encoded, encoded.length - 16, encoded.length));
+            System.out.println(nonce);
+            if (nonce.equals(nonceCheck)) {
+                return sessionkey;
+            } else {
+                return null;
+            }
+        } catch (Exception e){
+            //Any form of exception constitutes authentication failure
+            return null;
+        }
     }
 
     /**
