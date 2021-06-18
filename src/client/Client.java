@@ -2,19 +2,16 @@
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-
 import java.io.File;
-
 import java.io.FileInputStream;
 import java.io.BufferedInputStream;
 import java.util.Scanner;
 import java.nio.ByteBuffer;
 
 public class Client {
-
+    static volatile boolean done = true;
     public static void main(String[] args) throws Exception {
 
         // scanner used for all client input
@@ -54,48 +51,20 @@ public class Client {
                 // password is incorrect, repeat loop
                 System.out.println("Password Incorrect");
             }
+            //threads for sending and receiving messages/images
+            readThread read = new readThread("Bob", socket, in, out);
+            writeThread write = new writeThread("Bob", scanner, socket, in, out);
+                read.start();
+                write.start();
+            while(done){
 
-            // while() loop to keep checking for client commands (UPLOAD, DOWNLOAD, LIST, quit)
-            while (true) {
-                // prompt client to enter command
-                System.out.println("Enter Message or [Upload] to send Image or [quit] to exit:");
-                // client enters message
-                String message = scanner.nextLine(); 
-                if (message.equals("quit")){
-                    System.out.println("Disconnecting from server...");
-                    // << HEADER sent to server to signify a QUIT
-                    out.writeUTF("CMD,quit,null,null,null");
-                    // close input and output streams
-                    in.close();
-                    out.close();
-                    break;
-                }
-                if(message.equals("Upload")){
-                    System.out.println("Enter Filename:");
-                    String fName = scanner.nextLine();
-                    //check whether file is there to upload
-                    File temp = new File(fName);
-                    if (!temp.exists()) {
-                        System.out.println("Cannot find file.");
-                        continue;
-                    }
-                    //send header for Bob to download
-                    out.writeUTF("Auth,I," + fName + ",null, null");
-                    upload(fName, in,out, scanner); //uploads client header and image/caption
-                    String [] reply = in.readUTF().split(",");
-                    if(reply[4].equals("success")){
-                        System.out.println("Image sent to Bob");
-                    }else if(reply[4].equals("failed")){
-                        System.out.println("Image failed to send");
-                    }
-                }else{
-                    //basic messaging
-                    out.writeUTF("Auth,M,null,null,null");
-                    out.writeUTF(message);
-                }
-                
-            }
-        }
+            }   
+            System.out.println("Bye Alice...");
+            System.exit(0);
+        }catch (Exception e) {
+            System.out.println(e);
+            System.out.println("Connection ended main");
+        } 
     }
     /**
      * upload file
@@ -144,22 +113,4 @@ public class Client {
                     .put(caption)
                     .array();
     }
-
-    /**
-     * check if string is digit
-     * @param strNum
-     * @return
-     */
-    public static boolean isInteger(String strNum){
-  if(strNum == null){
-    return false;
-  }
-  try{
-    int num = Integer.parseInt(strNum);
-  }
-  catch(NumberFormatException nfe){
-    return false;
-  }
-  return true;
-}
 }
