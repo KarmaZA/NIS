@@ -3,6 +3,7 @@ import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
 import java.net.Socket;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Base64;
 import java.util.Scanner;
@@ -19,6 +20,9 @@ class Alice{
     public static Key privateKey; //TODO change back to private
 
     final String IP = "localhost";
+
+    //For two way messaging
+    static volatile boolean done = true;
 
     /**
      * The main function for the class Alice. Sets up the variables and keys to be used in the program
@@ -38,45 +42,29 @@ class Alice{
             //Catch a possible Null Pointer Exception
             System.out.println("Key pair generation failed.");
         }
+        //Connect to socket
+        Socket socket = Connect(portUpload);
+        //Socket connection failed try new port or quit
 
-        SecretKey sharedkey= KeyGenerator.genSharedKey();
-        System.out.println("encrypting with Chels function ");
-        byte[] encryptedForAuth = SecurityFunctions.PGPAuthenticationEncrypt("Hello World", Alice.privateKey);
-        System.out.println(new String(SecurityFunctions.PGPAuthenticationDecrypt(encryptedForAuth, Alice.publicKey)));
+        while(socket == null){
+            System.out.println("Port Connection failed please input a new port number (0 to exit):");
+            portUpload = Integer.parseInt(scanner.nextLine());
+            if(portUpload == 0){ System.exit(0);}
+            socket = Connect(portUpload);
+        }
+        //Authenticate communication
+        DataInputStream in = new DataInputStream(socket.getInputStream());
+        DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+        boolean authenticated = AuthenticateCommunication(socket,in, out);
+        if(authenticated){
+            startMessaging(socket,in, out);
+        } else {
+            //Authentication failed. Assume it's malicious and end program
+            System.out.println("Authentication Failed");
+            System.exit(0);
+        }
 
-        System.out.println("Full PGP function - testing with ChelLynn is the best");
-        byte[] fullEncrypted = SecurityFunctions.PGPFullEncrypt("ChelLynn is the best".getBytes(), sharedkey, Alice.privateKey, Alice.publicKey);
-        String fullDecrypted = new String (SecurityFunctions.PGPFullDecrypt(fullEncrypted, Alice.privateKey, Alice.publicKey));
-        System.out.println(fullDecrypted);
-//
-//        //Connect to socket
-//        Socket socket = Connect(portUpload);
-//        //Socket connection failed try new port or quit
-//
-//        while(socket == null){
-//            System.out.println("Port Connection failed please input a new port number (0 to exit):");
-//            portUpload = Integer.parseInt(scanner.nextLine());
-//            if(portUpload == 0){ System.exit(0);}
-//            socket = Connect(portUpload);
-//        }
-//        //Authenticate communication
-//        boolean authenticated = AuthenticateCommunication(socket);
-//        if(authenticated){
-//            startMessaging(socket);
-//        } else {
-//            //Authentication failed. Assume it's malicious and end program
-//            System.out.println("Authentication Failed");
-//            System.exit(0);
-//        }
 
-        /* I don't know if this is needed
-        byte[] encryptedonPGP = SecurityFunctions.PGPConfidentialityEncrypt("hello world", KeyGenerator.genSharedKey(), Alice.publicKey);
-        String returned = SecurityFunctions.PGPConfidentialityDecrypt(encryptedonPGP, Alice.privateKey);
-        System.out.println(returned);
-
-        //this shows that the functions do work independently
-        System.out.println(SecurityFunctions.decryptWithSharedKey(SecurityFunctions.encryptWithSharedKey("Hello world".getBytes(), sharedkey), sharedkey));
-        */
     }
 
     /**
@@ -102,17 +90,15 @@ class Alice{
      * @param socket The socket that is connected to Bob
      * @return true if the authentication is validated
      */
-    private static boolean AuthenticateCommunication(Socket socket){
+    private static boolean AuthenticateCommunication(Socket socket, DataInputStream inBob, DataOutputStream outBob){
         try {
 
             //Set up IO streams
             String toSend = "Communication request";
-            PrintStream outBob = new PrintStream(socket.getOutputStream());
-            BufferedReader inBob = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
             //STEP 1 request communication
             System.out.println("Step 1");
-            outBob.println(toSend);
+            outBob.write(toSend.getBytes());
             System.out.println("Request has been sent.");
             //STEP 2 Receive Nonce from Bob
             System.out.println("Step 2");
@@ -120,7 +106,7 @@ class Alice{
             //toSend = inBob.readLine();
             System.out.println("Step 2");
 
-            toSend = inBob.readLine();
+            toSend = new String(inBob.readAllBytes());
 
             System.out.println("The Nonce from Bob is " + toSend);
 
@@ -142,11 +128,11 @@ class Alice{
 
             //STEP 5 send semi-decrypted auth server to Bob
             System.out.println("Step 5 /n Data sent to Bob");
-            outBob.println(checkEncryption[1]);
+            outBob.write(checkEncryption[1].getBytes());
 
             //STEP 6 Receive shared key from Bob (Decrypted from AS)
             System.out.println("Step 6");
-            toSend = inBob.readLine();
+            //toSend = inBob.readLine();
             //verify this matches our session key
             System.out.println("The session key from Bob is " + toSend);
 
@@ -161,8 +147,16 @@ class Alice{
         }
     }
 
-    private static boolean checkString(String encoded, String nonce){
+    private static boolean checkString(String encoded, String nonce) throws Exception {
         /*
+        encoded = SecurityFunctions.decryptWithSharedKey(encoded.getBytes(), masterAlice);
+        String[] arr = encoded.split("|");
+        if (arr[1] == nonce){
+            //SecretKey sessionKey = arr[0];
+            return true;
+        }
+        return false;
+
         Decode the string
         split off |
         the 1st element is the encoded sessions key
@@ -176,159 +170,65 @@ class Alice{
      * session has been authenticated.
      * @param socket The socket connected to Bob
      */
-    private static void startMessaging(Socket socket){
-        // scanner used for all client input
-        Scanner scanner = new Scanner(System.in);
+    private static void startMessaging(Socket socket, DataInputStream in, DataOutputStream out){
+            // scanner used for all client input
+            //Scanner scanner = new Scanner(System.in);
 
-        // client enters IP address to connect to server
-        // System.out.println("Enter: <IP>");
-        // String clientIP = scanner.nextLine();
+            // client enters IP address to connect to server
+            // System.out.println("Enter: <IP>");
+            // String clientIP = scanner.nextLine();
 
-        System.out.println("Connecting...");
+            System.out.println("Connecting...");
 
-        // connect to server on designated IP address and port number 59897
-        try{
+            // connect to server on designated IP address and port number 59897
+            try{
 
-            // If connection is successful, this block will run. Otherwise, connection will time out.
-            System.out.println("Connection Successful");
+                // If connection is successful, this block will run. Otherwise, connection will time out.
+                System.out.println("Connection Successful");
 
-            // input and output streams to read and write from server
-            DataInputStream in = new DataInputStream(socket.getInputStream());
-            DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+                // input and output streams to read and write from server
 
-            // while() loop for password authentication
-            while (true) {
-                // client enters server password
-                System.out.println("Enter: <Password>");
-                String clientPassword = scanner.nextLine();
-                // << HEADER sent to server to check password
-                out.writeUTF("CMD,START," + clientPassword + ",null,null");
 
-                // >> HEADER received from server detailing if password is correct or not
-                String[] serverHeader = in.readUTF().split(",");
-
-                // check if password is correct or not
-                if (serverHeader[4].equals("success")) {
-                    System.out.println("Password Correct");
-                    // password is correct, break out of while() loop
-                    break;
-                }
-                // password is incorrect, repeat loop
-                System.out.println("Password Incorrect");
-            }
-
-            // while() loop to keep checking for client commands (UPLOAD, DOWNLOAD, LIST, quit)
-            while (true) {
-                // prompt client to enter command
-                System.out.println("Enter Message or [Upload] to send Image or [quit] to exit:");
-                // client enters message
-                String message = scanner.nextLine();
-                if (message.equals("quit")){
-                    System.out.println("Disconnecting from server...");
-                    // << HEADER sent to server to signify a QUIT
-                    out.writeUTF("CMD,quit,null,null,null");
-                    // close input and output streams
-                    in.close();
-                    out.close();
-                    break;
-                }
-                if(message.equals("Upload")){
-                    System.out.println("Enter Filename:");
-                    String fName = scanner.nextLine();
-                    //check whether file is there to upload
-                    File temp = new File(fName);
-                    if (!temp.exists()) {
-                        System.out.println("Cannot find file.");
-                        continue;
+                // while() loop for password authentication
+                while (true) {
+                    // client enters server password
+                    System.out.println("Enter: <Password>");
+                    String clientPassword = scanner.nextLine();
+                    // << HEADER sent to server to check password
+                    out.writeUTF("CMD,START," + clientPassword + ",null,null");
+                    // >> HEADER received from server detailing if password is correct or not
+                    String[] serverHeader = in.readUTF().split(",");
+                    System.out.println(serverHeader);
+                    // check if password is correct or not
+                    if (serverHeader[4].equals("success")) {
+                        System.out.println("Password Correct");
+                        // password is correct, break out of while() loop
+                        break;
                     }
-                    //send header for Bob to download
-                    out.writeUTF("Auth,I," + fName + ",null, null");
-                    upload(fName, in,out, scanner); //uploads client header and image/caption
-                    String [] reply = in.readUTF().split(",");
-                    if(reply[4].equals("success")){
-                        System.out.println("Image sent to Bob");
-                    }else if(reply[4].equals("failed")){
-                        System.out.println("Image failed to send");
-                    }
-                }else{
-                    //basic messaging
-                    out.writeUTF("Auth,M,null,null,null");
-                    out.writeUTF(message);
+                    // password is incorrect, repeat loop
+                    System.out.println("Password Incorrect");
                 }
+                //threads for sending and receiving messages/images
+                readThread read = new readThread("Bob", socket, in, out);
+                writeThread write = new writeThread("Bob", scanner, socket, in, out);
+                read.start();
+                write.start();
+                while(done){
 
+                }
+                System.out.println("Bye Alice...");
+                System.exit(0);
+            }catch (Exception e) {
+                System.out.println(e);
+                System.out.println("Connection ended main");
             }
-        } catch (IOException e){
-            System.out.println("IOException in startMessaging");
-            e.printStackTrace();
+        }
+
+        //combine two arrays
+        public static byte[] joinByteArray(byte[] image, byte[] caption){
+            return ByteBuffer.allocate(image.length + caption.length)
+                    .put(image)
+                    .put(caption)
+                    .array();
         }
     }
-
-    /**
-     * Sends a file through the connection to bob
-     * @param clientCommand the name of the file
-     * @param in the DataInputStream
-     * @param out the DataOutputStream
-     * @param scanner for user input
-     */
-    public static void upload(String clientCommand,DataInputStream in, DataOutputStream out, Scanner scanner){
-
-        try {
-
-            // create new file with the name specified by the client
-            File myFile = new File(clientCommand);
-            System.out.println("Enter Caption for Image:");
-            String caption = scanner.nextLine();
-
-            // create byte array that will be used to store file content
-            byte[] mybytearray = new byte[(int) myFile.length()];
-            // FileInputStream -> BufferedInputStream -> DataInputStream -> byte array
-            FileInputStream fis = new FileInputStream(myFile);
-            BufferedInputStream bis = new BufferedInputStream(fis);
-            DataInputStream dis = new DataInputStream(bis);
-            dis.readFully(mybytearray, 0, mybytearray.length);
-            // combiine byte arrays
-            byte[] payload = joinByteArray(mybytearray, caption.getBytes());
-
-            //SECURE MESSAGE??
-
-
-            // << PAYLOAD sent to server containing length of byte array to upload
-            out.writeLong(mybytearray.length);
-            out.writeLong(caption.getBytes().length);
-            // << PAYLOAD sent to server containing byte array
-            out.write(payload, 0, payload.length);
-
-            out.flush();
-            dis.close();
-            System.out.println("File sent: " + clientCommand);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-    //combine two arrays
-    public static byte[] joinByteArray(byte[] image, byte[] caption){
-        return ByteBuffer.allocate(image.length + caption.length)
-                .put(image)
-                .put(caption)
-                .array();
-    }
-
-    /**
-     * check if string is digit
-     * @param strNum
-     * @return
-     */
-    public static boolean isInteger(String strNum){
-        if(strNum == null){
-            return false;
-        }
-        try{
-            int num = Integer.parseInt(strNum);
-        }
-        catch(NumberFormatException nfe){
-            return false;
-        }
-        return true;
-    }
-}

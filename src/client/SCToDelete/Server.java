@@ -15,6 +15,7 @@ public class Server {
 
     // server password (client must authenticate before accessing server)
     final private static String password = "1234";
+
     // hash table to store all file names and passwords
     // private static Hashtable<String,String> fileNames = new Hashtable<String,String>();
     //key is name, the other thing is the password

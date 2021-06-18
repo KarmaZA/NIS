@@ -41,7 +41,7 @@ public class writeThread implements Runnable {
                     // close input and output streams
                     in.close();
                     out.close();
-                    Client.done = false;
+                    Alice.done = false;
                     break;
                 }
                 if(message.equals("Upload")){
