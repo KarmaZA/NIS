@@ -1,4 +1,4 @@
-
+/*
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -69,7 +69,7 @@ public class Client {
     /**
      * upload file
      * @param clientCommand
-     */
+     * /
     public static void upload(String clientCommand,DataInputStream in, DataOutputStream out, Scanner scanner){
 
         try {
@@ -114,3 +114,4 @@ public class Client {
                     .array();
     }
 }
+*/

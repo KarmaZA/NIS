@@ -4,8 +4,11 @@
     <list default="true" id="dc3e1ea2-3b77-47f8-91ba-81d1e6514c54" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/client/Alice.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/Alice.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/client/AuthenticationServer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/AuthenticationServer.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/client/Bob.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/Bob.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/SCToDelete/Client.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/SCToDelete/Client.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/SCToDelete/Server.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/SCToDelete/Server.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/readThread.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/readThread.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/writeThread.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/writeThread.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -159,36 +162,8 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="KeyGenerator" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="KeyGenerator" />
-      <module name="NIS" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="SecurityFunctions" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="SecurityFunctions" />
-      <module name="NIS" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="Server" type="Application" factoryName="Application">
-      <option name="MAIN_CLASS_NAME" value="Server" />
-      <module name="NIS" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="authServer" type="Application" factoryName="Application">
       <option name="MAIN_CLASS_NAME" value="AuthenticationServer" />
-      <module name="NIS" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="client" type="Application" factoryName="Application">
-      <option name="MAIN_CLASS_NAME" value="Client" />
       <module name="NIS" />
       <method v="2">
         <option name="Make" enabled="true" />
@@ -201,19 +176,13 @@
       </method>
     </configuration>
     <list>
-      <item itemvalue="Application.Server" />
-      <item itemvalue="Application.client" />
       <item itemvalue="Application.Bob" />
       <item itemvalue="Application.authServer" />
-      <item itemvalue="Application.KeyGenerator" />
       <item itemvalue="Application.Alice" />
-      <item itemvalue="Application.SecurityFunctions" />
     </list>
     <recent_temporary>
       <list>
         <item itemvalue="Application.Alice" />
-        <item itemvalue="Application.SecurityFunctions" />
-        <item itemvalue="Application.KeyGenerator" />
       </list>
     </recent_temporary>
   </component>

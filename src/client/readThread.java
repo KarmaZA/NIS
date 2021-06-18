@@ -40,7 +40,7 @@ public class readThread implements Runnable {
 
                         // record filename and password from  client HEADER
                         String fileName = clientHeader[2];
-                        // outputstream to write file uploaded from client onto server PC
+                        // output stream to write file uploaded from client onto server PC
                         OutputStream output = new FileOutputStream("output/"+fileName);
                         // >> HEADER received from client containing length of byte array to upload
                         long size = in.readLong();

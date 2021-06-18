@@ -4,21 +4,18 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.util.Scanner;
-import java.io.OutputStream;
-import java.io.FileOutputStream;
 
 public class writeThread implements Runnable {
 
     private Thread write;
-    private String threadName;
-    private DataInputStream in;
-    private DataOutputStream out;
-    private Socket socket;
-    private Scanner scanner;
+    private final String threadName;
+    private final DataInputStream in;
+    private final DataOutputStream out;
+    private final Socket socket;
+    private final Scanner scanner;
 
     writeThread(String threadName, Scanner scanner, Socket socket, DataInputStream in, DataOutputStream out){
         this.threadName = threadName;
@@ -63,8 +60,8 @@ public class writeThread implements Runnable {
                 }            
             }
         }catch (Exception e) {
-                System.out.println(e);
                 System.out.println("Connection ended");
+                e.printStackTrace();
             } 
     }
     /**
@@ -78,20 +75,20 @@ public class writeThread implements Runnable {
             System.out.println("Enter Caption for Image:");
             String caption = scanner.nextLine();
             // create byte array that will be used to store file content
-            byte[] mybytearray = new byte[(int) myFile.length()];
+            byte[] myByteArray = new byte[(int) myFile.length()];
             // FileInputStream -> BufferedInputStream -> DataInputStream -> byte array
             FileInputStream fis = new FileInputStream(myFile);
             BufferedInputStream bis = new BufferedInputStream(fis);
             DataInputStream dis = new DataInputStream(bis);
-            dis.readFully(mybytearray, 0, mybytearray.length);
-            // combiine byte arrays
-            byte[] payload = joinByteArray(mybytearray, caption.getBytes());
+            dis.readFully(myByteArray, 0, myByteArray.length);
+            // combine byte arrays
+            byte[] payload = joinByteArray(myByteArray, caption.getBytes());
 
             //SECURE MESSAGE??
 
 
             // << PAYLOAD sent to server containing length of byte array to upload
-            out.writeLong(mybytearray.length);
+            out.writeLong(myByteArray.length);
             out.writeLong(caption.getBytes().length);
             // << PAYLOAD sent to server containing byte array
             out.write(payload, 0, payload.length);
