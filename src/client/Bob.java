@@ -87,22 +87,21 @@ class Bob {
 				DataInputStream in = new DataInputStream(socket.getInputStream());
 				DataOutputStream out = new DataOutputStream(socket.getOutputStream());
 				//Step 1 and 2
-				/*String line = new String(in.readAllBytes());
-				System.out.println("The message from Alice is" + line);
-				//Bob's reply
-				//Generating a nonce of length 32 from the method in secure Random
-				line = KeyGenerator.nonceGenerator(32);
-				out.write(line.getBytes());
-				out.write(line.getBytes());
-				out.flush();
+				String aliceAuthHeaderLine = in.readUTF();
+				System.out.println(aliceAuthHeaderLine);
+				String[] AliceHeaderLine = aliceAuthHeaderLine.split(",");
+				if(AliceHeaderLine[0].equals("CMD") && AliceHeaderLine[1].equals("START") && AliceHeaderLine[2].equals("REQCOM")){
+					//Communication request received send back a non
+					System.out.println("Communication request received");
+					out.writeUTF("CMD," + KeyGenerator.nonceGenerator(16) + ",null,null,null");
+				}
 
-			//Step 5 and 61234
-
-			line = in.readLine();
-			System.out.println("The message from Alice is" + line);
-			//Bob's reply
-			out.write("Hi Alice I'm Bob. Don't we need to authenticate to talk");
-			out.flush();*/
+				//Step 5 and 6
+				System.out.println("Here");
+				long bufferSize = in.readLong();
+				System.out.println("Here");
+				byte[] buffer = in.readNBytes((int)bufferSize);
+				System.out.println("The message from Alice is");// + buffer.toString());
 
 			/******************************/
 				try {

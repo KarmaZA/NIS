@@ -1,25 +1,22 @@
 import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
 import java.net.Socket;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.security.Key;
-import java.util.Base64;
+import java.util.Arrays;
 import java.util.Scanner;
 
 class Alice{
     //Preset master key with Alice
     private static SecretKey masterAlice = null;
 
-    private final String username = "Alice";
     private final static Scanner scanner = new Scanner(System.in);
     private static int portUpload = 45554;
 
     public static Key publicKey;
     public static Key privateKey; //TODO change back to private
 
-    final String IP = "localhost";
+    //final String IP = "localhost";
 
     //For two way messaging
     static volatile boolean done = true;
@@ -55,7 +52,7 @@ class Alice{
         //Authenticate communication
         DataInputStream in = new DataInputStream(socket.getInputStream());
         DataOutputStream out = new DataOutputStream(socket.getOutputStream());
-        boolean authenticated = AuthenticateCommunication(socket,in, out);
+        boolean authenticated = AuthenticateCommunication(in, out);
         if(authenticated){
             startMessaging(socket,in, out);
         } else {
@@ -87,57 +84,63 @@ class Alice{
      * Executes the authentication steps with the KDC using master keys and nonces to authenticate the
      * communication session between Alice and Bob and generate a session key. As well as validate that the
      * conversation is indeed between Alice and Bob.
-     * @param socket The socket that is connected to Bob
      * @return true if the authentication is validated
      */
-    private static boolean AuthenticateCommunication(Socket socket, DataInputStream inBob, DataOutputStream outBob){
+    private static boolean AuthenticateCommunication(DataInputStream inBob, DataOutputStream outBob){
         try {
-            /*
-            //Set up IO streams
-            String toSend = "Communication request";
-
             //STEP 1 request communication
             System.out.println("Step 1");
-            outBob.write(toSend.getBytes());
+            //Header to request communication
+            outBob.writeUTF("CMD,START,REQCOM,null,null");
             System.out.println("Request has been sent.");
             //STEP 2 Receive Nonce from Bob
-            System.out.println("Step 2");
 
             //toSend = inBob.readLine();
             System.out.println("Step 2");
 
-            toSend = new String(inBob.readAllBytes());
+            //If this is a problem make it two lines
+            String line = inBob.readUTF();
+            String[] bobHeader = line.split(",");
+            String nonce = bobHeader[1];
+            System.out.println("The Nonce from Bob is " + nonce);
 
-            System.out.println("The Nonce from Bob is " + toSend);
+
 
             //STEP 3 send nonce to Auth Server
             System.out.println("Step 3");
+            System.out.println("Sending request and nonce to authentication server for verification");
             Socket authServerSocket = Connect(45555);
-            PrintStream outAuthServ = new PrintStream(authServerSocket.getOutputStream());
-            BufferedReader inAuthServ = new BufferedReader(new InputStreamReader(authServerSocket.getInputStream()));
+            DataOutputStream outAuthServ = new DataOutputStream(authServerSocket.getOutputStream());
+            DataInputStream inAuthServ = new DataInputStream(authServerSocket.getInputStream());
 
-            //Write some encryption here
-            outAuthServ.println(toSend);
+            //Check header with AuthServ
+            outAuthServ.writeUTF("AUTH,Bob,Alice," + nonce + ",null");
 
             //STEP 4 receive encrypted nonce from server
             System.out.println("Step 4");
-            toSend = inAuthServ.readLine();
-            System.out.println(toSend);
-            String[] checkEncryption = toSend.split("|");
+            int bytesRead;
+            long aliceSize = inAuthServ.readLong();
+            //long bobSize = inAuthServ.readLong();
+            byte[] payload = inAuthServ.readAllBytes();
+            byte[] aliceBuffer = Arrays.copyOfRange(payload, 0, (int)aliceSize);
+            byte[] bobBuffer = Arrays.copyOfRange(payload, (int)aliceSize,payload.length);
+
            // checkString(checkEncryption[0]); //Lynn commented this out since it was causing errors.
 
             //STEP 5 send semi-decrypted auth server to Bob
-            System.out.println("Step 5 /n Data sent to Bob");
-            outBob.write(checkEncryption[1].getBytes());
+            System.out.println("Step 5 Data sent to Bob");
+            System.out.println(bobBuffer.length);
+            outBob.writeLong(bobBuffer.length);
+            outBob.write(bobBuffer, 0 , bobBuffer.length);
 
             //STEP 6 Receive shared key from Bob (Decrypted from AS)
             System.out.println("Step 6");
             //toSend = inBob.readLine();
             //verify this matches our session key
-            System.out.println("The session key from Bob is " + toSend);
+            //System.out.println("The session key from Bob is " + toSend);
 
             inAuthServ.close();
-            outAuthServ.close();*/
+            outAuthServ.close();
             return true;
 
         } catch (Exception e){
@@ -222,13 +225,5 @@ class Alice{
                 System.out.println(e);
                 System.out.println("Connection ended main");
             }
-        }
-
-        //combine two arrays
-        public static byte[] joinByteArray(byte[] image, byte[] caption){
-            return ByteBuffer.allocate(image.length + caption.length)
-                    .put(image)
-                    .put(caption)
-                    .array();
         }
     }
