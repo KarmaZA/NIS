@@ -2,6 +2,7 @@ import javax.crypto.SecretKey;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Hashtable;
 import java.util.Scanner;
@@ -43,48 +44,16 @@ class Bob {
 		}
 		startServer();
 		System.out.println("Bob is bobbing");
+
 		try {
-			Socket socket = serverSocket.accept();
-
-			//RequestHandler requestHandler = new RequestHandler(socket);
-			//requestHandler.start();
-			try {
-				System.out.println("Received a connection");
-
-				// Get input and output streams
-				BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-				PrintWriter out = new PrintWriter(socket.getOutputStream());
-				//Step 1 and 2
-				String line = in.readLine();
-				System.out.println("The message from Alice is" + line);
-				//Bob's reply
-				//Generating a nonce of length 32 from the method in secure Random
-				line = KeyGenerator.nonceGenerator(32);
-				out.write(line);
-				out.println(line);
-				out.flush();
-
-				//Step 5 and 61234
-
-				line = in.readLine();
-				System.out.println("The message from Alice is" + line);
-				//Bob's reply
-				out.write("Hi Alice I'm Bob. Don't we need to authenticate to talk");
-				out.flush();
-
-				ExecutorService pool = Executors.newFixedThreadPool(20);
-				pool.execute(new Handler(socket));
-				// server socket continuosly listens for client connections
-				while (true) {
-					// when a client connects to server socket, the new socket is run in a seperate thread
-					pool.execute(new Handler(serverSocket.accept()));
-					System.out.println("new socket");
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
+			ExecutorService pool = Executors.newFixedThreadPool(20);
+			// server socket continuosly listens for client connections
+			while (true) {
+				// when a client connects to server socket, the new socket is run in a seperate thread
+				pool.execute(new Handler(serverSocket.accept()));
+				System.out.println("new socket");
 			}
-		} catch (IOException e) {
-			System.out.println("Bob's bobbing did not bob up anything");
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
@@ -113,40 +82,66 @@ class Bob {
 		public void run() {
 			// client connection successful
 			System.out.println("Verifying Alice on: " + socket);
-			try {
-				// scanner used for all client input
-				Scanner scanner = new Scanner(System.in);
-				// input and output streams to read and write from client
+			/******************************/
+			try {// Get input and output streams
 				DataInputStream in = new DataInputStream(socket.getInputStream());
 				DataOutputStream out = new DataOutputStream(socket.getOutputStream());
-				// initialise client HEADER that will be received
-				String clientAuthHeaderLine;
-				while ((clientAuthHeaderLine = in.readUTF()) != null) { //read in from Alice
-					String[] clientAuthHeader = clientAuthHeaderLine.split(",");
-					// check authentication before proceeding
-					if(clientAuthHeader[0].equals("CMD") && clientAuthHeader[1].equals("START")){
+				//Step 1 and 2
+				/*String line = new String(in.readAllBytes());
+				System.out.println("The message from Alice is" + line);
+				//Bob's reply
+				//Generating a nonce of length 32 from the method in secure Random
+				line = KeyGenerator.nonceGenerator(32);
+				out.write(line.getBytes());
+				out.write(line.getBytes());
+				out.flush();
 
-						if(clientAuthHeader[2].equals(Bob.password)){
-							System.out.println("Password Correct: " + socket);
-							out.writeUTF("CMD,null,null,null,success");
-							Alice.done = false;
-							break;
-						}
-						else{
-							System.out.println("Password Incorrect: " + socket);
-							out.writeUTF("CMD,null,null,null,fail");
+			//Step 5 and 61234
+
+			line = in.readLine();
+			System.out.println("The message from Alice is" + line);
+			//Bob's reply
+			out.write("Hi Alice I'm Bob. Don't we need to authenticate to talk");
+			out.flush();*/
+
+			/******************************/
+				try {
+					// scanner used for all client input
+					Scanner scanner = new Scanner(System.in);
+					// input and output streams to read and write from client
+
+					// initialise client HEADER that will be received
+					String clientAuthHeaderLine;
+					while ((clientAuthHeaderLine = in.readUTF()) != null) { //read in from Alice
+						String[] clientAuthHeader = clientAuthHeaderLine.split(",");
+						// check authentication before proceeding
+						if(clientAuthHeader[0].equals("CMD") && clientAuthHeader[1].equals("START")){
+
+							if(clientAuthHeader[2].equals(Bob.password)){
+								System.out.println("Password Correct: " + socket);
+								out.writeUTF("CMD,null,null,null,success");
+								Alice.done = false;
+								break;
+							}
+							else{
+								System.out.println("Password Incorrect: " + socket);
+								out.writeUTF("CMD,null,null,null,fail");
+							}
 						}
 					}
+
+					//threads for sending and receiving messages/images
+					readThread read = new readThread("Alice", socket, in, out);
+					writeThread write = new writeThread("Alice", scanner, socket, in, out);
+					read.start();
+					write.start();
+
+				} catch (Exception e) {
+					System.out.println("Bye Bob");
 				}
-
-				//threads for sending and receiving messages/images
-				readThread read = new readThread("Alice", socket, in, out);
-				writeThread write = new writeThread("Alice", scanner, socket, in, out);
-				read.start();
-				write.start();
-
-			} catch (Exception e) {
-				System.out.println("Bye Bob");
+			} catch (Exception e){
+				System.out.println("Jonno's code is the problem");
+				//Delete this try catch block later
 			}
 		}
 	}

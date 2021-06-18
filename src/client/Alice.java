@@ -92,7 +92,7 @@ class Alice{
      */
     private static boolean AuthenticateCommunication(Socket socket, DataInputStream inBob, DataOutputStream outBob){
         try {
-
+            /*
             //Set up IO streams
             String toSend = "Communication request";
 
@@ -137,10 +137,10 @@ class Alice{
             System.out.println("The session key from Bob is " + toSend);
 
             inAuthServ.close();
-            outAuthServ.close();
+            outAuthServ.close();*/
             return true;
 
-        } catch (IOException e){
+        } catch (Exception e){
             System.out.println("No message, you've been ghosted");
             e.printStackTrace();
             return false;

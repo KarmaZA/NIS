@@ -5,9 +5,6 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/client/Alice.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/Alice.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/client/Bob.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/Bob.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/client/Client.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/client/Server.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/client/writeThread.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/writeThread.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
