@@ -128,14 +128,17 @@ class Alice{
             System.out.println("Step 4");
             toSend = inAuthServ.readLine();
             System.out.println(toSend);
+            String[] checkEncryption = toSend.split("|");
+            checkString(checkEncryption[0]);
 
             //STEP 5 send semi-decrypted auth server to Bob
-            System.out.println("Data sent to Bob");
-            outBob.println("Step 5 semi decrypted from AS");
+            System.out.println("Step 5 /n Data sent to Bob");
+            outBob.println(checkEncryption[1]);
 
             //STEP 6 Receive shared key from Bob (Decrypted from AS)
             System.out.println("Step 6");
-            //toSend = inBob.readLine();
+            toSend = inBob.readLine();
+            //verify this matches our session key
             System.out.println("The session key from Bob is " + toSend);
 
             inAuthServ.close();
@@ -147,6 +150,16 @@ class Alice{
             e.printStackTrace();
             return false;
         }
+    }
+
+    private static boolean checkString(String encoded, String nonce){
+        /*
+        Decode the string
+        split off |
+        the 1st element is the encoded sessions key
+        the second element is the nonce we sent
+         */
+        return true;
     }
 
     /**

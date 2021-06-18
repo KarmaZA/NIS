@@ -2,7 +2,9 @@ import javax.crypto.SecretKey;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.Objects;
 
 class AuthenticationServer{
 
@@ -64,15 +66,22 @@ class AuthenticationServer{
             System.out.println(nonce);
             //generate session key and encrypt (session key|request|nonce with Alice Master Key
             SecretKey sessionKey = KeyGenerator.genSharedKey();
-            String AliceEncrypt = Base64.getEncoder().encodeToString(sessionKey.getEncoded()) + "|" + nonce;
+
+            String AliceEncrypt = sessionKey.getEncoded() + "|" + nonce;
+            System.out.println(AliceEncrypt);
             //AliceEncrypt.encrypt with master key
+            AliceEncrypt = new String(Objects.requireNonNull(SecurityFunctions.encryptWithSharedKey(AliceEncrypt.getBytes(), masterAlice)));
+            //System.out.println("Alice encrpyt is : " + AliceEncrypt);
+            //System.out.println(SecurityFunctions.decryptWithSharedKey(AliceEncrypt.getBytes(),masterAlice));
 
             //Encrypt ticket Session|"Alice"|nonce with bob master key for Bob
             String BobEncrypt = Base64.getEncoder().encodeToString(sessionKey.getEncoded()) + "|Alice|" + nonce;
             //BobEncrypt with master key for bob
+            BobEncrypt = new String(Objects.requireNonNull(SecurityFunctions.encryptWithSharedKey(BobEncrypt.getBytes(), masterBob)));
 
             AliceEncrypt += "|" + BobEncrypt;
-            //Bob's reply
+            System.out.println(AliceEncrypt);
+            //send back to Alice
             out.write(AliceEncrypt);
             out.flush();
             // Close our connection
@@ -80,7 +89,7 @@ class AuthenticationServer{
             out.close();
             sckt.close();
 
-            System.out.println( "Connection closed" );
+            System.out.println( "Authentication completed closed" );
         }
         catch( Exception e )
         {
