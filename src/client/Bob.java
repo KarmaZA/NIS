@@ -2,7 +2,6 @@ import javax.crypto.SecretKey;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Arrays;
 import java.util.Hashtable;
@@ -81,19 +80,29 @@ class Bob {
 			this.socket = socket;
 		}
 
-		private static byte[] verifyConnection(byte[] encoded, String nonce) throws Exception {
+		/**
+		 * Decodes the encoded byte[] from Authentication server sent via Alice encoded with Bob's master key
+		 * that is shared with the server. Returns a session key if authenticated else null
+		 * @param encoded encoded string with Bob's master key
+		 * @param nonce nonce that Bob sent to Alice
+		 * @return session key if valid else null
+		 * @throws Exception assumes failed authentication returns null
+		 */
+		private static byte[] verifyConnection(byte[] encoded, String nonce){
 			//This is working without encryption/decryption
-			//The right amount of data is getting here
+			//The right amount of data is getting here4
 			try {
+				System.out.println("in verify Connection");
+				encoded = (SecurityFunctions.decryptWithSharedKey(encoded,masterBob)).getBytes();
 				System.out.println(new String(encoded));
-				byte[] sessionkey = Arrays.copyOfRange(encoded, 0, encoded.length - 23);
-				System.out.println("Session key: " + new String(sessionkey));
+				byte[] sessionKey = Arrays.copyOfRange(encoded, 0, encoded.length - 23);
+				System.out.println("Session key: " + new String(sessionKey));
 				String aliceCheck = new String(Arrays.copyOfRange(encoded, encoded.length - 23, encoded.length-16));
 				System.out.println(aliceCheck);
 				String nonceCheck = new String(Arrays.copyOfRange(encoded, encoded.length - 16, encoded.length));
 				System.out.println(nonce);
 				if (nonce.equals(nonceCheck) && aliceCheck.equals("|Alice|")) {
-					return sessionkey;
+					return sessionKey;
 				} else {
 					return null;
 				}
@@ -103,6 +112,10 @@ class Bob {
 			}
 		}
 
+		/**
+		 * Run method for the thread. undergoes the authentication then if successful spawns threads to read and
+		 * write data for Bob to and from Alice
+		 */
 		@Override
 		public void run() {
 			// client connection successful
@@ -122,9 +135,7 @@ class Bob {
 				}
 
 				//Step 5 and 6
-				System.out.println("Here");
 				long bufferSize = in.readLong();
-				System.out.println("Here");
 				byte[] buffer = in.readNBytes((int)bufferSize);
 				System.out.println("The message from Alice is" + buffer.toString());
 

@@ -102,8 +102,6 @@ class Alice{
             String nonce = bobHeader[1];
             System.out.println("The Nonce from Bob is " + nonce);
 
-
-
             //STEP 3 send nonce to Auth Server
             System.out.println("Step 3");
             System.out.println("Sending request and nonce to authentication server for verification");
@@ -122,7 +120,7 @@ class Alice{
             byte[] aliceBuffer = Arrays.copyOfRange(payload, 0, (int)aliceSize);
             byte[] bobBuffer = Arrays.copyOfRange(payload, (int)aliceSize,payload.length);
 
-            byte[] sessionKey = checkString(aliceBuffer, nonce);
+            byte[] sessionKey = verifyConnection(aliceBuffer, nonce);
             //If the nonce does not match the session key returns null
             if (sessionKey == null){
                 //Terminate connection first for safety
@@ -159,17 +157,27 @@ class Alice{
         }
     }
 
-    private static byte[] checkString(byte[] encoded, String nonce) throws Exception {
+    /**
+     * Takes the Alice half of the encoded string from the auth server and verifies it off the nonce and then
+     * returns the session key if the nonce is verfied else null
+     * @param encoded encoded byte[] from Authentication Server
+     * @param nonce Nonce that was sent to the Auth server
+     * @return byte[] session key if authenticated else null
+     * @throws Exception returns null assumes failed authentication
+     */
+    private static byte[] verifyConnection(byte[] encoded, String nonce){
         //This is working without encryption/decryption
         //The right amount of data is getting here
         try {
+            System.out.println("In verify connection");
+            encoded = (SecurityFunctions.decryptWithSharedKey(encoded, masterAlice)).getBytes();
             System.out.println(new String(encoded));
-            byte[] sessionkey = Arrays.copyOfRange(encoded, 0, encoded.length - 17);
-            System.out.println("Session key: " + new String(sessionkey));
+            byte[] sessionKey = Arrays.copyOfRange(encoded, 0, encoded.length - 17);
+            System.out.println("Session key: " + new String(sessionKey));
             String nonceCheck = new String(Arrays.copyOfRange(encoded, encoded.length - 16, encoded.length));
             System.out.println(nonce);
             if (nonce.equals(nonceCheck)) {
-                return sessionkey;
+                return sessionKey;
             } else {
                 return null;
             }
@@ -185,56 +193,40 @@ class Alice{
      * @param socket The socket connected to Bob
      */
     private static void startMessaging(Socket socket, DataInputStream in, DataOutputStream out){
-            // scanner used for all client input
-            //Scanner scanner = new Scanner(System.in);
-
-            // client enters IP address to connect to server
-            // System.out.println("Enter: <IP>");
-            // String clientIP = scanner.nextLine();
-
-            System.out.println("Connecting...");
-
-            // connect to server on designated IP address and port number 59897
-            try{
-
-                // If connection is successful, this block will run. Otherwise, connection will time out.
-                System.out.println("Connection Successful");
-
-                // input and output streams to read and write from server
-
-
-                // while() loop for password authentication
-                while (true) {
-                    // client enters server password
-                    System.out.println("Enter: <Password>");
-                    String clientPassword = scanner.nextLine();
-                    // << HEADER sent to server to check password
-                    out.writeUTF("CMD,START," + clientPassword + ",null,null");
-                    // >> HEADER received from server detailing if password is correct or not
-                    String[] serverHeader = in.readUTF().split(",");
-                    System.out.println(serverHeader);
-                    // check if password is correct or not
-                    if (serverHeader[4].equals("success")) {
-                        System.out.println("Password Correct");
-                        // password is correct, break out of while() loop
-                        break;
-                    }
-                    // password is incorrect, repeat loop
-                    System.out.println("Password Incorrect");
+        // When we use IPs we will use preset ones
+        try{
+            // while() loop for password authentication
+            while (true) {
+                // client enters server password
+                System.out.println("Enter: <Password>");
+                String clientPassword = scanner.nextLine();
+                // << HEADER sent to server to check password
+                out.writeUTF("CMD,START," + clientPassword + ",null,null");
+                // >> HEADER received from server detailing if password is correct or not
+                String[] serverHeader = in.readUTF().split(",");
+                System.out.println(serverHeader);
+                // check if password is correct or not
+                if (serverHeader[4].equals("success")) {
+                    System.out.println("Password Correct");
+                    // password is correct, break out of while() loop
+                    break;
                 }
-                //threads for sending and receiving messages/images
-                readThread read = new readThread("Bob", socket, in, out);
-                writeThread write = new writeThread("Bob", scanner, socket, in, out);
-                read.start();
-                write.start();
-                while(done){
-
-                }
-                System.out.println("Bye Alice...");
-                System.exit(0);
-            }catch (Exception e) {
-                System.out.println(e);
-                System.out.println("Connection ended main");
+                // password is incorrect, repeat loop
+                System.out.println("Password Incorrect");
             }
+            //threads for sending and receiving messages/images
+            readThread read = new readThread("Bob", socket, in, out);
+            writeThread write = new writeThread("Bob", scanner, socket, in, out);
+            read.start();
+            write.start();
+            while(done){
+
+            }
+            System.out.println("Bye Alice...");
+            System.exit(0);
+        }catch (Exception e) {
+            System.out.println(e);
+            System.out.println("Connection ended main");
         }
     }
+}
