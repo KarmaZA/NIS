@@ -19,13 +19,13 @@ public class SecurityFunctions {
     private static byte[] IV;
 
     public static byte[] PGPFullEncrypt(byte[] toEncrypt, SecretKey sharedKey, Key senderPrivate, Key receiverPublic ) throws NoSuchAlgorithmException, IOException {
-        byte[] pgpAuth = PGPAuthenticationEncrypt(new String(toEncrypt), senderPrivate);
-        byte[] pgpConfid = PGPConfidentialityEncrypt(new String(pgpAuth), sharedKey, receiverPublic);
+        byte[] pgpAuth = PGPAuthenticationEncrypt(toEncrypt, senderPrivate);
+        byte[] pgpConfid = PGPConfidentialityEncrypt(pgpAuth, sharedKey, receiverPublic);
         return pgpConfid;
     }
 
     public static byte[] PGPFullDecrypt(byte[] encrypted, Key receiverPrivate , Key senderPublic) throws IOException, NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
-        byte[] pgpConfidDecrypt = PGPConfidentialityDecrypt(encrypted, receiverPrivate).getBytes();
+        byte[] pgpConfidDecrypt = PGPConfidentialityDecrypt(encrypted, receiverPrivate);
 
         byte[] pgpAuthDecrypt = PGPAuthenticationDecrypt(pgpConfidDecrypt, senderPublic);
         return pgpAuthDecrypt;
@@ -38,21 +38,18 @@ public class SecurityFunctions {
      * @return A signed hash and the original message, concatenated together
      * @throws NoSuchAlgorithmException
      */
-    public static byte[] PGPAuthenticationEncrypt(String message, Key privateKey) throws NoSuchAlgorithmException {
+    public static byte[] PGPAuthenticationEncrypt(byte[] message, Key privateKey) throws NoSuchAlgorithmException {
         //commented examples assume Alice is sending to Bob
         //hash the message
         String hashedMessage = hashString(message);
-        System.out.print("Hash string length is ");
-        System.out.println(hashedMessage.length());
+
         //encrypt the hash with Alice's private key
         byte[] encryptedHash = encryptWithAsymmetricKey(hashedMessage,privateKey); //encrypt with private key
-        System.out.print("Hash encrypted length is ");
-        System.out.println(encryptedHash.length);
 
         //why hash weird characters?
 
         //concatenate the encryptedHash and the original message
-        byte[] encryptionAndMessage = concatenateArrays(encryptedHash, message.getBytes());
+        byte[] encryptionAndMessage = concatenateArrays(encryptedHash, message);
         return encryptionAndMessage;
     }
 
@@ -70,13 +67,13 @@ public class SecurityFunctions {
         //get two parts of message
         byte[] encryptedHashOnly = getPartFromArray(concatMessage,0,128);
         byte[] messageOnly = getPartFromArray(concatMessage,128, concatMessage.length);
-        System.out.println("message only is " + new String(messageOnly));
+
 
 
         //decrypt the hash with Alice's public key
         String decryptedHash = decryptWithAsymmetricKey(encryptedHashOnly,senderPublicKey); //decrypt with  public key
         //System.out.println("Hash only is " + new String (decryptedHash));
-        String hashMessageForComparison = hashString(new String(messageOnly));
+        String hashMessageForComparison = hashString(messageOnly);
         //compare the hash that was encrypted and the original message with the new hash if they match then we ensure confidentiality
 
         if(decryptedHash==null){
@@ -104,14 +101,14 @@ public class SecurityFunctions {
      * @return A compressed and encrypted (with shared key) version of the message, concatenated to the shared key (encrypted with the public key)
      * @throws IOException
      */
-    public static byte[] PGPConfidentialityEncrypt(String message, SecretKey sharedKey, Key publicKey) throws IOException {
+    public static byte[] PGPConfidentialityEncrypt(byte[] message, SecretKey sharedKey, Key publicKey) throws IOException {
         try {
             //compress
-            String compressedMessage = compress(message);
+            byte[] compressedMessage = compress(message);
             //String compressedMessage = new String(newcompress(message)); //new compression method
 
             //encrypt this message with the shared key
-            byte[] encryptedCompressedMessage = encryptWithSharedKey(compressedMessage.getBytes(), sharedKey);
+            byte[] encryptedCompressedMessage = encryptWithSharedKey(compressedMessage, sharedKey);
 
             //make key a string and encrypt with receiver's public Key
             String keyString =  new String(Base64.getEncoder().encode(sharedKey.getEncoded()));
@@ -133,7 +130,7 @@ public class SecurityFunctions {
      * @return the decrypted message
      * @throws IOException
      */
-    public static String PGPConfidentialityDecrypt(byte[] encrypted, Key privateKey) throws IOException {
+    public static byte[] PGPConfidentialityDecrypt(byte[] encrypted, Key privateKey) throws IOException {
         try {
             //get the two parts of the message:
             byte[] sharedKeyEncrypted = getPartFromArray(encrypted,0,128);
@@ -143,11 +140,9 @@ public class SecurityFunctions {
             byte[] keyAsBytes = Base64.getDecoder().decode(decryptedSharedKeyString);
             SecretKey sharedKey = new SecretKeySpec(keyAsBytes,0,keyAsBytes.length, "AES");
 
-            System.out.println("Extracted shared key: " + Base64.getEncoder().encodeToString(sharedKey.getEncoded())); //debug statement
+            byte[] decryptedCompressedMessage = decryptWithSharedKey(encryptedMessageOnly,sharedKey);
 
-            String decryptedCompressedMessage = decryptWithSharedKey(encryptedMessageOnly,sharedKey);
-
-            String finalOutput = deCompress(decryptedCompressedMessage);
+            byte[] finalOutput = deCompress(decryptedCompressedMessage);
            // String finalOutput = newdecompress(decryptedCompressedMessage.getBytes(),20); // new decompression function //TODO make num generic.
 
             return finalOutput;
@@ -213,7 +208,7 @@ public class SecurityFunctions {
             IvParameterSpec ivSpecification = new IvParameterSpec(IV); //make IvParameterSpec based on IV
             cipher.init(Cipher.ENCRYPT_MODE, keySpecification, ivSpecification); //we want to encrypt
             byte[] cipherText = cipher.doFinal(message); //perform encryption
-            System.out.println("Encrypted with shared key");
+
             return cipherText;
         }
         catch (Exception e) {
@@ -230,7 +225,7 @@ public class SecurityFunctions {
      * @return the decrypted message
      * @throws Exception
      */
-    public static String decryptWithSharedKey (byte[] cipherText, SecretKey sharedKey) throws Exception
+    public static byte[] decryptWithSharedKey (byte[] cipherText, SecretKey sharedKey) throws Exception
     {
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding"); //cipher instance
         SecretKeySpec keySpecification = new SecretKeySpec(sharedKey.getEncoded(), "AES"); //using AES algorithm
@@ -238,7 +233,7 @@ public class SecurityFunctions {
         cipher.init(Cipher.DECRYPT_MODE, keySpecification, ivSpecification); //we want to decrypt
         byte[] decryptedText = cipher.doFinal(cipherText); //decrypt the message
         System.out.println("Decrypted with shared key");
-        return new String(decryptedText);
+        return decryptedText;
     }
 
 
@@ -252,10 +247,9 @@ public class SecurityFunctions {
         try {
             Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
             Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding"); //RSA cipher object
-            System.out.println("The security provider is: " + cipher.getProvider().getInfo());
             cipher.init(Cipher.ENCRYPT_MODE, asymmetricKey); //encrypting mode
             byte[] cipherText = cipher.doFinal(message.getBytes()); //encrypt
-            System.out.println("Encrypted with asymmetric key");
+
             return cipherText;
         }
         catch (Exception e) {
@@ -276,7 +270,7 @@ public class SecurityFunctions {
             Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
             cipher.init(Cipher.DECRYPT_MODE, asymmetricKey);
             dectyptedText = cipher.doFinal(cipherText);
-            System.out.println("Decrypted with asymmetric key");
+
             return new String (dectyptedText);
         }
         catch (Exception e) {
@@ -293,11 +287,10 @@ public class SecurityFunctions {
      * @return
      * @throws NoSuchAlgorithmException
      */
-    public static String hashString(String message) throws NoSuchAlgorithmException {
+    public static String hashString(byte[] message) throws NoSuchAlgorithmException {
         MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
-        byte[] hash = messageDigest.digest(message.getBytes(StandardCharsets.UTF_8)); //ISO or UTF
-        //return  new String(Hex.encode(hash));
-        return  new String(hash);
+        byte[] hash = messageDigest.digest(message); //ISO or UTF
+        return  new String(Hex.encode(hash));
     }
 
     /**
@@ -306,18 +299,18 @@ public class SecurityFunctions {
      * @return A compressed version of the message
      * @throws IOException
      */
-    public static String compress(String message) throws IOException { //assuming message is not null
-        System.out.print("Compressing string of length ");
-        System.out.println(message.length());
+    public static byte[] compress(byte[] message) throws IOException { //assuming message is not null
+
         //set up streams
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         GZIPOutputStream gzip = new GZIPOutputStream(out);
         //create compressed version
-        gzip.write(message.getBytes()); //write the message to the output stream
+        gzip.write(message); //write the message to the output stream
         gzip.close();
-        String toReturn = out.toString("ISO-8859-1");
-        System.out.print("To length ");
-        System.out.println(toReturn.length());
+        byte[] toReturn = out.toByteArray();
+
+        GZIPInputStream gzipInputStream = new GZIPInputStream(new ByteArrayInputStream(out.toByteArray()));
+
         return toReturn;
     }
 
@@ -327,47 +320,34 @@ public class SecurityFunctions {
      * @return Decompressed version of the message
      * @throws IOException
      */
-    public static String deCompress (String compressed) throws IOException {
-        System.out.print("Decompressing string of length ");
-        System.out.println(compressed.length());
+    public static byte[] deCompress (byte[] compressed) throws IOException {
+
 
         //set up stream and reader
-        GZIPInputStream gzipInputStream = new GZIPInputStream(new ByteArrayInputStream(compressed.getBytes("ISO-8859-1")));
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(gzipInputStream, "ISO-8859-1"));
 
-        //create message
-        String toReturn = "";
-        String line;
-        while ((line=bufferedReader.readLine())!=null) { //per line of reader
-            toReturn += line;
-        }
+        GZIPInputStream gzipInputStream = new GZIPInputStream(new ByteArrayInputStream(compressed));
 
-        System.out.print("To length ");
-        System.out.println(toReturn.length());
-        return toReturn;
+        return gzipInputStream.readAllBytes();
+
+
+
     }
 
-    public static byte[] newcompress(String toCompress){
-        try {
-            // Encode a String into bytes
-            byte[] input = toCompress.getBytes("UTF-8");
+    public static byte[] newcompress(byte[] toCompress){
+        // Encode a String into bytes
+        byte[] input = toCompress;
 
-            // Compress the bytes
-            byte[] output = new byte[100]; //wont this limit the length?
-            Deflater compresser = new Deflater();
-            compresser.setInput(input);
-            compresser.finish();
-            int compressedDataLength = compresser.deflate(output);
-            System.out.print("compressed data length ");
-            System.out.println(compressedDataLength);
-            compresser.end();
+        // Compress the bytes
+        byte[] output = new byte[100]; //wont this limit the length?
+        Deflater compresser = new Deflater();
+        compresser.setInput(input);
+        compresser.finish();
+        int compressedDataLength = compresser.deflate(output);
 
-            return output; //some say to encode to string using base 64
+        compresser.end();
 
-        } catch(java.io.UnsupportedEncodingException ex) {
-            // handle
-        }
-        return null;
+        return output; //some say to encode to string using base 64
+
     }
 
     public static String newdecompress(byte[] compressed, int compressedDataLength){
@@ -381,8 +361,7 @@ public class SecurityFunctions {
 
             // Decode the bytes into a String
             String outputString = new String(result, 0, resultLength, "UTF-8");
-            System.out.println("returning decompressed string of length ");
-            System.out.println(outputString.length());
+
             return outputString;
 
 

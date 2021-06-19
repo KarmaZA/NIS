@@ -45,25 +45,25 @@ class Alice{
 
 
         //All test statements for SecurityFunctions. Please do not delete. Uncomment if want to use/debug
-        /*
+/*
         SecretKey sharedKey = KeyGenerator.genSharedKey();
         System.out.println("Testing authentication encryption with hello world");
-        byte[] encrypted = SecurityFunctions.PGPAuthenticationEncrypt("Hello World", Alice.privateKey);
+        byte[] encrypted = SecurityFunctions.PGPAuthenticationEncrypt("Hello World".getBytes(), Alice.privateKey);
         System.out.println(new String(SecurityFunctions.PGPAuthenticationDecrypt(encrypted,Alice.publicKey)));
 
         System.out.println("Testing full PGP with ChelLynn is the best");
-        encrypted = SecurityFunctions.PGPFullEncrypt("ChelLynn is the best".getBytes(),sharedKey, Alice.privateKey,Alice.publicKey);
+        encrypted = SecurityFunctions.PGPFullEncrypt("ChelLynn is the best".getBytes(StandardCharsets.UTF_8),sharedKey, Alice.privateKey,Alice.publicKey);
         System.out.println( new String (SecurityFunctions.PGPFullDecrypt(encrypted, Alice.privateKey,Alice.publicKey)));
 
         System.out.println("Testing confid PGP with Lynn is here");
-        encrypted = SecurityFunctions.PGPConfidentialityEncrypt("Lynn is here",sharedKey,Alice.publicKey);
+        encrypted = SecurityFunctions.PGPConfidentialityEncrypt("Lynn is here".getBytes(),sharedKey,Alice.publicKey);
         System.out.println( SecurityFunctions.PGPConfidentialityDecrypt(encrypted, Alice.privateKey));
 
         System.out.println("compressed version of UCT is the best" );
-        System.out.println(SecurityFunctions.newcompress("UCT is the best"));
-        System.out.println(SecurityFunctions.newdecompress(SecurityFunctions.newcompress("UCT is the best"),23));
-        */
+        System.out.println(SecurityFunctions.newcompress("UCT is the best".getBytes()));
+        System.out.println(SecurityFunctions.newdecompress(SecurityFunctions.newcompress("UCT is the best".getBytes()),23));
 
+*/
 
         while(socket == null){
             System.out.println("Port Connection failed please input a new port number (0 to exit):");
@@ -193,7 +193,7 @@ class Alice{
         //The right amount of data is getting here
         try {
             System.out.println("In verify connection");
-            encoded = (SecurityFunctions.decryptWithSharedKey(encoded, masterAlice)).getBytes();
+            encoded = (SecurityFunctions.decryptWithSharedKey(encoded, masterAlice));
             System.out.println(new String(encoded));
             byte[] sessionKey = Arrays.copyOfRange(encoded, 0, encoded.length - 17);
             System.out.println("Session key: " + new String(sessionKey));
