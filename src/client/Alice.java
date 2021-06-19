@@ -1,6 +1,7 @@
 import javax.crypto.SecretKey;
 import java.io.*;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Arrays;
 import java.util.Scanner;
@@ -41,6 +42,28 @@ class Alice{
         //Connect to socket
         Socket socket = Connect(portUpload);
         //Socket connection failed try new port or quit
+
+
+        //All test statements for SecurityFunctions. Please do not delete. Uncomment if want to use/debug
+        /*
+        SecretKey sharedKey = KeyGenerator.genSharedKey();
+        System.out.println("Testing authentication encryption with hello world");
+        byte[] encrypted = SecurityFunctions.PGPAuthenticationEncrypt("Hello World", Alice.privateKey);
+        System.out.println(new String(SecurityFunctions.PGPAuthenticationDecrypt(encrypted,Alice.publicKey)));
+
+        System.out.println("Testing full PGP with ChelLynn is the best");
+        encrypted = SecurityFunctions.PGPFullEncrypt("ChelLynn is the best".getBytes(),sharedKey, Alice.privateKey,Alice.publicKey);
+        System.out.println( new String (SecurityFunctions.PGPFullDecrypt(encrypted, Alice.privateKey,Alice.publicKey)));
+
+        System.out.println("Testing confid PGP with Lynn is here");
+        encrypted = SecurityFunctions.PGPConfidentialityEncrypt("Lynn is here",sharedKey,Alice.publicKey);
+        System.out.println( SecurityFunctions.PGPConfidentialityDecrypt(encrypted, Alice.privateKey));
+
+        System.out.println("compressed version of UCT is the best" );
+        System.out.println(SecurityFunctions.newcompress("UCT is the best"));
+        System.out.println(SecurityFunctions.newdecompress(SecurityFunctions.newcompress("UCT is the best"),23));
+        */
+
 
         while(socket == null){
             System.out.println("Port Connection failed please input a new port number (0 to exit):");

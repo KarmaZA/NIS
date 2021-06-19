@@ -8,9 +8,11 @@ import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
+import java.util.zip.Deflater;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import java.util.Base64;
+import java.util.zip.Inflater;
 
 public class SecurityFunctions {
 
@@ -40,8 +42,15 @@ public class SecurityFunctions {
         //commented examples assume Alice is sending to Bob
         //hash the message
         String hashedMessage = hashString(message);
+        System.out.print("Hash string length is ");
+        System.out.println(hashedMessage.length());
         //encrypt the hash with Alice's private key
         byte[] encryptedHash = encryptWithAsymmetricKey(hashedMessage,privateKey); //encrypt with private key
+        System.out.print("Hash encrypted length is ");
+        System.out.println(encryptedHash.length);
+
+        //why hash weird characters?
+
         //concatenate the encryptedHash and the original message
         byte[] encryptionAndMessage = concatenateArrays(encryptedHash, message.getBytes());
         return encryptionAndMessage;
@@ -59,8 +68,8 @@ public class SecurityFunctions {
     public static byte[] PGPAuthenticationDecrypt(byte[] concatMessage, Key senderPublicKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException {
         //commented examples assume Alice is sending to Bob
         //get two parts of message
-        byte[] encryptedHashOnly = getPartFromArray(concatMessage,0,64);
-        byte[] messageOnly = getPartFromArray(concatMessage,64, concatMessage.length);
+        byte[] encryptedHashOnly = getPartFromArray(concatMessage,0,128);
+        byte[] messageOnly = getPartFromArray(concatMessage,128, concatMessage.length);
         System.out.println("message only is " + new String(messageOnly));
 
 
@@ -99,6 +108,7 @@ public class SecurityFunctions {
         try {
             //compress
             String compressedMessage = compress(message);
+            //String compressedMessage = new String(newcompress(message)); //new compression method
 
             //encrypt this message with the shared key
             byte[] encryptedCompressedMessage = encryptWithSharedKey(compressedMessage.getBytes(), sharedKey);
@@ -128,7 +138,6 @@ public class SecurityFunctions {
             //get the two parts of the message:
             byte[] sharedKeyEncrypted = getPartFromArray(encrypted,0,128);
             byte[] encryptedMessageOnly = getPartFromArray(encrypted,128,encrypted.length);
-
             //get shared key
             String decryptedSharedKeyString = decryptWithAsymmetricKey(sharedKeyEncrypted,privateKey);
             byte[] keyAsBytes = Base64.getDecoder().decode(decryptedSharedKeyString);
@@ -139,6 +148,7 @@ public class SecurityFunctions {
             String decryptedCompressedMessage = decryptWithSharedKey(encryptedMessageOnly,sharedKey);
 
             String finalOutput = deCompress(decryptedCompressedMessage);
+           // String finalOutput = newdecompress(decryptedCompressedMessage.getBytes(),20); // new decompression function //TODO make num generic.
 
             return finalOutput;
 
@@ -285,8 +295,9 @@ public class SecurityFunctions {
      */
     public static String hashString(String message) throws NoSuchAlgorithmException {
         MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
-        byte[] hash = messageDigest.digest(message.getBytes(StandardCharsets.UTF_8));
-        return  new String(Hex.encode(hash));
+        byte[] hash = messageDigest.digest(message.getBytes(StandardCharsets.UTF_8)); //ISO or UTF
+        //return  new String(Hex.encode(hash));
+        return  new String(hash);
     }
 
     /**
@@ -296,13 +307,18 @@ public class SecurityFunctions {
      * @throws IOException
      */
     public static String compress(String message) throws IOException { //assuming message is not null
+        System.out.print("Compressing string of length ");
+        System.out.println(message.length());
         //set up streams
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         GZIPOutputStream gzip = new GZIPOutputStream(out);
         //create compressed version
         gzip.write(message.getBytes()); //write the message to the output stream
         gzip.close();
-        return out.toString("ISO-8859-1");
+        String toReturn = out.toString("ISO-8859-1");
+        System.out.print("To length ");
+        System.out.println(toReturn.length());
+        return toReturn;
     }
 
     /**
@@ -312,6 +328,9 @@ public class SecurityFunctions {
      * @throws IOException
      */
     public static String deCompress (String compressed) throws IOException {
+        System.out.print("Decompressing string of length ");
+        System.out.println(compressed.length());
+
         //set up stream and reader
         GZIPInputStream gzipInputStream = new GZIPInputStream(new ByteArrayInputStream(compressed.getBytes("ISO-8859-1")));
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(gzipInputStream, "ISO-8859-1"));
@@ -322,8 +341,59 @@ public class SecurityFunctions {
         while ((line=bufferedReader.readLine())!=null) { //per line of reader
             toReturn += line;
         }
+
+        System.out.print("To length ");
+        System.out.println(toReturn.length());
         return toReturn;
     }
 
+    public static byte[] newcompress(String toCompress){
+        try {
+            // Encode a String into bytes
+            byte[] input = toCompress.getBytes("UTF-8");
+
+            // Compress the bytes
+            byte[] output = new byte[100]; //wont this limit the length?
+            Deflater compresser = new Deflater();
+            compresser.setInput(input);
+            compresser.finish();
+            int compressedDataLength = compresser.deflate(output);
+            System.out.print("compressed data length ");
+            System.out.println(compressedDataLength);
+            compresser.end();
+
+            return output; //some say to encode to string using base 64
+
+        } catch(java.io.UnsupportedEncodingException ex) {
+            // handle
+        }
+        return null;
+    }
+
+    public static String newdecompress(byte[] compressed, int compressedDataLength){
+        try {
+            // Decompress the bytes
+            Inflater decompresser = new Inflater();
+            decompresser.setInput(compressed, 0, compressedDataLength);
+            byte[] result = new byte[100];
+            int resultLength = decompresser.inflate(result);
+            decompresser.end();
+
+            // Decode the bytes into a String
+            String outputString = new String(result, 0, resultLength, "UTF-8");
+            System.out.println("returning decompressed string of length ");
+            System.out.println(outputString.length());
+            return outputString;
+
+
+        } catch(java.io.UnsupportedEncodingException ex) {
+            System.out.println(ex);
+            // handle
+        } catch (java.util.zip.DataFormatException ex) {
+            System.out.println(ex);
+            // handle
+        }
+        return null;
+    }
 
 }
