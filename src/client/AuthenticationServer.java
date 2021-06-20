@@ -3,6 +3,7 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Objects;
@@ -62,6 +63,9 @@ class AuthenticationServer {
 
             String header = in.readUTF();
             String[] headerArray = header.split(",");
+            if(headerArray[0].equals("SIGN")){
+                generateCertificate(headerArray,out);
+            }
             String nonce = headerArray[3];
             System.out.println(nonce);
             //generate session key and encrypt (session key|request|nonce with Alice Master Key
@@ -97,6 +101,24 @@ class AuthenticationServer {
             e.printStackTrace();
         }
 
+    }
+
+    private static void generateCertificate(String[] header, DataOutputStream outWrite) throws Exception {
+        //Bob is sent unencrypted but the certificate string is encrypted with their shared key?
+
+        String certified;
+        if (header[2].equals("bob")){
+            //certified = new String(SecurityFunctions.decryptWithSharedKey(header[1].getBytes(), masterBob));
+            //encrypt with private key
+            certified = "bob";
+        }else if (header[2].equals("alice")){
+            //certified = new String(SecurityFunctions.decryptWithSharedKey(header[1].getBytes(), masterAlice));
+            //encrypt with private key
+            certified = "alice";
+        } else {
+            certified = "unknown";
+        }
+        outWrite.writeUTF("SIGNED," + certified + ",null,null,null");
     }
 
     public static byte[] joinByteArray(byte[] image, byte[] caption) {

@@ -60,6 +60,27 @@ class Bob {
 
 	}
 
+	private static String signCertificate(String certificate){
+		try {
+			System.out.println("Generating a signed certificate.");
+			Socket authServerSocket = new Socket("localhost", 45555);
+			DataOutputStream outAuthServ = new DataOutputStream(authServerSocket.getOutputStream());
+			DataInputStream inAuthServ = new DataInputStream(authServerSocket.getInputStream());
+			System.out.println("Connected to CA.");
+			outAuthServ.writeUTF("SIGN," + certificate +",bob,null,null");
+			String certify = inAuthServ.readUTF();
+			String[] certifyArray = certify.split(",");
+			if (certifyArray[0].equals("SIGNED")){
+
+				return certifyArray[1];
+			}
+		} catch (Exception e) {
+			System.out.println("I have nothing to connect to :'(");
+		}
+		return null;
+
+	}
+
 	/**
 	 * starts the ServerSocket in an try catch block in case of an IO Exception
 	 */
@@ -131,7 +152,10 @@ class Bob {
 				if(AliceHeaderLine[0].equals("CMD") && AliceHeaderLine[1].equals("START") && AliceHeaderLine[2].equals("REQCOM")){
 					//Communication request received send back a non
 					System.out.println("Communication request received");
-					out.writeUTF("CMD," + nonce + ",null,null,null");
+					//generates a certificate from the "CA" (AuthServer)
+					String certificate = Bob.signCertificate("bob");
+					System.out.println("The certificate has been signed");
+					out.writeUTF("CMD," + nonce + "," + certificate + ",null,null");
 				}
 
 				//Step 5 and 6

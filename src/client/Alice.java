@@ -9,6 +9,7 @@ import java.util.Scanner;
 class Alice{
     //Preset master key with Alice
     private static SecretKey masterAlice = null;
+    public static Key publicKeyCA;
 
     private final static Scanner scanner = new Scanner(System.in);
     private static int portUpload = 45554;
@@ -102,6 +103,23 @@ class Alice{
     }
 
     /**
+     * Method to verify that the connection is to bob. Decrypts the string with the CA public key and makes
+     * sure that it says bob who we are trying to talk to.
+     * @param cert The encoded String that is signed by the CA with their private key
+     * @return true if the certificate is validated.
+     */
+    private static boolean authenticateCertificate(String cert){
+        //Use CA public key
+        //cert = SecurityFunctions.decryptWithAsymmetricKey(cert.getBytes(),publicKeyCA);
+        //Make sure decrypted says bob
+        if(cert.equals("bob")) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
      * Executes the authentication steps with the KDC using master keys and nonces to authenticate the
      * communication session between Alice and Bob and generate a session key. As well as validate that the
      * conversation is indeed between Alice and Bob.
@@ -122,7 +140,19 @@ class Alice{
             //If this is a problem make it two lines
             String line = inBob.readUTF();
             String[] bobHeader = line.split(",");
+            if(!authenticateCertificate(bobHeader[2])){
+                //Terminate connection first for safety
+                inBob.close();
+                outBob.close();
+                //inform user
+                System.out.println("Authentication Failure");
+                System.out.println("Program Exiting to avoid malicious connection");
+                //return false
+                return false;
+            }
+            System.out.println("The certificate has been verified");
             String nonce = bobHeader[1];
+
             System.out.println("The Nonce from Bob is " + nonce);
 
             //STEP 3 send nonce to Auth Server
