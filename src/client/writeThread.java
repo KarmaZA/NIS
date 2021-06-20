@@ -1,3 +1,4 @@
+import javax.crypto.SecretKey;
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -16,13 +17,15 @@ public class writeThread implements Runnable {
     private final DataOutputStream out;
     private final Socket socket;
     private final Scanner scanner;
+    private static SecretKey communicationSessionKey;
 
-    writeThread(String threadName, Scanner scanner, Socket socket, DataInputStream in, DataOutputStream out){
+    writeThread(String threadName, Scanner scanner, Socket socket, DataInputStream in, DataOutputStream out, SecretKey communicationSessionKey){
         this.threadName = threadName;
         this.scanner = scanner;
         this.in = in;
         this.out = out;
         this.socket = socket;
+        this.communicationSessionKey = communicationSessionKey;
     }
     public void run(){
         // while() loop to keep checking for client commands (UPLOAD, DOWNLOAD, LIST, quit)
@@ -85,7 +88,7 @@ public class writeThread implements Runnable {
             byte[] payload = joinByteArray(myByteArray, caption.getBytes());
 
             //SECURE MESSAGE??
-
+            //payload = SecurityFunctions.PGPFullEncrypt(payload, communicationSessionKey, privateKey, publicKey)
 
             // << PAYLOAD sent to server containing length of byte array to upload
             out.writeLong(myByteArray.length);

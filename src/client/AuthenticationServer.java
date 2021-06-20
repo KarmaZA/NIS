@@ -3,10 +3,8 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Base64;
-import java.util.Objects;
 
 class AuthenticationServer {
 
@@ -66,6 +64,7 @@ class AuthenticationServer {
             if(headerArray[0].equals("SIGN")){
                 generateCertificate(headerArray,out);
                 in.close();
+                out.close();
                 socket.close();
             }
             String nonce = headerArray[3];
@@ -106,7 +105,7 @@ class AuthenticationServer {
     }
 
     private static void generateCertificate(String[] header, DataOutputStream outWrite) throws Exception {
-        //Bob is sent unencrypted but the certificate string is encrypted with their shared key?
+        //TODO Bob is sent unencrypted but the certificate string is encrypted with their shared key?
 
         String certified;
         if (header[2].equals("bob")){

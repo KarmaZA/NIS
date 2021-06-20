@@ -1,4 +1,5 @@
 import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -29,6 +30,7 @@ class Bob {
 	//Public private key pair
 	public static Key publicKey;
 	private static Key privateKey;
+	private static SecretKey communicationSessionKey;
 
 	/**
 	 * @param args String array to take input into the main method
@@ -170,6 +172,8 @@ class Bob {
 					System.out.println("Program Exiting to avoid malicious connection");
 					System.exit(1);
 				}
+				//TODO Is this the correct way to create a Session key with what we have?
+				Bob.communicationSessionKey = new SecretKeySpec(sessionKey, 0, sessionKey.length, "AES");
 				// scanner used for all client input
 
 				// input and output streams to read and write from client
@@ -195,8 +199,8 @@ class Bob {
 				}
 
 				//threads for sending and receiving messages/images
-				readThread read = new readThread("Alice", socket, in, out);
-				writeThread write = new writeThread("Alice", scanner, socket, in, out);
+				readThread read = new readThread("Alice", socket, in, out, communicationSessionKey);
+				writeThread write = new writeThread("Alice", scanner, socket, in, out, communicationSessionKey);
 				read.start();
 				write.start();
 

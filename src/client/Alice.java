@@ -1,4 +1,5 @@
 import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
@@ -15,7 +16,8 @@ class Alice{
     private static int portUpload = 45554;
 
     public static Key publicKey;
-    public static Key privateKey; //TODO change back to private
+    private static Key privateKey;
+    private static SecretKey communicationSessionKey;
 
     //final String IP = "localhost";
 
@@ -185,6 +187,8 @@ class Alice{
                 //return false
                 return false;
             }
+            //TODO Is this the correct way to create a Session key with what we have?
+            communicationSessionKey = new SecretKeySpec(sessionKey, 0, sessionKey.length, "AES");
 
 
             //STEP 5 send semi-decrypted auth server to Bob
@@ -268,8 +272,8 @@ class Alice{
                 System.out.println("Password Incorrect");
             }
             //threads for sending and receiving messages/images
-            readThread read = new readThread("Bob", socket, in, out);
-            writeThread write = new writeThread("Bob", scanner, socket, in, out);
+            readThread read = new readThread("Bob", socket, in, out,communicationSessionKey);
+            writeThread write = new writeThread("Bob", scanner, socket, in, out, communicationSessionKey);
             read.start();
             write.start();
             while(done){

@@ -1,3 +1,4 @@
+import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -12,13 +13,15 @@ public class readThread implements Runnable {
     private DataInputStream in;
     private DataOutputStream out;
     private Socket socket;
+    private static SecretKey communicationSessionKey;
     
 
-    public readThread(String threadName, Socket socket, DataInputStream in, DataOutputStream out){
+    public readThread(String threadName, Socket socket, DataInputStream in, DataOutputStream out, SecretKey communicationSessionKey){
         this.threadName = threadName;
         this.socket  = socket;
         this.in = in;
         this.out = out;
+        this.communicationSessionKey = communicationSessionKey;
     }
 
     @Override
