@@ -116,7 +116,7 @@ class Bob {
 			//The right amount of data is getting here4
 			try {
 				System.out.println("in verify Connection");
-				//encoded = (SecurityFunctions.decryptWithSharedKey(encoded,masterBob));
+				encoded = (SecurityFunctions.decryptWithSharedKey(encoded,masterBob));
 				System.out.println(new String(encoded));
 				byte[] sessionKey = Arrays.copyOfRange(encoded, 0, encoded.length - 23);
 
@@ -133,6 +133,8 @@ class Bob {
 				}
 			} catch (Exception e){
 				//Any form of exception constitutes authentication failure
+				System.out.println("Exception thrown. Disconnect for safety.");
+				e.printStackTrace();
 				return null;
 			}
 		}

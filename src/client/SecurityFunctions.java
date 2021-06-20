@@ -203,6 +203,8 @@ public class SecurityFunctions {
             if (IV==null){ //If IV does not exist, make one here
                 IV=KeyGenerator.genIV();
             }
+            System.out.println("THe encrypty IV is " + IV);
+            //TODO print statement above
             Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding"); //cipher instance
             SecretKeySpec keySpecification = new SecretKeySpec(sharedKey.getEncoded(), "AES"); //using AES akgorithm
             IvParameterSpec ivSpecification = new IvParameterSpec(IV); //make IvParameterSpec based on IV
@@ -227,6 +229,10 @@ public class SecurityFunctions {
      */
     public static byte[] decryptWithSharedKey (byte[] cipherText, SecretKey sharedKey) throws Exception
     {
+        //Testing to fix nullpointer exception
+        if(IV == null || IV.length == 0) IV = KeyGenerator.genIV();
+        System.out.println("THe decrypty IV is " + IV);
+        //TODO Jonno wrote these lines above ^
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding"); //cipher instance
         SecretKeySpec keySpecification = new SecretKeySpec(sharedKey.getEncoded(), "AES"); //using AES algorithm
         IvParameterSpec ivSpecification = new IvParameterSpec(IV); //based on same IV as used in encryption

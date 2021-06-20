@@ -227,7 +227,7 @@ class Alice{
         //The right amount of data is getting here
         try {
             System.out.println("In verify connection");
-            //encoded = (SecurityFunctions.decryptWithSharedKey(encoded, masterAlice));
+            encoded = (SecurityFunctions.decryptWithSharedKey(encoded, masterAlice));
             System.out.println(new String(encoded));
             byte[] sessionKey = Arrays.copyOfRange(encoded, 0, encoded.length - 17);
             System.out.println("Session key: " + new String(sessionKey));
@@ -240,6 +240,8 @@ class Alice{
             }
         } catch (Exception e){
             //Any form of exception constitutes authentication failure
+            System.out.println("Exception thrown. Disconnect for safety.");
+            e.printStackTrace();
             return null;
         }
     }

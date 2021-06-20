@@ -5,6 +5,7 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -87,14 +88,14 @@ class AuthenticationServer{
                 String AliceEncrypt = Arrays.toString(sessionKey.getEncoded()) + "," + nonce;
                 System.out.println(AliceEncrypt);
                 //AliceEncrypt.encrypt with master key
-                byte[] aliceToSend = AliceEncrypt.getBytes();//Objects.requireNonNull(SecurityFunctions.encryptWithSharedKey(AliceEncrypt.getBytes(), masterAlice));//
+                byte[] aliceToSend = Objects.requireNonNull(SecurityFunctions.encryptWithSharedKey(AliceEncrypt.getBytes(), masterAlice));//AliceEncrypt.getBytes();//
                 //System.out.println("Alice encrypt is : " + AliceEncrypt);
                 //System.out.println(SecurityFunctions.decryptWithSharedKey(AliceEncrypt.getBytes(),masterAlice));
 
                 //Encrypt ticket Session|"Alice"|nonce with bob master key for Bob
-                String BobEncrypt = Base64.getEncoder().encodeToString(sessionKey.getEncoded()) + "|Alice|" + nonce;
+                String BobEncrypt = sessionKey.getEncoded() + "|Alice|" + nonce;//Base64.getEncoder().
                 //BobEncrypt with master key for bob
-                byte[] bobToSend = BobEncrypt.getBytes();//Objects.requireNonNull(SecurityFunctions.encryptWithSharedKey(BobEncrypt.getBytes(), masterBob));//
+                byte[] bobToSend = Objects.requireNonNull(SecurityFunctions.encryptWithSharedKey(BobEncrypt.getBytes(), masterBob));//BobEncrypt.getBytes();//
 
                 //Generate payload to send
                 byte[] payload = joinByteArray(aliceToSend,bobToSend);
