@@ -65,6 +65,8 @@ class AuthenticationServer {
             String[] headerArray = header.split(",");
             if(headerArray[0].equals("SIGN")){
                 generateCertificate(headerArray,out);
+                in.close();
+                socket.close();
             }
             String nonce = headerArray[3];
             System.out.println(nonce);
@@ -74,14 +76,14 @@ class AuthenticationServer {
             String AliceEncrypt = Arrays.toString(sessionKey.getEncoded()) + "," + nonce;
             System.out.println(AliceEncrypt);
             //AliceEncrypt.encrypt with master key
-            byte[] aliceToSend = Objects.requireNonNull(SecurityFunctions.encryptWithSharedKey(AliceEncrypt.getBytes(), masterAlice));//AliceEncrypt.getBytes();
+            byte[] aliceToSend = AliceEncrypt.getBytes();//Objects.requireNonNull(SecurityFunctions.encryptWithSharedKey(AliceEncrypt.getBytes(), masterAlice));//
             //System.out.println("Alice encrypt is : " + AliceEncrypt);
             //System.out.println(SecurityFunctions.decryptWithSharedKey(AliceEncrypt.getBytes(),masterAlice));
 
             //Encrypt ticket Session|"Alice"|nonce with bob master key for Bob
             String BobEncrypt = Base64.getEncoder().encodeToString(sessionKey.getEncoded()) + "|Alice|" + nonce;
             //BobEncrypt with master key for bob
-            byte[] bobToSend = Objects.requireNonNull(SecurityFunctions.encryptWithSharedKey(BobEncrypt.getBytes(), masterBob));//BobEncrypt.getBytes(StandardCharsets.UTF_8);
+            byte[] bobToSend = BobEncrypt.getBytes();//Objects.requireNonNull(SecurityFunctions.encryptWithSharedKey(BobEncrypt.getBytes(), masterBob));//
 
             //Generate payload to send
             byte[] payload = joinByteArray(aliceToSend,bobToSend);
@@ -119,6 +121,7 @@ class AuthenticationServer {
             certified = "unknown";
         }
         outWrite.writeUTF("SIGNED," + certified + ",null,null,null");
+        outWrite.close();
     }
 
     public static byte[] joinByteArray(byte[] image, byte[] caption) {

@@ -114,7 +114,7 @@ class Bob {
 			//The right amount of data is getting here4
 			try {
 				System.out.println("in verify Connection");
-				encoded = (SecurityFunctions.decryptWithSharedKey(encoded,masterBob));
+				//encoded = (SecurityFunctions.decryptWithSharedKey(encoded,masterBob));
 				System.out.println(new String(encoded));
 				byte[] sessionKey = Arrays.copyOfRange(encoded, 0, encoded.length - 23);
 				System.out.println("Session key: " + new String(sessionKey));
@@ -153,7 +153,8 @@ class Bob {
 					//Communication request received send back a non
 					System.out.println("Communication request received");
 					//generates a certificate from the "CA" (AuthServer)
-					String certificate = Bob.signCertificate("bob");
+					//String certificate = Bob.signCertificate("bob");
+					String certificate = "bob";
 					System.out.println("The certificate has been signed");
 					out.writeUTF("CMD," + nonce + "," + certificate + ",null,null");
 				}
