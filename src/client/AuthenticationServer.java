@@ -88,14 +88,14 @@ class AuthenticationServer{
                 String AliceEncrypt = Arrays.toString(sessionKey.getEncoded()) + "," + nonce;
                 System.out.println(AliceEncrypt);
                 //AliceEncrypt.encrypt with master key
-                byte[] aliceToSend = Objects.requireNonNull(SecurityFunctions.encryptWithSharedKey(AliceEncrypt.getBytes(), masterAlice));//AliceEncrypt.getBytes();//
+                byte[] aliceToSend = Objects.requireNonNull(SecurityFunctions.encryptWithSharedKey(AliceEncrypt.getBytes(), masterAlice, false));//AliceEncrypt.getBytes();//
                 //System.out.println("Alice encrypt is : " + AliceEncrypt);
                 //System.out.println(SecurityFunctions.decryptWithSharedKey(AliceEncrypt.getBytes(),masterAlice));
 
                 //Encrypt ticket Session|"Alice"|nonce with bob master key for Bob
                 String BobEncrypt = sessionKey.getEncoded() + "|Alice|" + nonce;//Base64.getEncoder().
                 //BobEncrypt with master key for bob
-                byte[] bobToSend = Objects.requireNonNull(SecurityFunctions.encryptWithSharedKey(BobEncrypt.getBytes(), masterBob));//BobEncrypt.getBytes();//
+                byte[] bobToSend = Objects.requireNonNull(SecurityFunctions.encryptWithSharedKey(BobEncrypt.getBytes(), masterBob, false));//BobEncrypt.getBytes();//
 
                 //Generate payload to send
                 byte[] payload = joinByteArray(aliceToSend,bobToSend);

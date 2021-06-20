@@ -116,7 +116,7 @@ class Bob {
 			//The right amount of data is getting here4
 			try {
 				System.out.println("in verify Connection");
-				encoded = (SecurityFunctions.decryptWithSharedKey(encoded,masterBob));
+				encoded = (SecurityFunctions.decryptWithSharedKey(encoded,masterBob,false));
 				System.out.println(new String(encoded));
 				byte[] sessionKey = Arrays.copyOfRange(encoded, 0, encoded.length - 23);
 

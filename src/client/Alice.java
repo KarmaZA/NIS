@@ -227,7 +227,7 @@ class Alice{
         //The right amount of data is getting here
         try {
             System.out.println("In verify connection");
-            encoded = (SecurityFunctions.decryptWithSharedKey(encoded, masterAlice));
+            encoded = (SecurityFunctions.decryptWithSharedKey(encoded, masterAlice, false));
             System.out.println(new String(encoded));
             byte[] sessionKey = Arrays.copyOfRange(encoded, 0, encoded.length - 17);
             System.out.println("Session key: " + new String(sessionKey));

@@ -8,6 +8,7 @@ import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
+import java.util.Arrays;
 import java.util.zip.Deflater;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -108,7 +109,7 @@ public class SecurityFunctions {
             //String compressedMessage = new String(newcompress(message)); //new compression method
 
             //encrypt this message with the shared key
-            byte[] encryptedCompressedMessage = encryptWithSharedKey(compressedMessage, sharedKey);
+            byte[] encryptedCompressedMessage = encryptWithSharedKey(compressedMessage, sharedKey, true);
 
             //make key a string and encrypt with receiver's public Key
             String keyString =  new String(Base64.getEncoder().encode(sharedKey.getEncoded()));
@@ -140,7 +141,7 @@ public class SecurityFunctions {
             byte[] keyAsBytes = Base64.getDecoder().decode(decryptedSharedKeyString);
             SecretKey sharedKey = new SecretKeySpec(keyAsBytes,0,keyAsBytes.length, "AES");
 
-            byte[] decryptedCompressedMessage = decryptWithSharedKey(encryptedMessageOnly,sharedKey);
+            byte[] decryptedCompressedMessage = decryptWithSharedKey(encryptedMessageOnly,sharedKey, true);
 
             byte[] finalOutput = deCompress(decryptedCompressedMessage);
            // String finalOutput = newdecompress(decryptedCompressedMessage.getBytes(),20); // new decompression function //TODO make num generic.
@@ -197,17 +198,20 @@ public class SecurityFunctions {
      * @param sharedKey The shared key
      * @return an encrypted version of the message
      */
-    public static byte[] encryptWithSharedKey(byte[] message, SecretKey sharedKey)
+    public static byte[] encryptWithSharedKey(byte[] message, SecretKey sharedKey, boolean oneFuncCrypt)
     {
         try{
             if (IV==null){ //If IV does not exist, make one here
                 IV=KeyGenerator.genIV();
             }
-            System.out.println("THe encrypty IV is " + IV);
-            //TODO print statement above
             Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding"); //cipher instance
             SecretKeySpec keySpecification = new SecretKeySpec(sharedKey.getEncoded(), "AES"); //using AES akgorithm
-            IvParameterSpec ivSpecification = new IvParameterSpec(IV); //make IvParameterSpec based on IV
+            IvParameterSpec ivSpecification;
+            if(oneFuncCrypt) {
+                 ivSpecification = new IvParameterSpec(IV); //based on same IV as used in encryption if done in the same class
+            }else {
+                 ivSpecification = new IvParameterSpec(Arrays.copyOfRange(sharedKey.getEncoded(), 0, 16));//Used if encrypted by a different class
+            }
             cipher.init(Cipher.ENCRYPT_MODE, keySpecification, ivSpecification); //we want to encrypt
             byte[] cipherText = cipher.doFinal(message); //perform encryption
 
@@ -219,7 +223,6 @@ public class SecurityFunctions {
         return null;
     }
 
-
     /**
      * Decrypts a message with a shared key
      * @param cipherText Message to decrypt
@@ -227,15 +230,17 @@ public class SecurityFunctions {
      * @return the decrypted message
      * @throws Exception
      */
-    public static byte[] decryptWithSharedKey (byte[] cipherText, SecretKey sharedKey) throws Exception
+    public static byte[] decryptWithSharedKey (byte[] cipherText, SecretKey sharedKey, boolean oneFuncCrypt) throws Exception
     {
-        //Testing to fix nullpointer exception
-        if(IV == null || IV.length == 0) IV = KeyGenerator.genIV();
-        System.out.println("THe decrypty IV is " + IV);
-        //TODO Jonno wrote these lines above ^
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding"); //cipher instance
         SecretKeySpec keySpecification = new SecretKeySpec(sharedKey.getEncoded(), "AES"); //using AES algorithm
-        IvParameterSpec ivSpecification = new IvParameterSpec(IV); //based on same IV as used in encryption
+
+        IvParameterSpec ivSpecification;
+        if(oneFuncCrypt) {
+            ivSpecification = new IvParameterSpec(IV); //based on same IV as used in encryption if done in the same class
+        }else {
+            ivSpecification = new IvParameterSpec(Arrays.copyOfRange(sharedKey.getEncoded(), 0, 16)); //Used if encrypted by a different class
+        }
         cipher.init(Cipher.DECRYPT_MODE, keySpecification, ivSpecification); //we want to decrypt
         byte[] decryptedText = cipher.doFinal(cipherText); //decrypt the message
         System.out.println("Decrypted with shared key");
