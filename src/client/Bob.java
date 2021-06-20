@@ -119,11 +119,13 @@ class Bob {
 				//encoded = (SecurityFunctions.decryptWithSharedKey(encoded,masterBob));
 				System.out.println(new String(encoded));
 				byte[] sessionKey = Arrays.copyOfRange(encoded, 0, encoded.length - 23);
+
 				System.out.println("Session key: " + new String(sessionKey));
 				String aliceCheck = new String(Arrays.copyOfRange(encoded, encoded.length - 23, encoded.length-16));
 				System.out.println(aliceCheck);
 				String nonceCheck = new String(Arrays.copyOfRange(encoded, encoded.length - 16, encoded.length));
 				System.out.println(nonce);
+
 				if (nonce.equals(nonceCheck) && aliceCheck.equals("|Alice|")) {
 					return sessionKey;
 				} else {
@@ -155,8 +157,8 @@ class Bob {
 					//Communication request received send back a non
 					System.out.println("Communication request received");
 					//generates a certificate from the "CA" (AuthServer)
-					//String certificate = Bob.signCertificate("bob");
-					String certificate = "bob";
+					String certificate = Bob.signCertificate("bob");
+					//String certificate = "bob";
 					System.out.println("The certificate has been signed");
 					out.writeUTF("CMD," + nonce + "," + certificate + ",null,null");
 				}
