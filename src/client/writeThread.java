@@ -55,7 +55,7 @@ public class writeThread implements Runnable {
                     }
                     //send header for Bob to download
                     out.writeUTF("Auth,I," + fName + ",null, null");
-                    upload(fName, in,out, scanner); //uploads client header and image/caption
+                    upload(fName,out, scanner); //uploads client header and image/caption
                 }else{
                     //basic messaging
                     out.writeUTF("Auth,M,null,null,null");
@@ -71,7 +71,7 @@ public class writeThread implements Runnable {
      * upload file
      * @param clientCommand file name given as input
      */
-    public static void upload(String clientCommand,DataInputStream in, DataOutputStream out, Scanner scanner){
+    public static void upload(String clientCommand, DataOutputStream out, Scanner scanner){
         try {
             // create new file with the name specified by the client
             File myFile = new File(clientCommand);

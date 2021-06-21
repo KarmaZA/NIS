@@ -1,8 +1,15 @@
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.security.*;
+import java.security.spec.EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import javax.crypto.SecretKey;
 import java.security.SecureRandom;
+import java.util.Scanner;
 import javax.crypto.spec.SecretKeySpec;
 
 //package com.javainterviewpoint;
@@ -37,8 +44,8 @@ class KeyGenerator{
             Key pubKey = keys.getPublic();
             Key privKey = keys.getPrivate();
 
-            System.out.println("publicKey : " + Base64.getEncoder().encodeToString(pubKey.getEncoded()));
-            System.out.println("privateKey : " +Base64.getEncoder().encodeToString(privKey.getEncoded()));
+            System.out.println("publicKey : " +  Base64.getEncoder().encodeToString(pubKey.getEncoded()));
+            System.out.println("privateKey : " + Base64.getEncoder().encodeToString(privKey.getEncoded()));
             System.out.println();
 
             Key[] toReturn= new Key[2];
@@ -49,7 +56,20 @@ class KeyGenerator{
             e.printStackTrace();
         }
         return null; //if it didnt work
+    }
 
+    /**
+     * Public key generator that reads the public.txt file of the CA public key and turns it into a key
+     * @return The public key of the CA
+     * @throws Exception File does not exist or null pointer
+     */
+    public static Key getPublicKey() throws Exception {
+        Scanner fileIn = new Scanner(new File("public.txt"));
+        String pubKey = fileIn.nextLine();
+        byte [] publicKeyBytes = Base64.getDecoder().decode(pubKey.getBytes());
+        EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKeyBytes);
+        KeyFactory keyFactory = KeyFactory.getInstance("RSA", "BC");
+        return keyFactory.generatePublic(publicKeySpec);
     }
 
     /**

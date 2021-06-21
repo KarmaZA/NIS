@@ -3,6 +3,8 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.ByteBuffer;
+import java.security.Key;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Objects;
@@ -18,11 +20,26 @@ class AuthenticationServer{
     //Preset master key with Bob
     private static SecretKey masterBob = null;
 
+    public static Key publicKey;
+    private static Key privateKey;
+
     /**
      * The main method of the class. Sets up the keys and starts the server listening. then when a connection comes in
      * it authenticates the keys of the session and sets up a session key
      */
     public static void main(String[] args) {
+        try {
+            Key[] keypair = KeyGenerator.generateKeyPair();
+            publicKey = keypair[0];
+            privateKey = keypair[1];
+            FileWriter outFile = new FileWriter("public.txt");
+            outFile.write(Base64.getEncoder().encodeToString(publicKey.getEncoded()));
+            outFile.close();
+        } catch (Exception e){
+            //Catch a possible Null Pointer Exception
+            System.out.println("Key pair generation failed.");
+            e.printStackTrace();
+        }
         //Generating Master Keys from Strings
         masterAlice = KeyGenerator.genMasterKeyFromString("w10PtdhELmt/ZPzcZjxFdg==");
         masterBob   = KeyGenerator.genMasterKeyFromString("055WVjVBB95Yaw6ZhRAWug==");
