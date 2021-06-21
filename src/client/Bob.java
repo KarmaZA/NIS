@@ -3,9 +3,11 @@ import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Arrays;
 import java.util.Hashtable;
+import java.util.Objects;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -69,12 +71,22 @@ class Bob {
 			DataOutputStream outAuthServ = new DataOutputStream(authServerSocket.getOutputStream());
 			DataInputStream inAuthServ = new DataInputStream(authServerSocket.getInputStream());
 			System.out.println("Connected to CA.");
+
 			outAuthServ.writeUTF("SIGN," + certificate +",bob,null,null");
 			String certify = inAuthServ.readUTF();
 			String[] certifyArray = certify.split(",");
-			if (certifyArray[0].equals("SIGNED")){
 
-				return certifyArray[1];
+			if (certifyArray[0].equals("SIGNED")){
+				/*System.out.println("here");
+				String toReturn = certifyArray[1];
+				System.out.println(toReturn);
+				Key publicKey = KeyGenerator.getCAPublicKey();
+				System.out.println("Got pub key");
+				toReturn = Objects.requireNonNull(SecurityFunctions.decryptWithAsymmetricKey(toReturn.getBytes(), publicKey));
+				System.out.println(toReturn);
+	//Objects.requireNonNull(SecurityFunctions.decryptWithAsymmetricKey(
+				//						certifyArray[1].getBytes(StandardCharsets.UTF_8),KeyGenerator.getCAPublicKey()))
+				return toReturn;*/ return certifyArray[1];
 			}
 		} catch (Exception e) {
 			System.out.println("I have nothing to connect to :'(");
@@ -160,6 +172,7 @@ class Bob {
 					System.out.println("Communication request received");
 					//generates a certificate from the "CA" (AuthServer)
 					String certificate = Bob.signCertificate("bob");
+					System.out.println(certificate);
 					//String certificate = "bob";
 					System.out.println("The certificate has been signed");
 					out.writeUTF("CMD," + nonce + "," + certificate + ",null,null");

@@ -63,7 +63,7 @@ class KeyGenerator{
      * @return The public key of the CA
      * @throws Exception File does not exist or null pointer
      */
-    public static Key getPublicKey() throws Exception {
+    public static Key getCAPublicKey() throws Exception {
         Scanner fileIn = new Scanner(new File("public.txt"));
         String pubKey = fileIn.nextLine();
         byte [] publicKeyBytes = Base64.getDecoder().decode(pubKey.getBytes());

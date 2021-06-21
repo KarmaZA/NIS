@@ -150,6 +150,8 @@ class AuthenticationServer{
             } else {
                 certified = "unknown";
             }
+            //certified = new String(Objects.requireNonNull(SecurityFunctions.encryptWithAsymmetricKey(certified, privateKey)));
+
             outWrite.writeUTF("SIGNED," + certified + ",null,null,null");
             outWrite.close();
         }
