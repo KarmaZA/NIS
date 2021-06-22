@@ -3,7 +3,10 @@ import java.io.*;
 import java.net.Socket;
 import java.security.Key;
 import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.spec.EncodedKeySpec;
+import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.util.Objects;
@@ -96,7 +99,6 @@ class Alice{
             DataInputStream inAuthServ = new DataInputStream(authServerSocket.getInputStream());
             System.out.println("Connected to CA.");
 
-            //TODO Uncomment
             certificate = Objects.requireNonNull(SecurityFunctions.encryptWithSharedKey(certificate,masterAlice,false));
 
             outAuthServ.writeUTF("SIGN," + certificate.length +",Alice,null,null");
@@ -113,7 +115,6 @@ class Alice{
             System.out.println("I have nothing to connect to :'(");
         }
         return null;
-
     }
 
     /**
@@ -122,11 +123,14 @@ class Alice{
      * @param cert The encoded String that is signed by the CA with their private key
      * @return true if the certificate is validated.
      */
-    private static boolean authenticateCertificate(String cert){
+    private static void getPublicKey(byte[] cert) throws InvalidKeySpecException, NoSuchProviderException, NoSuchAlgorithmException {
         //Use CA public key
         //cert = SecurityFunctions.decryptWithAsymmetricKey(cert.getBytes(),publicKeyCA);
-        //Make sure decrypted says bob
-        return true;
+        //cert = SecurityFunctions.decryptWithAsymmetricKey(cert,publicKeyCA).getBytes();
+        cert = Base64.getDecoder().decode(cert);
+        EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(cert);
+        KeyFactory keyFactory = KeyFactory.getInstance("RSA", "BC");
+        BobPublicKey = keyFactory.generatePublic(publicKeySpec);
     }
 
     /**
@@ -154,7 +158,7 @@ class Alice{
             byte[] certificate = inBob.readNBytes(Integer.parseInt(bobHeader[2]));
 
             System.out.println("Certificate Received");
-            //TODO getPublicKey(certificate);
+            getPublicKey(certificate);
 
             System.out.println("The certificate has been verified");
             String nonce = bobHeader[1];
@@ -164,8 +168,8 @@ class Alice{
             //STEP 3 send nonce to Auth Server
             System.out.println("Step 3");
             System.out.println("Sending request and nonce to authentication server for verification");
-
-            certificate = signCertificate(username.getBytes());
+            certificate = Base64.getEncoder().encode(publicKey.getEncoded());
+            certificate = signCertificate(certificate);
             if(certificate == null) System.exit(1);
 
             //String certificate = "bob";
@@ -207,8 +211,8 @@ class Alice{
                     byte [] publicKeyBytes = Base64.getDecoder().decode(serverHeader[1].getBytes());
                     EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKeyBytes);
                     KeyFactory keyFactory = KeyFactory.getInstance("RSA", "BC");
-                    BobPublicKey= keyFactory.generatePublic(publicKeySpec);
-
+                    Key BobPublicKey1 = keyFactory.generatePublic(publicKeySpec);
+                    if(BobPublicKey.equals(BobPublicKey1)) System.out.println("True");
                     // password is correct, break out of while() loop
                     break;
                 }

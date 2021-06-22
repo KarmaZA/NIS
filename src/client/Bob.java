@@ -6,7 +6,10 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.spec.EncodedKeySpec;
+import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -85,7 +88,6 @@ class Bob {
 
 			certificate = inAuthServ.readNBytes(Integer.parseInt(certifyArray[1]));
 
-			//TODO returns the username|publickey encrypted with CA private key
 			if (certifyArray[0].equals("SIGNED")){
 				return certificate;
 			}
@@ -118,7 +120,15 @@ class Bob {
 		private static void getPublicKey(byte[] cert){
 			//Use CA public key
 			//cert = SecurityFunctions.decryptWithAsymmetricKey(cert.getBytes(),publicKeyCA);
-			//Make sure decrypted says bob
+			//cert = SecurityFunctions.decryptWithAsymmetricKey(cert,publicKeyCA).getBytes();
+			try {
+				cert = Base64.getDecoder().decode(cert);
+				EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(cert);
+				KeyFactory keyFactory = KeyFactory.getInstance("RSA", "BC");
+				AlicePublicKey = keyFactory.generatePublic(publicKeySpec);
+			} catch (Exception e){
+				e.printStackTrace();
+			}
 		}
 
 
@@ -159,7 +169,9 @@ class Bob {
 
 				requestHeader = in.readUTF();
 				requestHeaderArray = requestHeader.split(",");
-				certificate = in.readNBytes(Integer.parseInt(requestHeaderArray[2]));
+				int len = Integer.parseInt(requestHeaderArray[2]);
+				certificate = in.readNBytes(len);
+				System.out.println("Extracting Public Key");
 				getPublicKey(certificate);
 
 				// initialise client HEADER that will be received
@@ -177,8 +189,8 @@ class Bob {
 							byte [] publicKeyBytes = Base64.getDecoder().decode(clientAuthHeader[3].getBytes());
 							EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKeyBytes);
 							KeyFactory keyFactory = KeyFactory.getInstance("RSA", "BC");
-							AlicePublicKey= keyFactory.generatePublic(publicKeySpec);
-
+							Key AlicePublicKey1= keyFactory.generatePublic(publicKeySpec);
+							if(AlicePublicKey1.equals(AlicePublicKey))System.out.println("True");
 							//send Bob's public key to Alice
 							String BobPublicKeyString =  new String(Base64.getEncoder().encode(publicKey.getEncoded()));
 							out.writeUTF("CMD;"+BobPublicKeyString+";null;null;success");
