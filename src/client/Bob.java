@@ -220,7 +220,6 @@ class Bob {
 							//send Bob's public key to Alice
 							String BobPublicKeyString =  new String(Base64.getEncoder().encode(publicKey.getEncoded()));
 							out.writeUTF("CMD;"+BobPublicKeyString+";null;null;success");
-							System.out.println("\n"+BobPublicKeyString);
 							Alice.done = false;
 							break;
 						}

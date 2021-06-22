@@ -97,7 +97,7 @@ class KeyGenerator{
         random.nextBytes(keyBytes);
         SecretKeySpec sharedKey = new SecretKeySpec(keyBytes, "AES");
 
-        System.out.println("sharedKey : " + Base64.getEncoder().encodeToString(sharedKey.getEncoded()));
+        System.out.println("Generated sharedKey : " + Base64.getEncoder().encodeToString(sharedKey.getEncoded()));
         return sharedKey;
     }
 

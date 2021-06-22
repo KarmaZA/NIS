@@ -267,11 +267,8 @@ class Alice{
                 // << HEADER sent to server to check password
                 String publicKeyString =  new String(Base64.getEncoder().encode(publicKey.getEncoded()));
                 out.writeUTF("CMD;START;" + clientPassword + ";" + publicKeyString + ";null");
-                System.out.println(Base64.getEncoder().encodeToString(publicKey.getEncoded()));
-                System.out.println(publicKey);
                 // >> HEADER received from server detailing if password is correct or not
                 String[] serverHeader = in.readUTF().split(";");
-                System.out.println(serverHeader);
 
                 // check if password is correct or not
                 if (serverHeader[4].equals("success")) {

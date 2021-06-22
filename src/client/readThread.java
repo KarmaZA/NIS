@@ -41,7 +41,7 @@ public class readThread implements Runnable {
                     // break out of while() loop so that the finally() block can be run
                     break;
                 }
-                else if(clientHeader[0].equals("Auth") && clientHeader[1].equals("I")){
+                else if(clientHeader[0].equals("Auth") && clientHeader[1].equals("I")){ //if receiving a file and caption
                     // System.out.println("here");
                     try {
                         int bytesRead;
@@ -52,18 +52,17 @@ public class readThread implements Runnable {
                         // >> HEADER received from client containing length of byte array to upload
                         long imgSize = in.readLong();
                         long capSize = in.readLong();
-                        // System.out.println(capSize);
+                        System.out.println("Decrypting image");
                         byte[] buffer = new byte[(int)imgSize];
                         while (imgSize > 0 && (bytesRead = in.read(buffer, 0, (int) Math.min(buffer.length, imgSize))) != -1) {
 //                            output.write(buffer, 0, bytesRead);
                             imgSize -= bytesRead;
                         }
-
                         byte[] decryptedBuffer = SecurityFunctions.PGPFullDecrypt(buffer,receiverPrivate,senderPublic);
-
-                        System.out.println("here again ");
                         output.write(decryptedBuffer, 0, decryptedBuffer.length);
                         output.close();
+
+                        System.out.println("Decrypting caption");
                         byte[] capBuff = new byte[(int)capSize];
                         in.read(capBuff, 0, (int)capSize);
                         byte[] captionDecrypted = SecurityFunctions.PGPFullDecrypt(capBuff,receiverPrivate,senderPublic);
@@ -77,16 +76,9 @@ public class readThread implements Runnable {
                         out.writeUTF("CTR,null,null,null,failed");
                     }
                 }
-                else if(clientHeader[0].equals("Auth") && clientHeader[1].equals("M")){
+                else if(clientHeader[0].equals("Auth") && clientHeader[1].equals("M")){ //if receiving a message
+                    System.out.println("Decrypting message from " + this.threadName);
                     //print message
-                    System.out.print(this.threadName + ": ");
-//                    String encrypted = in.readUTF();
-//                    String decrypted = new String (SecurityFunctions.PGPFullDecrypt(encrypted.getBytes(),receiverPrivate,senderPublic));
-//                    System.out.println(decrypted);
-//                    byte[] capBuff = new byte[(int)capSize];
-//                    in.read(capBuff, 0, (int)capSize);
-//                    byte[] captionDecrypted = SecurityFunctions.PGPFullDecrypt(capBuff,receiverPrivate,senderPublic);
-//                    String Caption = new String (captionDecrypted);
                     long len = in.readLong();
                     byte[] inputEncrypted = in.readNBytes((int)len);
                     byte[] inputDecrypted = SecurityFunctions.PGPFullDecrypt(inputEncrypted,receiverPrivate,senderPublic);

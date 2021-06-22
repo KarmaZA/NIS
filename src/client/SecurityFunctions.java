@@ -47,8 +47,6 @@ public class SecurityFunctions {
         //encrypt the hash with Alice's private key
         byte[] encryptedHash = encryptWithAsymmetricKey(hashedMessage,privateKey); //encrypt with private key
 
-        //why hash weird characters?
-
         //concatenate the encryptedHash and the original message
         byte[] encryptionAndMessage = concatenateArrays(encryptedHash, message);
         return encryptionAndMessage;
@@ -69,8 +67,6 @@ public class SecurityFunctions {
         byte[] encryptedHashOnly = getPartFromArray(concatMessage,0,128);
         byte[] messageOnly = getPartFromArray(concatMessage,128, concatMessage.length);
 
-
-
         //decrypt the hash with Alice's public key
         String decryptedHash = decryptWithAsymmetricKey(encryptedHashOnly,senderPublicKey); //decrypt with  public key
         //System.out.println("Hash only is " + new String (decryptedHash));
@@ -78,7 +74,7 @@ public class SecurityFunctions {
         //compare the hash that was encrypted and the original message with the new hash if they match then we ensure confidentiality
 
         if(decryptedHash==null){
-            System.out.println("why is it null?");
+            System.out.println("the hash is null... this will likely cause issues.");
             return messageOnly;
         }
         if(decryptedHash.equals(hashMessageForComparison))
@@ -106,7 +102,6 @@ public class SecurityFunctions {
         try {
             //compress
             byte[] compressedMessage = compress(message);
-            //String compressedMessage = new String(newcompress(message)); //new compression method
 
             //encrypt this message with the shared key
             byte[] encryptedCompressedMessage = encryptWithSharedKey(compressedMessage, sharedKey, false);
@@ -138,13 +133,13 @@ public class SecurityFunctions {
             byte[] encryptedMessageOnly = getPartFromArray(encrypted,128,encrypted.length);
             //get shared key
             String decryptedSharedKeyString = decryptWithAsymmetricKey(sharedKeyEncrypted,privateKey);
+            System.out.println("Extracted shared key: " + decryptedSharedKeyString);
             byte[] keyAsBytes = Base64.getDecoder().decode(decryptedSharedKeyString);
             SecretKey sharedKey = new SecretKeySpec(keyAsBytes,0,keyAsBytes.length, "AES");
 
             byte[] decryptedCompressedMessage = decryptWithSharedKey(encryptedMessageOnly,sharedKey, false);
 
             byte[] finalOutput = deCompress(decryptedCompressedMessage);
-           // String finalOutput = newdecompress(decryptedCompressedMessage.getBytes(),20); // new decompression function //TODO make num generic.
 
             return finalOutput;
 
@@ -256,9 +251,6 @@ public class SecurityFunctions {
      */
     public static byte[] encryptWithAsymmetricKey(String message, Key asymmetricKey){
         try {
-            System.out.println("the public key received: ");
-            System.out.println(Base64.getEncoder().encodeToString(asymmetricKey.getEncoded()));
-
             Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
             Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding"); //RSA cipher object
             cipher.init(Cipher.ENCRYPT_MODE, asymmetricKey); //encrypting mode
@@ -323,8 +315,6 @@ public class SecurityFunctions {
         gzip.close();
         byte[] toReturn = out.toByteArray();
 
-        GZIPInputStream gzipInputStream = new GZIPInputStream(new ByteArrayInputStream(out.toByteArray()));
-
         return toReturn;
     }
 
@@ -336,57 +326,13 @@ public class SecurityFunctions {
      */
     public static byte[] deCompress (byte[] compressed) throws IOException {
 
-
         //set up stream and reader
-
         GZIPInputStream gzipInputStream = new GZIPInputStream(new ByteArrayInputStream(compressed));
-
         return gzipInputStream.readAllBytes();
-
-
-
     }
 
-    public static byte[] newcompress(byte[] toCompress){
-        // Encode a String into bytes
-        byte[] input = toCompress;
-
-        // Compress the bytes
-        byte[] output = new byte[100]; //wont this limit the length?
-        Deflater compresser = new Deflater();
-        compresser.setInput(input);
-        compresser.finish();
-        int compressedDataLength = compresser.deflate(output);
-
-        compresser.end();
-
-        return output; //some say to encode to string using base 64
-
-    }
-
-    public static String newdecompress(byte[] compressed, int compressedDataLength){
-        try {
-            // Decompress the bytes
-            Inflater decompresser = new Inflater();
-            decompresser.setInput(compressed, 0, compressedDataLength);
-            byte[] result = new byte[100];
-            int resultLength = decompresser.inflate(result);
-            decompresser.end();
-
-            // Decode the bytes into a String
-            String outputString = new String(result, 0, resultLength, "UTF-8");
-
-            return outputString;
 
 
-        } catch(java.io.UnsupportedEncodingException ex) {
-            System.out.println(ex);
-            // handle
-        } catch (java.util.zip.DataFormatException ex) {
-            System.out.println(ex);
-            // handle
-        }
-        return null;
-    }
+
 
 }

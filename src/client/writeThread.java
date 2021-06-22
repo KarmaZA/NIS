@@ -38,7 +38,7 @@ public class writeThread implements Runnable {
         try{
             while (true) {
                 // prompt client to enter command
-                System.out.println("Enter Message or [Upload] to send Image or [quit] to exit:");
+                System.out.println("Enter Message or [Upload] to send an image with a caption or [quit] to exit:");
                 // client enters message
                 String message = scanner.nextLine(); 
                 if (message.equals("quit")){
@@ -50,7 +50,7 @@ public class writeThread implements Runnable {
                     Alice.done = false;
                     break;
                 }
-                if(message.equals("Upload")){
+                if(message.equals("Upload")){ //upload file name
                     System.out.println("Enter Filename:");
                     String fName = scanner.nextLine();
                     //check whether file is there to upload
@@ -59,18 +59,16 @@ public class writeThread implements Runnable {
                         System.out.println("Cannot find file.");
                         continue;
                     }
-                    //send header for Bob to download
+                    //send header for other thread to download
                     out.writeUTF("Auth,I," + fName + ",null, null");
                     upload(fName,out, scanner); //uploads client header and image/caption
-                }else{
+                }else{ //just a normal message
                     //basic messaging
                     out.writeUTF("Auth,M,null,null,null");
+                    System.out.println("Sending encrypted message to " + this.threadName);
                     byte[] toSend = SecurityFunctions.PGPFullEncrypt(message.getBytes(),KeyGenerator.genSharedKey(),senderPrivateKey,recieverPublicKey);
                     out.writeLong(toSend.length);
                     out.write(toSend, 0, toSend.length);
-//                    byte[] encrypted = SecurityFunctions.PGPFullEncrypt(message.getBytes(), KeyGenerator.genSharedKey(), senderPrivateKey, recieverPublicKey );
-//                    //out.writeUTF();
-//                    out.write(encrypted, 0, encrypted.length);
                 }            
             }
         }catch (Exception e) {
@@ -97,19 +95,14 @@ public class writeThread implements Runnable {
             dis.readFully(myByteArray, 0, myByteArray.length);
             // combine byte arrays
 
+            System.out.println("Encrypting file");
             byte[] myByteArraySecure = SecurityFunctions.PGPFullEncrypt(myByteArray, KeyGenerator.genSharedKey(), senderPrivateKey, recieverPublicKey );
+            System.out.println("Encrypting caption");
             byte[] captionSecure = SecurityFunctions.PGPFullEncrypt(caption.getBytes(), KeyGenerator.genSharedKey(), senderPrivateKey, recieverPublicKey );
 
-            System.out.println("byteArr length");
-            System.out.println(myByteArraySecure.length);
-            System.out.println("caption length");
-            System.out.println(captionSecure.length);
 
             byte[] payload = joinByteArray(myByteArraySecure, captionSecure);
 
-
-            //SECURE MESSAGE??
-            //payload = SecurityFunctions.PGPFullEncrypt(payload, communicationSessionKey, privateKey, publicKey)
 
             // << PAYLOAD sent to server containing length of byte array to upload
             out.writeLong(myByteArraySecure.length);
