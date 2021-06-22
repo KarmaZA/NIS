@@ -6,11 +6,12 @@
       <change beforePath="$PROJECT_DIR$/out/production/NIS/Alice.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/NIS/Alice.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/NIS/AuthenticationServer$RequestHandler.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/NIS/AuthenticationServer$RequestHandler.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/NIS/Bob$Handler.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/NIS/Bob$Handler.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/NIS/Bob.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/NIS/Bob.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public.txt" beforeDir="false" afterPath="$PROJECT_DIR$/public.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/client/Alice.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/Alice.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/client/AuthenticationServer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/AuthenticationServer.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/client/Bob.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/Bob.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/readThread.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/readThread.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/client/writeThread.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/writeThread.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

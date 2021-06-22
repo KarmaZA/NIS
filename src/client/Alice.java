@@ -1,13 +1,10 @@
 import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.security.KeyFactory;
 import java.security.spec.EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.Objects;
 import java.util.Scanner;
@@ -15,17 +12,19 @@ import java.util.Scanner;
 class Alice{
     //Preset master key with Alice
     private static SecretKey masterAlice = null;
-    public static Key publicKeyCA;
+
 
     private final static Scanner scanner = new Scanner(System.in);
     private static int portUpload = 45554;
 
     private final static String username = "Alice";
 
+    private static SecretKey communicationSessionKey;
+
     public static Key publicKey;
     private static Key privateKey;
-    private static SecretKey communicationSessionKey;
     private static Key BobPublicKey;
+    public static Key publicKeyCA;
     //final String IP = "localhost";
 
     //For two way messaging
@@ -168,12 +167,12 @@ class Alice{
 
             certificate = signCertificate(username.getBytes());
             if(certificate == null) System.exit(1);
-/*
+
             //String certificate = "bob";
             System.out.println("The certificate has been signed");
             outBob.writeUTF("CMD," + nonce + "," + certificate.length + ",null,null");
             outBob.write(certificate);
-            */return true;
+            return true;
 
         } catch (Exception e){
             System.out.println("No message, you've been ghosted");
@@ -218,8 +217,8 @@ class Alice{
             }
 
             //threads for sending and receiving messages/images
-            readThread read = new readThread("Bob", socket, in, out,communicationSessionKey, Alice.privateKey, BobPublicKey);
-            writeThread write = new writeThread("Bob", scanner, socket, in, out, communicationSessionKey, Alice.privateKey, BobPublicKey);
+            readThread read = new readThread("Bob", socket, in, out, Alice.privateKey, BobPublicKey);
+            writeThread write = new writeThread("Bob", scanner, socket, in, out, Alice.privateKey, BobPublicKey);
             read.start();
             write.start();
             while(done){

@@ -115,11 +115,10 @@ class Bob {
 			this.socket = socket;
 		}
 
-		private static boolean authenticateCertificate(String cert){
+		private static void getPublicKey(byte[] cert){
 			//Use CA public key
 			//cert = SecurityFunctions.decryptWithAsymmetricKey(cert.getBytes(),publicKeyCA);
 			//Make sure decrypted says bob
-			return true;
 		}
 
 
@@ -139,13 +138,13 @@ class Bob {
 				System.out.println(requestHeader);
 				String[] requestHeaderArray = requestHeader.split(",");
 				String nonce = KeyGenerator.nonceGenerator(16);
-
+				byte[] certificate;
 				if(requestHeaderArray[0].equals("CMD") && requestHeaderArray[1].equals("START") && requestHeaderArray[2].equals("REQCOM")){
 					//Communication request received send back a non
 					System.out.println("Communication request received from " + requestHeaderArray[3]);
 
 					//generates a certificate from the "CA" (AuthServer)
-					byte[] certificate = Base64.getEncoder().encode(publicKey.getEncoded());
+					certificate = Base64.getEncoder().encode(publicKey.getEncoded());
 					//System.out.println();
 					certificate = Bob.signCertificate(certificate);
 
@@ -157,19 +156,11 @@ class Bob {
 					out.write(certificate);
 					System.out.println("Certificate has been sent");
 				}
-/*
-				/*requestHeader = in.readUTF();
+
+				requestHeader = in.readUTF();
 				requestHeaderArray = requestHeader.split(",");
-
-				if(!authenticateCertificate(requestHeaderArray[2])){
-					in.close();
-					out.close();
-					System.out.println("Certificate invalid or expired.\nTerminating");
-					System.exit(1);
-				}*/
-				// scanner used for all client input
-
-				// input and output streams to read and write from client
+				certificate = in.readNBytes(Integer.parseInt(requestHeaderArray[2]));
+				getPublicKey(certificate);
 
 				// initialise client HEADER that will be received
 				String clientAuthHeaderLine;
@@ -202,8 +193,8 @@ class Bob {
 				}
 
 				//threads for sending and receiving messages/images
-				readThread read = new readThread("Alice", socket, in, out, communicationSessionKey, Bob.privateKey, AlicePublicKey);
-				writeThread write = new writeThread("Alice", scanner, socket, in, out, communicationSessionKey, Bob.privateKey, AlicePublicKey );
+				readThread read = new readThread("Alice", socket, in, out, Bob.privateKey, AlicePublicKey);
+				writeThread write = new writeThread("Alice", scanner, socket, in, out, Bob.privateKey, AlicePublicKey );
 
 				read.start();
 				write.start();
