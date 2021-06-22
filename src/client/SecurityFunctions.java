@@ -243,7 +243,7 @@ public class SecurityFunctions {
         }
         cipher.init(Cipher.DECRYPT_MODE, keySpecification, ivSpecification); //we want to decrypt
         byte[] decryptedText = cipher.doFinal(cipherText); //decrypt the message
-        System.out.println("Decrypted with shared key");
+        //System.out.println("Decrypted with shared key");
         return decryptedText;
     }
 

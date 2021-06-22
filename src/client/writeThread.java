@@ -65,9 +65,12 @@ public class writeThread implements Runnable {
                 }else{
                     //basic messaging
                     out.writeUTF("Auth,M,null,null,null");
-                    byte[] encrypted = SecurityFunctions.PGPFullEncrypt(message.getBytes(), KeyGenerator.genSharedKey(), senderPrivateKey, recieverPublicKey );
-                    //out.writeUTF();
-                    out.write(encrypted, 0, encrypted.length);
+                    byte[] toSend = SecurityFunctions.PGPFullEncrypt(message.getBytes(),KeyGenerator.genSharedKey(),senderPrivateKey,recieverPublicKey);
+                    out.writeLong(toSend.length);
+                    out.write(toSend, 0, toSend.length);
+//                    byte[] encrypted = SecurityFunctions.PGPFullEncrypt(message.getBytes(), KeyGenerator.genSharedKey(), senderPrivateKey, recieverPublicKey );
+//                    //out.writeUTF();
+//                    out.write(encrypted, 0, encrypted.length);
                 }            
             }
         }catch (Exception e) {

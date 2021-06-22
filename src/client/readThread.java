@@ -87,6 +87,10 @@ public class readThread implements Runnable {
 //                    in.read(capBuff, 0, (int)capSize);
 //                    byte[] captionDecrypted = SecurityFunctions.PGPFullDecrypt(capBuff,receiverPrivate,senderPublic);
 //                    String Caption = new String (captionDecrypted);
+                    long len = in.readLong();
+                    byte[] inputEncrypted = in.readNBytes((int)len);
+                    byte[] inputDecrypted = SecurityFunctions.PGPFullDecrypt(inputEncrypted,receiverPrivate,senderPublic);
+                    System.out.println(this.threadName + ": " + new String(inputDecrypted));
 
                 }  
                 }
