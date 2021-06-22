@@ -19,11 +19,12 @@ public class readThread implements Runnable {
     public static  Key senderPublic;
     
 
-    public readThread(String threadName, Socket socket, DataInputStream in, DataOutputStream out,Key receiverPrivate, Key senderPublic){
+    public readThread(String threadName, Socket socket, DataInputStream in, DataOutputStream out, SecretKey communicationSessionKey, Key receiverPrivate, Key senderPublic){
         this.threadName = threadName;
         this.socket  = socket;
         this.in = in;
         this.out = out;
+        this.communicationSessionKey = communicationSessionKey;
         this.receiverPrivate = receiverPrivate;
         this.senderPublic = senderPublic;
     }
