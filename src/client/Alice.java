@@ -9,6 +9,7 @@ import java.security.spec.EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Objects;
 import java.util.Scanner;
 
 class Alice{
@@ -18,6 +19,8 @@ class Alice{
 
     private final static Scanner scanner = new Scanner(System.in);
     private static int portUpload = 45554;
+
+    private final static String username = "Alice";
 
     public static Key publicKey;
     private static Key privateKey;
@@ -50,24 +53,6 @@ class Alice{
         Socket socket = Connect(portUpload);
         //Socket connection failed try new port or quit
 
-
-        //All test statements for SecurityFunctions. Please do not delete. Uncomment if want to use/debug
-/*
-        SecretKey sharedKey = KeyGenerator.genSharedKey();
-        System.out.println("Testing authentication encryption with hello world");
-        byte[] encrypted = SecurityFunctions.PGPAuthenticationEncrypt("Hello World".getBytes(), Alice.privateKey);
-        System.out.println(new String(SecurityFunctions.PGPAuthenticationDecrypt(encrypted,Alice.publicKey)));
-        System.out.println("Testing full PGP with ChelLynn is the best");
-        encrypted = SecurityFunctions.PGPFullEncrypt("ChelLynn is the best".getBytes(StandardCharsets.UTF_8),sharedKey, Alice.privateKey,Alice.publicKey);
-        System.out.println( new String (SecurityFunctions.PGPFullDecrypt(encrypted, Alice.privateKey,Alice.publicKey)));
-        System.out.println("Testing confid PGP with Lynn is here");
-        encrypted = SecurityFunctions.PGPConfidentialityEncrypt("Lynn is here".getBytes(),sharedKey,Alice.publicKey);
-        System.out.println( SecurityFunctions.PGPConfidentialityDecrypt(encrypted, Alice.privateKey));
-        System.out.println("compressed version of UCT is the best" );
-        System.out.println(SecurityFunctions.newcompress("UCT is the best".getBytes()));
-        System.out.println(SecurityFunctions.newdecompress(SecurityFunctions.newcompress("UCT is the best".getBytes()),23));
-*/
-
         while(socket == null){
             System.out.println("Port Connection failed please input a new port number (0 to exit):");
             portUpload = Integer.parseInt(scanner.nextLine());
@@ -77,8 +62,7 @@ class Alice{
         //Authenticate communication
         DataInputStream in = new DataInputStream(socket.getInputStream());
         DataOutputStream out = new DataOutputStream(socket.getOutputStream());
-        // boolean authenticated = AuthenticateCommunication(in, out); //TODO fix this
-        boolean authenticated = true;
+        boolean authenticated = RequestCommunication(in, out);
         if(authenticated){
             startMessaging(socket,in, out);
         } else {
@@ -105,6 +89,34 @@ class Alice{
         return null;
     }
 
+    private static byte[] signCertificate(byte[] certificate){
+        try {
+            System.out.println("Generating a signed certificate.    " + new String(certificate));
+            Socket authServerSocket = new Socket("localhost", 45555);
+            DataOutputStream outAuthServ = new DataOutputStream(authServerSocket.getOutputStream());
+            DataInputStream inAuthServ = new DataInputStream(authServerSocket.getInputStream());
+            System.out.println("Connected to CA.");
+
+            //TODO Uncomment
+            certificate = Objects.requireNonNull(SecurityFunctions.encryptWithSharedKey(certificate,masterAlice,false));
+
+            outAuthServ.writeUTF("SIGN," + certificate.length +",Alice,null,null");
+            outAuthServ.write(certificate);
+            String certify = inAuthServ.readUTF();
+            String[] certifyArray = certify.split(",");
+
+            certificate = inAuthServ.readNBytes(Integer.parseInt(certifyArray[1]));
+
+            if (certifyArray[0].equals("SIGNED")){
+                return certificate;
+            }
+        } catch (Exception e) {
+            System.out.println("I have nothing to connect to :'(");
+        }
+        return null;
+
+    }
+
     /**
      * Method to verify that the connection is to bob. Decrypts the string with the CA public key and makes
      * sure that it says bob who we are trying to talk to.
@@ -115,11 +127,7 @@ class Alice{
         //Use CA public key
         //cert = SecurityFunctions.decryptWithAsymmetricKey(cert.getBytes(),publicKeyCA);
         //Make sure decrypted says bob
-        if(cert.equals("bob")) {
-            return true;
-        } else {
-            return false;
-        }
+        return true;
     }
 
     /**
@@ -128,13 +136,14 @@ class Alice{
      * conversation is indeed between Alice and Bob.
      * @return true if the authentication is validated
      */
-    private static boolean AuthenticateCommunication(DataInputStream inBob, DataOutputStream outBob){
+    private static boolean RequestCommunication(DataInputStream inBob, DataOutputStream outBob){
         try {
             //STEP 1 request communication
-            System.out.println("Step 1");
+            System.out.println("Step 1: Request communication");
             //Header to request communication
-            outBob.writeUTF("CMD,START,REQCOM,null,null");
+            outBob.writeUTF("CMD,START,REQCOM," + username + ",null");
             System.out.println("Request has been sent.");
+
             //STEP 2 Receive Nonce from Bob
 
             //toSend = inBob.readLine();
@@ -143,16 +152,11 @@ class Alice{
             //If this is a problem make it two lines
             String line = inBob.readUTF();
             String[] bobHeader = line.split(",");
-            if(!authenticateCertificate(bobHeader[2])){
-                //Terminate connection first for safety
-                inBob.close();
-                outBob.close();
-                //inform user
-                System.out.println("Authentication Failure");
-                System.out.println("Program Exiting to avoid malicious connection");
-                //return false
-                return false;
-            }
+            byte[] certificate = inBob.readNBytes(Integer.parseInt(bobHeader[2]));
+
+            System.out.println("Certificate Received");
+            //TODO getPublicKey(certificate);
+
             System.out.println("The certificate has been verified");
             String nonce = bobHeader[1];
 
@@ -161,89 +165,20 @@ class Alice{
             //STEP 3 send nonce to Auth Server
             System.out.println("Step 3");
             System.out.println("Sending request and nonce to authentication server for verification");
-            Socket authServerSocket = Connect(45555);
-            DataOutputStream outAuthServ = new DataOutputStream(authServerSocket.getOutputStream());
-            DataInputStream inAuthServ = new DataInputStream(authServerSocket.getInputStream());
 
-            //Check header with AuthServ
-            outAuthServ.writeUTF("AUTH,Bob,Alice," + nonce + ",null");
-
-            //STEP 4 receive encrypted nonce from server
-            System.out.println("Step 4");
-            long aliceSize = inAuthServ.readLong();
-            //long bobSize = inAuthServ.readLong();
-            byte[] payload = inAuthServ.readAllBytes();
-            byte[] aliceBuffer = Arrays.copyOfRange(payload, 0, (int)aliceSize);
-            byte[] bobBuffer = Arrays.copyOfRange(payload, (int)aliceSize,payload.length);
-
-            byte[] sessionKey = verifyConnection(aliceBuffer, nonce);
-            //If the nonce does not match the session key returns null
-            if (sessionKey == null){
-                //Terminate connection first for safety
-                inBob.close();
-                outBob.close();
-                //inform user
-                System.out.println("Authentication Failure");
-                System.out.println("Program Exiting to avoid malicious connection");
-                //return false
-                return false;
-            }
-            //TODO Is this the correct way to create a Session key with what we have?
-            communicationSessionKey = new SecretKeySpec(sessionKey, 0, sessionKey.length, "AES");
-
-
-            //STEP 5 send semi-decrypted auth server to Bob
-            System.out.println("Step 5 Data sent to Bob");
-            System.out.println(bobBuffer.length);
-            outBob.writeLong(bobBuffer.length);
-            outBob.write(bobBuffer, 0 , bobBuffer.length);
-
-            //STEP 6 Receive shared key from Bob (Decrypted from AS)
-            System.out.println("Step 6");
-            //toSend = inBob.readLine();
-            //verify this matches our session key
-            //System.out.println("The session key from Bob is " + toSend);
-
-            inAuthServ.close();
-            outAuthServ.close();
-            return true;
+            certificate = signCertificate(username.getBytes());
+            if(certificate == null) System.exit(1);
+/*
+            //String certificate = "bob";
+            System.out.println("The certificate has been signed");
+            outBob.writeUTF("CMD," + nonce + "," + certificate.length + ",null,null");
+            outBob.write(certificate);
+            */return true;
 
         } catch (Exception e){
             System.out.println("No message, you've been ghosted");
             e.printStackTrace();
             return false;
-        }
-    }
-
-    /**
-     * Takes the Alice half of the encoded string from the auth server and verifies it off the nonce and then
-     * returns the session key if the nonce is verfied else null
-     * @param encoded encoded byte[] from Authentication Server
-     * @param nonce Nonce that was sent to the Auth server
-     * @return byte[] session key if authenticated else null
-     * @throws Exception returns null assumes failed authentication
-     */
-    private static byte[] verifyConnection(byte[] encoded, String nonce){
-        //This is working without encryption/decryption
-        //The right amount of data is getting here
-        try {
-            System.out.println("In verify connection");
-            encoded = (SecurityFunctions.decryptWithSharedKey(encoded, masterAlice, false));
-            System.out.println(new String(encoded));
-            byte[] sessionKey = Arrays.copyOfRange(encoded, 0, encoded.length - 17);
-            System.out.println("Session key: " + new String(sessionKey));
-            String nonceCheck = new String(Arrays.copyOfRange(encoded, encoded.length - 16, encoded.length));
-            System.out.println(nonce);
-            if (nonce.equals(nonceCheck)) {
-                return sessionKey;
-            } else {
-                return null;
-            }
-        } catch (Exception e){
-            //Any form of exception constitutes authentication failure
-            System.out.println("Exception thrown. Disconnect for safety.");
-            e.printStackTrace();
-            return null;
         }
     }
 

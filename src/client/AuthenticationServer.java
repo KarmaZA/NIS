@@ -92,7 +92,7 @@ class AuthenticationServer{
                 String header = in.readUTF();
                 String[] headerArray = header.split(",");
                 if(headerArray[0].equals("SIGN")){
-                    generateCertificate(headerArray,out);
+                    generateCertificate(headerArray,in,out);
                     in.close();
                     out.close();
                     socket.close();
@@ -135,24 +135,34 @@ class AuthenticationServer{
 
 
 
-        private void generateCertificate(String[] header, DataOutputStream outWrite) throws Exception {
-            //TODO Bob is sent unencrypted but the certificate string is encrypted with their shared key?
+        /**
+         *
+         * @param header
+         * @param in
+         * @param outWrite
+         * @throws Exception
+         */
+        private void generateCertificate(String[] header, DataInputStream in, DataOutputStream outWrite) throws Exception {
+            byte[] certificate;
+            int certificateLength = Integer.parseInt(header[1]);
+            certificate = in.readNBytes(certificateLength);
+            System.out.println(header[1]);
 
-            String certified;
-            if (header[2].equals("bob")){
-                //certified = new String(SecurityFunctions.decryptWithSharedKey(header[1].getBytes(), masterBob));
+            if (header[3].equals("Bob")){
+                certificate = SecurityFunctions.decryptWithSharedKey(certificate, masterBob, false);
                 //encrypt with private key
-                certified = "bob";
-            }else if (header[2].equals("alice")){
-                //certified = new String(SecurityFunctions.decryptWithSharedKey(header[1].getBytes(), masterAlice));
+
+            }else if (header[3].equals("Alice")){
+                certificate = SecurityFunctions.decryptWithSharedKey(certificate, masterAlice, false);
                 //encrypt with private key
-                certified = "alice";
             } else {
-                certified = "unknown";
+                certificate = "unknown".getBytes();
             }
-            //certified = new String(Objects.requireNonNull(SecurityFunctions.encryptWithAsymmetricKey(certified, privateKey)));
+            System.out.println("The received certificate was " + new String(certificate));
+            //certificate = Objects.requireNonNull(SecurityFunctions.encryptWithAsymmetricKey(new String(certificate), privateKey));
 
-            outWrite.writeUTF("SIGNED," + certified + ",null,null,null");
+            outWrite.writeUTF("SIGNED," + certificate.length + ",null,null,null");
+            outWrite.write(certificate);
             outWrite.close();
         }
 
