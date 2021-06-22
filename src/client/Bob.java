@@ -38,6 +38,7 @@ class Bob {
 	public static Key publicKey;
 	private static Key privateKey;
 	private static SecretKey communicationSessionKey;
+	private static Key publicKeyCA;
 	private static Key AlicePublicKey;
 
 	/**
@@ -46,6 +47,7 @@ class Bob {
 	public static void main(String[] args) {
 		masterBob = KeyGenerator.genMasterKeyFromString("055WVjVBB95Yaw6ZhRAWug==");
 		try {
+			publicKeyCA = KeyGenerator.getCAPublicKey();
 			Key[] keypair = KeyGenerator.generateKeyPair();
 			publicKey = keypair[0];
 			privateKey = keypair[1];
@@ -87,7 +89,7 @@ class Bob {
 			String[] certifyArray = certify.split(",");
 
 			certificate = inAuthServ.readNBytes(Integer.parseInt(certifyArray[1]));
-
+			//certificate = SecurityFunctions.decryptWithAsymmetricKey(certificate,publicKeyCA).getBytes();
 			if (certifyArray[0].equals("SIGNED")){
 				return certificate;
 			}

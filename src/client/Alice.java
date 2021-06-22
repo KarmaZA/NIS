@@ -44,6 +44,7 @@ class Alice{
         masterAlice = KeyGenerator.genMasterKeyFromString("w10PtdhELmt/ZPzcZjxFdg==");
         //get keys
         try {
+            publicKeyCA = KeyGenerator.getCAPublicKey();
             Key[] keypair = KeyGenerator.generateKeyPair();
             publicKey = keypair[0];
             privateKey = keypair[1];
@@ -108,6 +109,7 @@ class Alice{
 
             certificate = inAuthServ.readNBytes(Integer.parseInt(certifyArray[1]));
 
+            //certificate = SecurityFunctions.decryptWithAsymmetricKey(certificate,publicKeyCA).getBytes();
             if (certifyArray[0].equals("SIGNED")){
                 return certificate;
             }

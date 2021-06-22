@@ -18,6 +18,7 @@ class AuthenticationServer{
 
     public static Key publicKey;
     private static Key privateKey;
+    public static Key publicKeyCA;
 
     /**
      * The main method of the class. Sets up the keys and starts the server listening. then when a connection comes in
@@ -31,6 +32,8 @@ class AuthenticationServer{
             FileWriter outFile = new FileWriter("public.txt");
             outFile.write(Base64.getEncoder().encodeToString(publicKey.getEncoded()));
             outFile.close();
+            Key Test = KeyGenerator.getCAPublicKey();
+
         } catch (Exception e){
             //Catch a possible Null Pointer Exception
             System.out.println("Key pair generation failed.");
@@ -122,7 +125,7 @@ class AuthenticationServer{
                 certificate = "unknown".getBytes();
             }
             System.out.println("The received certificate was " + new String(certificate));
-            //certificate = Objects.requireNonNull(SecurityFunctions.encryptWithAsymmetricKey(new String(certificate), privateKey));
+            //certificate = SecurityFunctions.encryptWithAsymmetricKey(new String(certificate), privateKey);
 
             outWrite.writeUTF("SIGNED," + certificate.length + ",null,null,null");
             outWrite.write(certificate);
