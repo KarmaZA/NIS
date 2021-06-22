@@ -2,12 +2,8 @@ import javax.crypto.SecretKey;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.ByteBuffer;
 import java.security.Key;
-import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
 import java.util.Base64;
-import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -33,7 +29,7 @@ class AuthenticationServer{
             publicKey = keypair[0];
             privateKey = keypair[1];
             FileWriter outFile = new FileWriter("public.txt");
-            outFile.write(Base64.getEncoder().encodeToString(publicKey.getEncoded()));
+            outFile.write(new String(Base64.getEncoder().encode(publicKey.getEncoded())));
             outFile.close();
         } catch (Exception e){
             //Catch a possible Null Pointer Exception
@@ -92,76 +88,45 @@ class AuthenticationServer{
                 String header = in.readUTF();
                 String[] headerArray = header.split(",");
                 if(headerArray[0].equals("SIGN")){
-                    generateCertificate(headerArray,out);
+                    generateCertificate(headerArray,in,out);
                     in.close();
                     out.close();
                     socket.close();
                 }
-                String nonce = headerArray[3];
-                System.out.println(nonce);
-                //generate session key and encrypt (session key|request|nonce with Alice Master Key
-                SecretKey sessionKey = KeyGenerator.genSharedKey();
-
-                String AliceEncrypt = Arrays.toString(sessionKey.getEncoded()) + "," + nonce;
-                System.out.println(AliceEncrypt);
-                //AliceEncrypt.encrypt with master key
-                byte[] aliceToSend = Objects.requireNonNull(SecurityFunctions.encryptWithSharedKey(AliceEncrypt.getBytes(), masterAlice, false));//AliceEncrypt.getBytes();//
-                //System.out.println("Alice encrypt is : " + AliceEncrypt);
-                //System.out.println(SecurityFunctions.decryptWithSharedKey(AliceEncrypt.getBytes(),masterAlice));
-
-                //Encrypt ticket Session|"Alice"|nonce with bob master key for Bob
-                String BobEncrypt = sessionKey.getEncoded() + "|Alice|" + nonce;//Base64.getEncoder().
-                //BobEncrypt with master key for bob
-                byte[] bobToSend = Objects.requireNonNull(SecurityFunctions.encryptWithSharedKey(BobEncrypt.getBytes(), masterBob, false));//BobEncrypt.getBytes();//
-
-                //Generate payload to send
-                byte[] payload = joinByteArray(aliceToSend,bobToSend);
-
-                //send back to Alice
-                out.writeLong(aliceToSend.length);
-                //out.writeLong(bobToSend.length);
-
-                out.write(payload, 0, payload.length);
-                // Close our connection
-                in.close();
-                out.close();
-                socket.close();
-
-                System.out.println("Authentication completed closed");
-            } catch (Exception e) {
+                            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
 
+        /**
+         *
+         * @param header
+         * @param in
+         * @param outWrite
+         * @throws Exception
+         */
+        private void generateCertificate(String[] header, DataInputStream in, DataOutputStream outWrite) throws Exception {
+            byte[] certificate;
+            int certificateLength = Integer.parseInt(header[1]);
+            certificate = in.readNBytes(certificateLength);
+            System.out.println(header[1]);
 
-
-        private void generateCertificate(String[] header, DataOutputStream outWrite) throws Exception {
-            //TODO Bob is sent unencrypted but the certificate string is encrypted with their shared key?
-
-            String certified;
-            if (header[2].equals("bob")){
-                //certified = new String(SecurityFunctions.decryptWithSharedKey(header[1].getBytes(), masterBob));
+            if (header[3].equals("Bob")){
+                certificate = SecurityFunctions.decryptWithSharedKey(certificate, masterBob, false);
                 //encrypt with private key
-                certified = "bob";
-            }else if (header[2].equals("alice")){
-                //certified = new String(SecurityFunctions.decryptWithSharedKey(header[1].getBytes(), masterAlice));
+
+            }else if (header[3].equals("Alice")){
+                certificate = SecurityFunctions.decryptWithSharedKey(certificate, masterAlice, false);
                 //encrypt with private key
-                certified = "alice";
             } else {
-                certified = "unknown";
+                certificate = "unknown".getBytes();
             }
-            //certified = new String(Objects.requireNonNull(SecurityFunctions.encryptWithAsymmetricKey(certified, privateKey)));
+            System.out.println("The received certificate was " + new String(certificate));
+            //certificate = Objects.requireNonNull(SecurityFunctions.encryptWithAsymmetricKey(new String(certificate), privateKey));
 
-            outWrite.writeUTF("SIGNED," + certified + ",null,null,null");
+            outWrite.writeUTF("SIGNED," + certificate.length + ",null,null,null");
+            outWrite.write(certificate);
             outWrite.close();
         }
-
-        public byte[] joinByteArray(byte[] image, byte[] caption) {
-            return ByteBuffer.allocate(image.length + caption.length)
-                    .put(image)
-                    .put(caption)
-                    .array();
-        }
-
     }
 }

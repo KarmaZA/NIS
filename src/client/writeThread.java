@@ -23,13 +23,12 @@ public class writeThread implements Runnable {
     private static Key senderPrivateKey;
     private static Key recieverPublicKey;
 
-    writeThread(String threadName, Scanner scanner, Socket socket, DataInputStream in, DataOutputStream out, SecretKey communicationSessionKey, Key senderPrivateKey, Key recieverPublicKey){
+    writeThread(String threadName, Scanner scanner, Socket socket, DataInputStream in, DataOutputStream out, Key senderPrivateKey, Key recieverPublicKey){
         this.threadName = threadName;
         this.scanner = scanner;
         this.in = in;
         this.out = out;
         this.socket = socket;
-        this.communicationSessionKey = communicationSessionKey;
         this.senderPrivateKey = senderPrivateKey;
         this.recieverPublicKey = recieverPublicKey;
     }
