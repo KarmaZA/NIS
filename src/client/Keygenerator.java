@@ -15,7 +15,7 @@ import javax.crypto.spec.SecretKeySpec;
 //package com.javainterviewpoint;
 
 /** This function will take in two file names as input and save the keys
-to those files.
+ to those files.
  */
 class KeyGenerator{
     public static void main(String[] args) throws NoSuchAlgorithmException {

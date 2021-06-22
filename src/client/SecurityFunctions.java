@@ -168,7 +168,7 @@ public class SecurityFunctions {
         }
         return finByteArr;
     }
-    
+
 
     /**
      * returns a part of a byte array
@@ -203,9 +203,9 @@ public class SecurityFunctions {
             SecretKeySpec keySpecification = new SecretKeySpec(sharedKey.getEncoded(), "AES"); //using AES akgorithm
             IvParameterSpec ivSpecification;
             if(oneFuncCrypt) {
-                 ivSpecification = new IvParameterSpec(IV); //based on same IV as used in encryption if done in the same class
+                ivSpecification = new IvParameterSpec(IV); //based on same IV as used in encryption if done in the same class
             }else {
-                 ivSpecification = new IvParameterSpec(Arrays.copyOfRange(sharedKey.getEncoded(), 0, 16));//Used if encrypted by a different class
+                ivSpecification = new IvParameterSpec(Arrays.copyOfRange(sharedKey.getEncoded(), 0, 16));//Used if encrypted by a different class
             }
             cipher.init(Cipher.ENCRYPT_MODE, keySpecification, ivSpecification); //we want to encrypt
             byte[] cipherText = cipher.doFinal(message); //perform encryption

@@ -17,7 +17,7 @@ public class readThread implements Runnable {
     private static SecretKey communicationSessionKey;
     private static Key receiverPrivate;
     public static  Key senderPublic;
-    
+
 
     public readThread(String threadName, Socket socket, DataInputStream in, DataOutputStream out, SecretKey communicationSessionKey, Key receiverPrivate, Key senderPublic){
         this.threadName = threadName;
@@ -70,7 +70,7 @@ public class readThread implements Runnable {
                         //print file and caption received
                         System.out.println("File received: " + fileName);
                         System.out.println("Image Caption: " + Caption);
-                            
+
                     } catch (IOException ex) {
                         System.out.println("Could not download file...");
                         out.writeUTF("CTR,null,null,null,failed");
@@ -84,10 +84,10 @@ public class readThread implements Runnable {
                     byte[] inputDecrypted = SecurityFunctions.PGPFullDecrypt(inputEncrypted,receiverPrivate,senderPublic);
                     System.out.println(this.threadName + ": " + new String(inputDecrypted));
 
-                }  
                 }
+            }
         }catch (Exception e) {
-        // System.out.println(e);
+            // System.out.println(e);
         }finally {
             try {
                 socket.close();
@@ -96,16 +96,16 @@ public class readThread implements Runnable {
             } catch (IOException e) {
                 System.out.println(e);
             }
-        }    
-    } 
- 
-    
-    
+        }
+    }
+
+
+
     public void start(){
         if(read == null){
             read = new Thread (this,threadName);
             read.start();
         }
     }
-    
+
 }

@@ -57,19 +57,15 @@ class Alice{
         System.out.println("Testing authentication encryption with hello world");
         byte[] encrypted = SecurityFunctions.PGPAuthenticationEncrypt("Hello World".getBytes(), Alice.privateKey);
         System.out.println(new String(SecurityFunctions.PGPAuthenticationDecrypt(encrypted,Alice.publicKey)));
-
         System.out.println("Testing full PGP with ChelLynn is the best");
         encrypted = SecurityFunctions.PGPFullEncrypt("ChelLynn is the best".getBytes(StandardCharsets.UTF_8),sharedKey, Alice.privateKey,Alice.publicKey);
         System.out.println( new String (SecurityFunctions.PGPFullDecrypt(encrypted, Alice.privateKey,Alice.publicKey)));
-
         System.out.println("Testing confid PGP with Lynn is here");
         encrypted = SecurityFunctions.PGPConfidentialityEncrypt("Lynn is here".getBytes(),sharedKey,Alice.publicKey);
         System.out.println( SecurityFunctions.PGPConfidentialityDecrypt(encrypted, Alice.privateKey));
-
         System.out.println("compressed version of UCT is the best" );
         System.out.println(SecurityFunctions.newcompress("UCT is the best".getBytes()));
         System.out.println(SecurityFunctions.newdecompress(SecurityFunctions.newcompress("UCT is the best".getBytes()),23));
-
 */
 
         while(socket == null){
@@ -81,7 +77,7 @@ class Alice{
         //Authenticate communication
         DataInputStream in = new DataInputStream(socket.getInputStream());
         DataOutputStream out = new DataOutputStream(socket.getOutputStream());
-       // boolean authenticated = AuthenticateCommunication(in, out); //TODO fix this
+        // boolean authenticated = AuthenticateCommunication(in, out); //TODO fix this
         boolean authenticated = true;
         if(authenticated){
             startMessaging(socket,in, out);

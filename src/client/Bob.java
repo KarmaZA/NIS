@@ -200,8 +200,8 @@ class Bob {
 				// initialise client HEADER that will be received
 
 
-			DataInputStream in = new DataInputStream(socket.getInputStream());
-			DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+				DataInputStream in = new DataInputStream(socket.getInputStream());
+				DataOutputStream out = new DataOutputStream(socket.getOutputStream());
 				String clientAuthHeaderLine;
 				while ((clientAuthHeaderLine = in.readUTF()) != null) { //read in from Alice
 					String[] clientAuthHeader = clientAuthHeaderLine.split(";");

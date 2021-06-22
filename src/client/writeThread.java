@@ -40,7 +40,7 @@ public class writeThread implements Runnable {
                 // prompt client to enter command
                 System.out.println("Enter Message or [Upload] to send an image with a caption or [quit] to exit:");
                 // client enters message
-                String message = scanner.nextLine(); 
+                String message = scanner.nextLine();
                 if (message.equals("quit")){
                     // << HEADER sent to server to signify a QUIT
                     out.writeUTF("CMD,quit,null,null,null");
@@ -69,12 +69,12 @@ public class writeThread implements Runnable {
                     byte[] toSend = SecurityFunctions.PGPFullEncrypt(message.getBytes(),KeyGenerator.genSharedKey(),senderPrivateKey,recieverPublicKey);
                     out.writeLong(toSend.length);
                     out.write(toSend, 0, toSend.length);
-                }            
+                }
             }
         }catch (Exception e) {
-                System.out.println("Connection ended");
-                e.printStackTrace();
-            } 
+            System.out.println("Connection ended");
+            e.printStackTrace();
+        }
     }
     /**
      * upload file
@@ -121,23 +121,23 @@ public class writeThread implements Runnable {
         }
     }
     /**
-     * 
+     *
      * @param image byte array
      * @param caption byte array
      * @return combined byte array
      */
     public static byte[] joinByteArray(byte[] image, byte[] caption){
         return ByteBuffer.allocate(image.length + caption.length)
-                    .put(image)
-                    .put(caption)
-                    .array();
+                .put(image)
+                .put(caption)
+                .array();
     }
-   
+
     public void start(){
         if(write == null){
             write = new Thread (this,threadName);
             write.start();
         }
     }
-    
+
 }
