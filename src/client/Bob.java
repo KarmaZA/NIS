@@ -5,10 +5,10 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
-import java.util.Arrays;
-import java.util.Hashtable;
-import java.util.Objects;
-import java.util.Scanner;
+import java.security.KeyFactory;
+import java.security.spec.EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -33,6 +33,7 @@ class Bob {
 	public static Key publicKey;
 	private static Key privateKey;
 	private static SecretKey communicationSessionKey;
+	private static Key AlicePublicKey;
 
 	/**
 	 * @param args String array to take input into the main method
@@ -49,6 +50,7 @@ class Bob {
 		}
 		startServer();
 		System.out.println("Bob is bobbing");
+
 
 		try {
 			ExecutorService pool = Executors.newFixedThreadPool(20);
@@ -160,64 +162,79 @@ class Bob {
 			// client connection successful
 			System.out.println("Verifying Alice on: " + socket);
 			try {
-				DataInputStream in = new DataInputStream(socket.getInputStream());
-				DataOutputStream out = new DataOutputStream(socket.getOutputStream());
-				//Step 1 and 2
-				String aliceAuthHeaderLine = in.readUTF();
-				System.out.println(aliceAuthHeaderLine);
-				String[] AliceHeaderLine = aliceAuthHeaderLine.split(",");
-				String nonce = KeyGenerator.nonceGenerator(16);
-				if(AliceHeaderLine[0].equals("CMD") && AliceHeaderLine[1].equals("START") && AliceHeaderLine[2].equals("REQCOM")){
-					//Communication request received send back a non
-					System.out.println("Communication request received");
-					//generates a certificate from the "CA" (AuthServer)
-					String certificate = Bob.signCertificate("bob");
-					System.out.println(certificate);
-					//String certificate = "bob";
-					System.out.println("The certificate has been signed");
-					out.writeUTF("CMD," + nonce + "," + certificate + ",null,null");
-				}
-
-				//Step 5 and 6
-				long bufferSize = in.readLong();
-				byte[] buffer = in.readNBytes((int)bufferSize);
-				System.out.println("The message from Alice is" + buffer.toString());
-
-				byte[] sessionKey = verifyConnection(buffer, nonce);
-				if(sessionKey == null){
-					System.out.println("Authentication Failure");
-					System.out.println("Program Exiting to avoid malicious connection");
-					System.exit(1);
-				}
+//				DataInputStream in = new DataInputStream(socket.getInputStream());
+//				DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+//				//Step 1 and 2
+//				String aliceAuthHeaderLine = in.readUTF();
+//				System.out.println(aliceAuthHeaderLine);
+//				String[] AliceHeaderLine = aliceAuthHeaderLine.split(",");
+//				String nonce = KeyGenerator.nonceGenerator(16);
+//				if(AliceHeaderLine[0].equals("CMD") && AliceHeaderLine[1].equals("START") && AliceHeaderLine[2].equals("REQCOM")){
+//					//Communication request received send back a non
+//					System.out.println("Communication request received");
+//					//generates a certificate from the "CA" (AuthServer)
+//					String certificate = Bob.signCertificate("bob");
+//					System.out.println(certificate);
+//					//String certificate = "bob";
+//					System.out.println("The certificate has been signed");
+//					out.writeUTF("CMD," + nonce + "," + certificate + ",null,null");
+//				}
+//
+//				//Step 5 and 6
+//				long bufferSize = in.readLong();
+//				byte[] buffer = in.readNBytes((int)bufferSize);
+//				System.out.println("The message from Alice is" + buffer.toString());
+//
+//				byte[] sessionKey = verifyConnection(buffer, nonce);
+//				if(sessionKey == null){
+//					System.out.println("Authentication Failure");
+//					System.out.println("Program Exiting to avoid malicious connection");
+//					System.exit(1);
+//				}
 				//TODO Is this the correct way to create a Session key with what we have?
-				Bob.communicationSessionKey = new SecretKeySpec(sessionKey, 0, sessionKey.length, "AES");
+//				Bob.communicationSessionKey = new SecretKeySpec(sessionKey, 0, sessionKey.length, "AES");
 				// scanner used for all client input
 
 				// input and output streams to read and write from client
 
 				// initialise client HEADER that will be received
+
+
+			DataInputStream in = new DataInputStream(socket.getInputStream());
+			DataOutputStream out = new DataOutputStream(socket.getOutputStream());
 				String clientAuthHeaderLine;
 				while ((clientAuthHeaderLine = in.readUTF()) != null) { //read in from Alice
-					String[] clientAuthHeader = clientAuthHeaderLine.split(",");
+					String[] clientAuthHeader = clientAuthHeaderLine.split(";");
 					// check authentication before proceeding
 					if(clientAuthHeader[0].equals("CMD") && clientAuthHeader[1].equals("START")){
 
 						if(clientAuthHeader[2].equals(Bob.password)){
 							System.out.println("Password Correct: " + socket);
-							out.writeUTF("CMD,null,null,null,success");
+
+							//extract Alice's public key
+							byte [] publicKeyBytes = Base64.getDecoder().decode(clientAuthHeader[3].getBytes());
+							EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKeyBytes);
+							KeyFactory keyFactory = KeyFactory.getInstance("RSA", "BC");
+							AlicePublicKey= keyFactory.generatePublic(publicKeySpec);
+
+							//send Bob's public key to Alice
+							String BobPublicKeyString =  new String(Base64.getEncoder().encode(publicKey.getEncoded()));
+							out.writeUTF("CMD;"+BobPublicKeyString+";null;null;success");
+							System.out.println("\n"+BobPublicKeyString);
 							Alice.done = false;
 							break;
 						}
 						else{
 							System.out.println("Password Incorrect: " + socket);
-							out.writeUTF("CMD,null,null,null,fail");
+							out.writeUTF("CMD;null;null;null;fail");
 						}
 					}
 				}
 
 				//threads for sending and receiving messages/images
-				readThread read = new readThread("Alice", socket, in, out, communicationSessionKey);
-				writeThread write = new writeThread("Alice", scanner, socket, in, out, communicationSessionKey);
+				readThread read = new readThread("Alice", socket, in, out, communicationSessionKey, Bob.privateKey, AlicePublicKey);
+				writeThread write = new writeThread("Alice", scanner, socket, in, out, communicationSessionKey, Bob.privateKey, AlicePublicKey );
+
 				read.start();
 				write.start();
 

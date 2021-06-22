@@ -109,7 +109,7 @@ public class SecurityFunctions {
             //String compressedMessage = new String(newcompress(message)); //new compression method
 
             //encrypt this message with the shared key
-            byte[] encryptedCompressedMessage = encryptWithSharedKey(compressedMessage, sharedKey, true);
+            byte[] encryptedCompressedMessage = encryptWithSharedKey(compressedMessage, sharedKey, false);
 
             //make key a string and encrypt with receiver's public Key
             String keyString =  new String(Base64.getEncoder().encode(sharedKey.getEncoded()));
@@ -141,7 +141,7 @@ public class SecurityFunctions {
             byte[] keyAsBytes = Base64.getDecoder().decode(decryptedSharedKeyString);
             SecretKey sharedKey = new SecretKeySpec(keyAsBytes,0,keyAsBytes.length, "AES");
 
-            byte[] decryptedCompressedMessage = decryptWithSharedKey(encryptedMessageOnly,sharedKey, true);
+            byte[] decryptedCompressedMessage = decryptWithSharedKey(encryptedMessageOnly,sharedKey, false);
 
             byte[] finalOutput = deCompress(decryptedCompressedMessage);
            // String finalOutput = newdecompress(decryptedCompressedMessage.getBytes(),20); // new decompression function //TODO make num generic.
@@ -256,6 +256,9 @@ public class SecurityFunctions {
      */
     public static byte[] encryptWithAsymmetricKey(String message, Key asymmetricKey){
         try {
+            System.out.println("the public key received: ");
+            System.out.println(Base64.getEncoder().encodeToString(asymmetricKey.getEncoded()));
+
             Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
             Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding"); //RSA cipher object
             cipher.init(Cipher.ENCRYPT_MODE, asymmetricKey); //encrypting mode

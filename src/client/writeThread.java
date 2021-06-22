@@ -7,6 +7,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.nio.ByteBuffer;
+import java.security.Key;
+import java.security.NoSuchAlgorithmException;
 import java.util.Scanner;
 
 public class writeThread implements Runnable {
@@ -18,14 +20,18 @@ public class writeThread implements Runnable {
     private final Socket socket;
     private final Scanner scanner;
     private static SecretKey communicationSessionKey;
+    private static Key senderPrivateKey;
+    private static Key recieverPublicKey;
 
-    writeThread(String threadName, Scanner scanner, Socket socket, DataInputStream in, DataOutputStream out, SecretKey communicationSessionKey){
+    writeThread(String threadName, Scanner scanner, Socket socket, DataInputStream in, DataOutputStream out, SecretKey communicationSessionKey, Key senderPrivateKey, Key recieverPublicKey){
         this.threadName = threadName;
         this.scanner = scanner;
         this.in = in;
         this.out = out;
         this.socket = socket;
         this.communicationSessionKey = communicationSessionKey;
+        this.senderPrivateKey = senderPrivateKey;
+        this.recieverPublicKey = recieverPublicKey;
     }
     public void run(){
         // while() loop to keep checking for client commands (UPLOAD, DOWNLOAD, LIST, quit)
@@ -59,7 +65,9 @@ public class writeThread implements Runnable {
                 }else{
                     //basic messaging
                     out.writeUTF("Auth,M,null,null,null");
-                    out.writeUTF(message);
+                    byte[] encrypted = SecurityFunctions.PGPFullEncrypt(message.getBytes(), KeyGenerator.genSharedKey(), senderPrivateKey, recieverPublicKey );
+                    //out.writeUTF();
+                    out.write(encrypted, 0, encrypted.length);
                 }            
             }
         }catch (Exception e) {
@@ -85,14 +93,24 @@ public class writeThread implements Runnable {
             DataInputStream dis = new DataInputStream(bis);
             dis.readFully(myByteArray, 0, myByteArray.length);
             // combine byte arrays
-            byte[] payload = joinByteArray(myByteArray, caption.getBytes());
+
+            byte[] myByteArraySecure = SecurityFunctions.PGPFullEncrypt(myByteArray, KeyGenerator.genSharedKey(), senderPrivateKey, recieverPublicKey );
+            byte[] captionSecure = SecurityFunctions.PGPFullEncrypt(caption.getBytes(), KeyGenerator.genSharedKey(), senderPrivateKey, recieverPublicKey );
+
+            System.out.println("byteArr length");
+            System.out.println(myByteArraySecure.length);
+            System.out.println("caption length");
+            System.out.println(captionSecure.length);
+
+            byte[] payload = joinByteArray(myByteArraySecure, captionSecure);
+
 
             //SECURE MESSAGE??
             //payload = SecurityFunctions.PGPFullEncrypt(payload, communicationSessionKey, privateKey, publicKey)
 
             // << PAYLOAD sent to server containing length of byte array to upload
-            out.writeLong(myByteArray.length);
-            out.writeLong(caption.getBytes().length);
+            out.writeLong(myByteArraySecure.length);
+            out.writeLong(captionSecure.length);
             // << PAYLOAD sent to server containing byte array
             out.write(payload, 0, payload.length);
 
@@ -101,6 +119,8 @@ public class writeThread implements Runnable {
             System.out.println("File sent: " + clientCommand);
 
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
     }

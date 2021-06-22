@@ -4,7 +4,11 @@ import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
+import java.security.KeyFactory;
+import java.security.spec.EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Scanner;
 
 class Alice{
@@ -18,7 +22,7 @@ class Alice{
     public static Key publicKey;
     private static Key privateKey;
     private static SecretKey communicationSessionKey;
-
+    private static Key BobPublicKey;
     //final String IP = "localhost";
 
     //For two way messaging
@@ -77,7 +81,8 @@ class Alice{
         //Authenticate communication
         DataInputStream in = new DataInputStream(socket.getInputStream());
         DataOutputStream out = new DataOutputStream(socket.getOutputStream());
-        boolean authenticated = AuthenticateCommunication(in, out);
+       // boolean authenticated = AuthenticateCommunication(in, out); //TODO fix this
+        boolean authenticated = true;
         if(authenticated){
             startMessaging(socket,in, out);
         } else {
@@ -260,22 +265,33 @@ class Alice{
                 System.out.println("Enter: <Password>");
                 String clientPassword = scanner.nextLine();
                 // << HEADER sent to server to check password
-                out.writeUTF("CMD,START," + clientPassword + ",null,null");
+                String publicKeyString =  new String(Base64.getEncoder().encode(publicKey.getEncoded()));
+                out.writeUTF("CMD;START;" + clientPassword + ";" + publicKeyString + ";null");
+                System.out.println(Base64.getEncoder().encodeToString(publicKey.getEncoded()));
+                System.out.println(publicKey);
                 // >> HEADER received from server detailing if password is correct or not
-                String[] serverHeader = in.readUTF().split(",");
+                String[] serverHeader = in.readUTF().split(";");
                 System.out.println(serverHeader);
+
                 // check if password is correct or not
                 if (serverHeader[4].equals("success")) {
                     System.out.println("Password Correct");
+                    //extract Bob's public key
+                    byte [] publicKeyBytes = Base64.getDecoder().decode(serverHeader[1].getBytes());
+                    EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKeyBytes);
+                    KeyFactory keyFactory = KeyFactory.getInstance("RSA", "BC");
+                    BobPublicKey= keyFactory.generatePublic(publicKeySpec);
+
                     // password is correct, break out of while() loop
                     break;
                 }
                 // password is incorrect, repeat loop
                 System.out.println("Password Incorrect");
             }
+
             //threads for sending and receiving messages/images
-            readThread read = new readThread("Bob", socket, in, out,communicationSessionKey);
-            writeThread write = new writeThread("Bob", scanner, socket, in, out, communicationSessionKey);
+            readThread read = new readThread("Bob", socket, in, out,communicationSessionKey, Alice.privateKey, BobPublicKey);
+            writeThread write = new writeThread("Bob", scanner, socket, in, out, communicationSessionKey, Alice.privateKey, BobPublicKey);
             read.start();
             write.start();
             while(done){
