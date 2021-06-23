@@ -281,6 +281,7 @@ public class SecurityFunctions {
         }
         catch (Exception e) {
             System.out.println(e);
+            e.printStackTrace();
         }
         return null; //if failed
     }

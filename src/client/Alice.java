@@ -46,6 +46,7 @@ class Alice{
         try {
             publicKeyCA = KeyGenerator.getCAPublicKey();
             Key[] keypair = KeyGenerator.generateKeyPair();
+            assert keypair != null;
             publicKey = keypair[0];
             privateKey = keypair[1];
         } catch (NullPointerException e){
@@ -92,7 +93,7 @@ class Alice{
         return null;
     }
 
-    private static String signCertificate(byte[] certificate){
+    private static byte[] signCertificate(byte[] certificate){
         try {
             System.out.println("Generating a signed certificate.    " + new String(certificate));
             Socket authServerSocket = new Socket("localhost", 45555);
@@ -103,18 +104,16 @@ class Alice{
             certificate = Objects.requireNonNull(SecurityFunctions.encryptWithSharedKey(certificate,masterAlice));
 
             outAuthServ.writeUTF("SIGN," + certificate.length +",Alice,null,null");
+
             outAuthServ.write(certificate);
             String certify = inAuthServ.readUTF();
             String[] certifyArray = certify.split(",");
-            //Can Delete
-            certificate = inAuthServ.readNBytes(Integer.parseInt(certifyArray[1]));
-            System.out.println(new String(certificate));
+
+            certificate = inAuthServ.readNBytes(Integer.parseInt(certifyArray[2]));
             //certificate = SecurityFunctions.decryptWithAsymmetricKey(certificate,publicKeyCA).getBytes();
             System.out.println(new String(certificate));
-
             if (certifyArray[0].equals("SIGNED")){
-                System.out.println("Key HasH: " + certifyArray[2]);
-                return certifyArray[2];
+                return certificate;
             }
         } catch (Exception e) {
             System.out.println("I have nothing to connect to :'(");
@@ -128,15 +127,18 @@ class Alice{
      * @param cert The encoded String that is signed by the CA with their private key
      * @return true if the certificate is validated.
      */
-    private static boolean getPublicKey(byte[] cert, String hashString) throws InvalidKeySpecException, NoSuchProviderException, NoSuchAlgorithmException {
+    private static boolean getPublicKey(byte[] cert, byte[] hashString) throws InvalidKeySpecException, NoSuchProviderException, NoSuchAlgorithmException {
         //Use CA public key
         //cert = SecurityFunctions.decryptWithAsymmetricKey(cert.getBytes(),publicKeyCA);
         //cert = SecurityFunctions.decryptWithAsymmetricKey(cert,publicKeyCA).getBytes();
         String checkHash = SecurityFunctions.hashString(cert);
-
-        //hashString = SecurityFunctions.decryptWithAsymmetricKey(hashString.getBytes(), publicKeyCA);
+        String decryptedSignature = SecurityFunctions.decryptWithAsymmetricKey(hashString, publicKeyCA);
+        System.out.println("The hashes are");
+        System.out.println(checkHash);
+        System.out.println(decryptedSignature);
         assert hashString!=null;
-        if(checkHash.equals(hashString)){
+        if(checkHash.equals(decryptedSignature)){
+            System.out.println("It works");
             cert = Base64.getDecoder().decode(cert);
             EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(cert);
             KeyFactory keyFactory = KeyFactory.getInstance("RSA", "BC");
@@ -155,6 +157,7 @@ class Alice{
      */
     private static boolean RequestCommunication(DataInputStream inBob, DataOutputStream outBob){
         try {
+            publicKeyCA = KeyGenerator.getCAPublicKey();
             //STEP 1 request communication
             System.out.println("Step 1: Request communication");
             //Header to request communication
@@ -170,10 +173,10 @@ class Alice{
             String line = inBob.readUTF();
             String[] bobHeader = line.split(",");
             byte[] certificate = inBob.readNBytes(Integer.parseInt(bobHeader[2]));
-
+            byte[] signedCertificate = inBob.readNBytes(Integer.parseInt(bobHeader[4]));
             System.out.println("Certificate Received");
-            String signedHash = bobHeader[4];
-            if(!getPublicKey(certificate, signedHash)){
+
+            if(!getPublicKey(certificate, signedCertificate)){
                 System.out.println("Invalid certificate");
                 System.exit(1);
             }
@@ -181,19 +184,18 @@ class Alice{
             System.out.println("The certificate has been verified");
             String nonce = bobHeader[1];
 
-            System.out.println("The Nonce from Bob is " + nonce);
 
             //STEP 3 send nonce to Auth Server
-            System.out.println("Step 3");
-            System.out.println("Sending request and nonce to authentication server for verification");
             certificate = Base64.getEncoder().encode(publicKey.getEncoded());
-            signedHash = signCertificate(certificate);
+            signedCertificate = signCertificate(certificate);
             if(certificate == null) System.exit(1);
-
             //String certificate = "bob";
+
             System.out.println("The certificate has been signed");
-            outBob.writeUTF("CMD," + nonce + "," + certificate.length + ",null," + signedHash);
+
+            outBob.writeUTF("CMD," + nonce + "," + certificate.length + "," + signedCertificate.length + ",null");
             outBob.write(certificate);
+            outBob.write(signedCertificate);
             return true;
 
         } catch (Exception e){

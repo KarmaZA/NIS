@@ -18,7 +18,6 @@ class AuthenticationServer{
 
     public static Key publicKey;
     private static Key privateKey;
-    public static Key publicKeyCA;
 
     /**
      * The main method of the class. Sets up the keys and starts the server listening. then when a connection comes in
@@ -32,7 +31,6 @@ class AuthenticationServer{
             FileWriter outFile = new FileWriter("public.txt");
             outFile.write(Base64.getEncoder().encodeToString(publicKey.getEncoded()));
             outFile.close();
-            Key Test = KeyGenerator.getCAPublicKey();
 
         } catch (Exception e){
             //Catch a possible Null Pointer Exception
@@ -120,17 +118,21 @@ class AuthenticationServer{
 
             }else if (header[2].equals("Alice")){
                 certificate = SecurityFunctions.decryptWithSharedKey(certificate, masterAlice);
+                System.out.println(new String(certificate));
                 //encrypt with private key
             } else {
                 certificate = "unknown".getBytes();
             }
+            //TODO CHECK CERT IS THE PUBLIC KEY OF BOB
             System.out.println("Signing the certificate");
             String keyHash = SecurityFunctions.hashString(certificate);
-            //keyHash = new String(SecurityFunctions.encryptWithAsymmetricKey(keyHash, privateKey));
-
-            System.out.println(keyHash);
-            outWrite.writeUTF("SIGNED," + certificate.length + "," + keyHash + ",null,null");
-            outWrite.write(certificate);
+            System.out.println(header[2]);
+            byte[] hashToSend =  SecurityFunctions.encryptWithAsymmetricKey(keyHash, privateKey);
+            System.out.println(new String(hashToSend));
+            assert hashToSend != null;
+            outWrite.writeUTF("SIGNED," + certificate.length + "," + hashToSend.length + ",null,null");
+            //outWrite.write(certificate);
+            outWrite.write(hashToSend);
             outWrite.close();
         }
 
