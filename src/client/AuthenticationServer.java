@@ -124,12 +124,15 @@ class AuthenticationServer{
             } else {
                 certificate = "unknown".getBytes();
             }
-            System.out.println("The received certificate was " + new String(certificate));
-            //certificate = SecurityFunctions.encryptWithAsymmetricKey(new String(certificate), privateKey);
+            System.out.println("Signing the certificate");
+            String keyHash = SecurityFunctions.hashString(certificate);
+            //keyHash = new String(SecurityFunctions.encryptWithAsymmetricKey(keyHash, privateKey));
 
-            outWrite.writeUTF("SIGNED," + certificate.length + ",null,null,null");
+            System.out.println(keyHash);
+            outWrite.writeUTF("SIGNED," + certificate.length + "," + keyHash + ",null,null");
             outWrite.write(certificate);
             outWrite.close();
         }
+
     }
 }

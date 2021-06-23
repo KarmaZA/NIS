@@ -73,7 +73,7 @@ class Bob {
 
 	}
 
-	private static byte[] signCertificate(byte[] certificate){
+	private static String signCertificate(byte[] certificate){
 		try {
 			System.out.println("Generating a signed certificate.    " + new String(certificate));
 			Socket authServerSocket = new Socket("localhost", 45555);
@@ -87,11 +87,15 @@ class Bob {
 			outAuthServ.write(certificate);
 			String certify = inAuthServ.readUTF();
 			String[] certifyArray = certify.split(",");
-
+			//Can Delete
 			certificate = inAuthServ.readNBytes(Integer.parseInt(certifyArray[1]));
+			System.out.println(new String(certificate));
 			//certificate = SecurityFunctions.decryptWithAsymmetricKey(certificate,publicKeyCA).getBytes();
+			System.out.println(new String(certificate));
+
 			if (certifyArray[0].equals("SIGNED")){
-				return certificate;
+				System.out.println("Key HasH: " + certifyArray[2]);
+				return certifyArray[2];
 			}
 		} catch (Exception e) {
 			System.out.println("I have nothing to connect to :'(");
@@ -119,17 +123,22 @@ class Bob {
 			this.socket = socket;
 		}
 
-		private static void getPublicKey(byte[] cert){
+		private static boolean getPublicKey(byte[] cert, String hashString) throws InvalidKeySpecException, NoSuchProviderException, NoSuchAlgorithmException {
 			//Use CA public key
 			//cert = SecurityFunctions.decryptWithAsymmetricKey(cert.getBytes(),publicKeyCA);
 			//cert = SecurityFunctions.decryptWithAsymmetricKey(cert,publicKeyCA).getBytes();
-			try {
+			String checkHash = SecurityFunctions.hashString(cert);
+
+			//hashString = SecurityFunctions.decryptWithAsymmetricKey(hashString.getBytes(), publicKeyCA);
+			assert hashString!=null;
+			if(checkHash.equals(hashString)){
 				cert = Base64.getDecoder().decode(cert);
 				EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(cert);
 				KeyFactory keyFactory = KeyFactory.getInstance("RSA", "BC");
 				AlicePublicKey = keyFactory.generatePublic(publicKeySpec);
-			} catch (Exception e){
-				e.printStackTrace();
+				return true;
+			} else {
+				return false;
 			}
 		}
 
@@ -158,13 +167,13 @@ class Bob {
 					//generates a certificate from the "CA" (AuthServer)
 					certificate = Base64.getEncoder().encode(publicKey.getEncoded());
 					//System.out.println();
-					certificate = Bob.signCertificate(certificate);
+					String signedCertificate = Bob.signCertificate(certificate);
 
 
 					System.out.println("The certificate has been signed");
 					assert certificate != null;
 
-					out.writeUTF("CMD," + nonce + "," + certificate.length + "," + username + ",null");
+					out.writeUTF("CMD," + nonce + "," + certificate.length + "," + username + "," + signedCertificate);
 					out.write(certificate);
 					System.out.println("Certificate has been sent");
 				}
@@ -173,8 +182,14 @@ class Bob {
 				requestHeaderArray = requestHeader.split(",");
 				int len = Integer.parseInt(requestHeaderArray[2]);
 				certificate = in.readNBytes(len);
+				String hash = requestHeaderArray[4];
 				System.out.println("Extracting Public Key");
-				getPublicKey(certificate);
+				System.out.println("Certificate Received");
+				String signedHash = requestHeaderArray[4];
+				if(!getPublicKey(certificate, signedHash)){
+					System.out.println("Invalid certificate");
+					System.exit(1);
+				}
 
 				// initialise client HEADER that will be received
 				String clientAuthHeaderLine;

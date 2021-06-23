@@ -92,7 +92,7 @@ class Alice{
         return null;
     }
 
-    private static byte[] signCertificate(byte[] certificate){
+    private static String signCertificate(byte[] certificate){
         try {
             System.out.println("Generating a signed certificate.    " + new String(certificate));
             Socket authServerSocket = new Socket("localhost", 45555);
@@ -106,12 +106,15 @@ class Alice{
             outAuthServ.write(certificate);
             String certify = inAuthServ.readUTF();
             String[] certifyArray = certify.split(",");
-
+            //Can Delete
             certificate = inAuthServ.readNBytes(Integer.parseInt(certifyArray[1]));
-
+            System.out.println(new String(certificate));
             //certificate = SecurityFunctions.decryptWithAsymmetricKey(certificate,publicKeyCA).getBytes();
+            System.out.println(new String(certificate));
+
             if (certifyArray[0].equals("SIGNED")){
-                return certificate;
+                System.out.println("Key HasH: " + certifyArray[2]);
+                return certifyArray[2];
             }
         } catch (Exception e) {
             System.out.println("I have nothing to connect to :'(");
@@ -125,14 +128,23 @@ class Alice{
      * @param cert The encoded String that is signed by the CA with their private key
      * @return true if the certificate is validated.
      */
-    private static void getPublicKey(byte[] cert) throws InvalidKeySpecException, NoSuchProviderException, NoSuchAlgorithmException {
+    private static boolean getPublicKey(byte[] cert, String hashString) throws InvalidKeySpecException, NoSuchProviderException, NoSuchAlgorithmException {
         //Use CA public key
         //cert = SecurityFunctions.decryptWithAsymmetricKey(cert.getBytes(),publicKeyCA);
         //cert = SecurityFunctions.decryptWithAsymmetricKey(cert,publicKeyCA).getBytes();
-        cert = Base64.getDecoder().decode(cert);
-        EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(cert);
-        KeyFactory keyFactory = KeyFactory.getInstance("RSA", "BC");
-        BobPublicKey = keyFactory.generatePublic(publicKeySpec);
+        String checkHash = SecurityFunctions.hashString(cert);
+
+        //hashString = SecurityFunctions.decryptWithAsymmetricKey(hashString.getBytes(), publicKeyCA);
+        assert hashString!=null;
+        if(checkHash.equals(hashString)){
+            cert = Base64.getDecoder().decode(cert);
+            EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(cert);
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA", "BC");
+            BobPublicKey = keyFactory.generatePublic(publicKeySpec);
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -160,7 +172,11 @@ class Alice{
             byte[] certificate = inBob.readNBytes(Integer.parseInt(bobHeader[2]));
 
             System.out.println("Certificate Received");
-            getPublicKey(certificate);
+            String signedHash = bobHeader[4];
+            if(!getPublicKey(certificate, signedHash)){
+                System.out.println("Invalid certificate");
+                System.exit(1);
+            }
 
             System.out.println("The certificate has been verified");
             String nonce = bobHeader[1];
@@ -171,12 +187,12 @@ class Alice{
             System.out.println("Step 3");
             System.out.println("Sending request and nonce to authentication server for verification");
             certificate = Base64.getEncoder().encode(publicKey.getEncoded());
-            certificate = signCertificate(certificate);
+            signedHash = signCertificate(certificate);
             if(certificate == null) System.exit(1);
 
             //String certificate = "bob";
             System.out.println("The certificate has been signed");
-            outBob.writeUTF("CMD," + nonce + "," + certificate.length + ",null,null");
+            outBob.writeUTF("CMD," + nonce + "," + certificate.length + ",null," + signedHash);
             outBob.write(certificate);
             return true;
 
