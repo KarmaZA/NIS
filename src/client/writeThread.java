@@ -63,10 +63,15 @@ public class writeThread implements Runnable {
                 }else{ //just a normal message
                     //basic messaging
                     out.writeUTF("Auth,M,null,null,null");
-                    System.out.println("Sending encrypted message to " + this.threadName);
+                    System.out.println("DEBUG:");
+                    System.out.println("----------");
+
+
                     byte[] toSend = SecurityFunctions.PGPFullEncrypt(message.getBytes(),KeyGenerator.genSharedKey(),senderPrivateKey,recieverPublicKey);
                     out.writeLong(toSend.length);
                     out.write(toSend, 0, toSend.length);
+                    System.out.println("Encrypted message sent to " + this.threadName);
+                    System.out.println("----------");
                 }
             }
         }catch (Exception e) {
@@ -92,10 +97,11 @@ public class writeThread implements Runnable {
             DataInputStream dis = new DataInputStream(bis);
             dis.readFully(myByteArray, 0, myByteArray.length);
             // combine byte arrays
-
-            System.out.println("Encrypting file");
+            System.out.println("DEBUG:");
+            System.out.println("----------");
+            System.out.println("ENCRYPTING IMAGE");
             byte[] myByteArraySecure = SecurityFunctions.PGPFullEncrypt(myByteArray, KeyGenerator.genSharedKey(), senderPrivateKey, recieverPublicKey );
-            System.out.println("Encrypting caption");
+            System.out.println("ENCRYPTING CAPTION");
             byte[] captionSecure = SecurityFunctions.PGPFullEncrypt(caption.getBytes(), KeyGenerator.genSharedKey(), senderPrivateKey, recieverPublicKey );
 
 
@@ -110,6 +116,7 @@ public class writeThread implements Runnable {
 
             out.flush();
             dis.close();
+            System.out.println("----------");
             System.out.println("File sent: " + clientCommand);
 
         } catch (IOException e) {

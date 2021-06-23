@@ -50,7 +50,10 @@ public class readThread implements Runnable {
                         // >> HEADER received from client containing length of byte array to upload
                         long imgSize = in.readLong();
                         long capSize = in.readLong();
-                        System.out.println("Decrypting image");
+                        System.out.println("DEBUG:");
+                        System.out.println("----------");
+                        System.out.println("DECRYPTING IMAGE");
+
                         byte[] buffer = new byte[(int)imgSize];
                         while (imgSize > 0 && (bytesRead = in.read(buffer, 0, (int) Math.min(buffer.length, imgSize))) != -1) {
 //                            output.write(buffer, 0, bytesRead);
@@ -60,14 +63,17 @@ public class readThread implements Runnable {
                         output.write(decryptedBuffer, 0, decryptedBuffer.length);
                         output.close();
 
-                        System.out.println("Decrypting caption");
+                        System.out.println("DECRYPTING CAPTION");
                         byte[] capBuff = new byte[(int)capSize];
                         in.read(capBuff, 0, (int)capSize);
                         byte[] captionDecrypted = SecurityFunctions.PGPFullDecrypt(capBuff,receiverPrivate,senderPublic);
                         String Caption = new String (captionDecrypted);
                         //print file and caption received
+                        System.out.println("----------");
                         System.out.println("File received: " + fileName);
                         System.out.println("Image Caption: " + Caption);
+                        System.out.println("Enter Message or [upload] to send an image with a caption or [quit] to exit:");
+
 
                     } catch (IOException ex) {
                         System.out.println("Could not download file...");
@@ -75,12 +81,17 @@ public class readThread implements Runnable {
                     }
                 }
                 else if(clientHeader[0].equals("Auth") && clientHeader[1].equals("M")){ //if receiving a message
+                    System.out.println("DEBUG:");
+                    System.out.println("----------");
                     System.out.println("Decrypting message from " + this.threadName);
                     //print message
                     long len = in.readLong();
                     byte[] inputEncrypted = in.readNBytes((int)len);
                     byte[] inputDecrypted = SecurityFunctions.PGPFullDecrypt(inputEncrypted,receiverPrivate,senderPublic);
+                    System.out.println("----------");
                     System.out.println(this.threadName + ": " + new String(inputDecrypted));
+                    System.out.println("Enter Message or [upload] to send an image with a caption or [quit] to exit:");
+
 
                 }
             }
