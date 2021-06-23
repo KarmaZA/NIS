@@ -36,7 +36,7 @@ public class writeThread implements Runnable {
         try{
             while (true) {
                 // prompt client to enter command
-                System.out.println("Enter Message or [Upload] to send an image with a caption or [quit] to exit:");
+                System.out.println("Enter Message or [upload] to send an image with a caption or [quit] to exit:");
                 // client enters message
                 String message = scanner.nextLine();
                 if (message.equals("quit")){
@@ -48,7 +48,7 @@ public class writeThread implements Runnable {
                     Alice.done = false;
                     break;
                 }
-                if(message.equals("Upload")){ //upload file name
+                if(message.equals("upload")){ //upload file name
                     System.out.println("Enter Filename:");
                     String fName = scanner.nextLine();
                     //check whether file is there to upload

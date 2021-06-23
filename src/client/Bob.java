@@ -81,7 +81,7 @@ class Bob {
 			DataInputStream inAuthServ = new DataInputStream(authServerSocket.getInputStream());
 			System.out.println("Connected to CA.");
 
-			certificate = Objects.requireNonNull(SecurityFunctions.encryptWithSharedKey(certificate,masterBob,false));
+			certificate = Objects.requireNonNull(SecurityFunctions.encryptWithSharedKey(certificate,masterBob));
 
 			outAuthServ.writeUTF("SIGN," + certificate.length +",Bob,null,null");
 			outAuthServ.write(certificate);

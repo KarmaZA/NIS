@@ -115,11 +115,11 @@ class AuthenticationServer{
             System.out.println(header[1]);
 
             if (header[2].equals("Bob")){
-                certificate = SecurityFunctions.decryptWithSharedKey(certificate, masterBob, false);
+                certificate = SecurityFunctions.decryptWithSharedKey(certificate, masterBob);
                 //encrypt with private key
 
             }else if (header[2].equals("Alice")){
-                certificate = SecurityFunctions.decryptWithSharedKey(certificate, masterAlice, false);
+                certificate = SecurityFunctions.decryptWithSharedKey(certificate, masterAlice);
                 //encrypt with private key
             } else {
                 certificate = "unknown".getBytes();

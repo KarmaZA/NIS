@@ -100,7 +100,7 @@ class Alice{
             DataInputStream inAuthServ = new DataInputStream(authServerSocket.getInputStream());
             System.out.println("Connected to CA.");
 
-            certificate = Objects.requireNonNull(SecurityFunctions.encryptWithSharedKey(certificate,masterAlice,false));
+            certificate = Objects.requireNonNull(SecurityFunctions.encryptWithSharedKey(certificate,masterAlice));
 
             outAuthServ.writeUTF("SIGN," + certificate.length +",Alice,null,null");
             outAuthServ.write(certificate);
