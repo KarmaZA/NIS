@@ -6,18 +6,14 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.util.Arrays;
-import java.util.zip.Deflater;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import java.util.Base64;
-import java.util.zip.Inflater;
 
 public class SecurityFunctions {
 
-    private static byte[] IV;
 
     public static byte[] PGPFullEncrypt(byte[] toEncrypt, SecretKey sharedKey, Key senderPrivate, Key receiverPublic ) throws NoSuchAlgorithmException, IOException {
         byte[] pgpAuth = PGPAuthenticationEncrypt(toEncrypt, senderPrivate);
@@ -205,17 +201,15 @@ public class SecurityFunctions {
     {
         System.out.println("Encrypting with shared key");
         try{
-            if (IV==null){ //If IV does not exist, make one here
-                IV=KeyGenerator.genIV();
-            }
             Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding"); //cipher instance
-            SecretKeySpec keySpecification = new SecretKeySpec(sharedKey.getEncoded(), "AES"); //using AES akgorithm
-            IvParameterSpec ivSpecification = new IvParameterSpec(Arrays.copyOfRange(sharedKey.getEncoded(), 0, 16));;
+            SecretKeySpec keySpecification = new SecretKeySpec(sharedKey.getEncoded(), "AES"); //using AES algorithm
+            byte[] IV = KeyGenerator.genIV();
+            IvParameterSpec ivSpecification = new IvParameterSpec(IV);;
 
             cipher.init(Cipher.ENCRYPT_MODE, keySpecification, ivSpecification); //we want to encrypt
             byte[] cipherText = cipher.doFinal(message); //perform encryption
 
-            return cipherText;
+            return concatenateArrays(IV,cipherText);
         }
         catch (Exception e) {
             System.out.println(e);
@@ -225,21 +219,23 @@ public class SecurityFunctions {
 
     /**
      * Decrypts a message with a shared key
-     * @param cipherText Message to decrypt
+     * @param cipherTextWithIV Message to decrypt, with the first 16 bits being the ciphertext
      * @param sharedKey The shared key
      * @return the decrypted message
      * @throws Exception
      */
-    public static byte[] decryptWithSharedKey (byte[] cipherText, SecretKey sharedKey) throws Exception
+    public static byte[] decryptWithSharedKey (byte[] cipherTextWithIV, SecretKey sharedKey) throws Exception
     {
         System.out.println("Decrypting with shared key");
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding"); //cipher instance
         SecretKeySpec keySpecification = new SecretKeySpec(sharedKey.getEncoded(), "AES"); //using AES algorithm
 
-        IvParameterSpec ivSpecification = new IvParameterSpec(Arrays.copyOfRange(sharedKey.getEncoded(), 0, 16));
+        byte[] IV = getPartFromArray(cipherTextWithIV, 0,16);
+        byte[] toDecrypt = getPartFromArray(cipherTextWithIV,16, cipherTextWithIV.length);
+        IvParameterSpec ivSpecification = new IvParameterSpec(IV);
 
         cipher.init(Cipher.DECRYPT_MODE, keySpecification, ivSpecification); //we want to decrypt
-        byte[] decryptedText = cipher.doFinal(cipherText); //decrypt the message
+        byte[] decryptedText = cipher.doFinal(toDecrypt); //decrypt the message
         //System.out.println("Decrypted with shared key");
         return decryptedText;
     }
