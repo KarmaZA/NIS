@@ -26,6 +26,7 @@ class AuthenticationServer{
     public static void main(String[] args) {
         try {
             Key[] keypair = KeyGenerator.generateKeyPair();
+            assert keypair!=null;
             publicKey = keypair[0];
             privateKey = keypair[1];
             FileWriter outFile = new FileWriter("public.txt");
@@ -44,9 +45,9 @@ class AuthenticationServer{
         System.out.println("The server has started");
         try {
             ExecutorService pool = Executors.newFixedThreadPool(20);
-            // server socket continuosly listens for client connections
+            // server socket continuously listens for client connections
             while (true) {
-                // when a client connects to server socket, the new socket is run in a seperate thread
+                // when a client connects to server socket, the new socket is run in a separate thread
                 pool.execute(new RequestHandler(serverSocket.accept()));
                 System.out.println("new socket");
             }
@@ -68,7 +69,7 @@ class AuthenticationServer{
     }
 
     private static class RequestHandler implements Runnable{
-        private Socket socket;
+        private final Socket socket;
 
         RequestHandler(Socket socket){
             this.socket = socket;
@@ -100,11 +101,11 @@ class AuthenticationServer{
         }
 
         /**
-         *
-         * @param header
-         * @param in
-         * @param outWrite
-         * @throws Exception
+         * Generates a signed hash of the public key sent to it by a trusted source
+         * @param header UTF header
+         * @param in input stream for data
+         * @param outWrite write data back to client
+         * @throws Exception For failure
          */
         private void generateCertificate(String[] header, DataInputStream in, DataOutputStream outWrite) throws Exception {
             byte[] certificate;
@@ -123,12 +124,10 @@ class AuthenticationServer{
             } else {
                 certificate = "unknown".getBytes();
             }
-            //TODO CHECK CERT IS THE PUBLIC KEY OF BOB
             System.out.println("Signing the certificate");
             String keyHash = SecurityFunctions.hashString(certificate);
-            System.out.println(header[2]);
             byte[] hashToSend =  SecurityFunctions.encryptWithAsymmetricKey(keyHash, privateKey);
-            System.out.println(new String(hashToSend));
+
             assert hashToSend != null;
             outWrite.writeUTF("SIGNED," + certificate.length + "," + hashToSend.length + ",null,null");
             //outWrite.write(certificate);

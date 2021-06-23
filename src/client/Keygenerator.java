@@ -1,7 +1,4 @@
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 import java.security.*;
 import java.security.spec.EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
@@ -12,15 +9,11 @@ import java.security.SecureRandom;
 import java.util.Scanner;
 import javax.crypto.spec.SecretKeySpec;
 
-//package com.javainterviewpoint;
-
 /** This function will take in two file names as input and save the keys
  to those files.
  */
 class KeyGenerator{
-    public static void main(String[] args) throws NoSuchAlgorithmException {
-//        generateKeyPair("public.txt","private.txt");
-    }
+
     public static String nonceGenerator(int size){
         SecureRandom secureRandom = new SecureRandom();
         StringBuilder stringBuilder = new StringBuilder();
@@ -30,32 +23,29 @@ class KeyGenerator{
         return stringBuilder.toString();
     }
 
-    public static Key[] generateKeyPair() throws NoSuchAlgorithmException {
+    public static Key[] generateKeyPair(){
         try {
-            // fix line below too
             Security.addProvider(new BouncyCastleProvider());
             KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA","BC");
-            //BASE64Encoder
-            //SecureRandom rand = secureRandomGen();
-            //generator.initialize(1024, rand); //Keysize and fixed rand
-            generator.initialize(1024); //Keysize and fixed rand
+
+            generator.initialize(1024); //KeySize and fixed rand
 
             KeyPair keys = generator.generateKeyPair();
             Key pubKey = keys.getPublic();
-            Key privKey = keys.getPrivate();
+            Key privateKey = keys.getPrivate();
 
             System.out.println("publicKey : " +  Base64.getEncoder().encodeToString(pubKey.getEncoded()));
-            System.out.println("privateKey : " + Base64.getEncoder().encodeToString(privKey.getEncoded()));
+            System.out.println("privateKey : " + Base64.getEncoder().encodeToString(privateKey.getEncoded()));
             System.out.println();
 
             Key[] toReturn= new Key[2];
             toReturn[0] = pubKey;
-            toReturn[1] = privKey;
+            toReturn[1] = privateKey;
             return toReturn;
         } catch (Exception e){
             e.printStackTrace();
         }
-        return null; //if it didnt work
+        return null;
     }
 
     /**
@@ -74,8 +64,8 @@ class KeyGenerator{
     }
 
     /**
-     *
-     * @return
+     * Generates an initialization vector
+     * @return IV byte[]
      */
     public static byte[] genIV(){
         // Generating IV.
@@ -110,57 +100,5 @@ class KeyGenerator{
     public static SecretKey genMasterKeyFromString(String key){
         byte[] decodedKey = Base64.getDecoder().decode(key);
         return new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
-    }
-
-    /**
-     *
-     * @return
-     */
-    private static SecureRandom secureRandomGen(){ return new FixedRand();}
-
-
-    /**
-     *
-     */
-    private static class FixedRand extends SecureRandom{
-        MessageDigest sha;
-        byte[] state;
-
-        /**
-         * Constructor that set up the SHA encryption level and the state,
-         */
-
-        FixedRand(){
-            try{
-                this.sha = MessageDigest.getInstance("SHA-1"); //Placeholder please can we use better encryption
-                this.state = sha.digest();
-            } catch (NoSuchAlgorithmException e){
-                e.printStackTrace();
-            }
-        }
-
-        /**
-         *
-         * @param bytes
-         */
-        public void nextBytes(byte[] bytes){
-            int offset = 0;
-            sha.update(state);
-
-            while(offset < bytes.length){
-                sha.digest();
-
-                if(bytes.length - offset > state.length){
-                    System.arraycopy(state, 0, bytes, offset, state.length);
-                }
-                else {
-                    System.arraycopy(state, 0, bytes, offset, bytes.length - offset);
-                }
-                offset += state.length;
-                sha.update(state);
-            }
-        }
-
-
     }
 }

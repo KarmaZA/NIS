@@ -22,8 +22,6 @@ class Alice{
 
     private final static String username = "Alice";
 
-    private static SecretKey communicationSessionKey;
-
     public static Key publicKey;
     private static Key privateKey;
     private static Key BobPublicKey;
@@ -93,10 +91,15 @@ class Alice{
         return null;
     }
 
+    /**
+     * Method to generate a certificate from the Authentication server
+     * @param certificate the public key
+     * @return Signed Hash of the public key
+     */
     private static byte[] signCertificate(byte[] certificate){
         try {
-            System.out.println("Generating a signed certificate.    " + new String(certificate));
-            Socket authServerSocket = new Socket("localhost", 45555);
+            System.out.println("Generating a signed certificate.");
+            Socket authServerSocket = Connect(45555);
             DataOutputStream outAuthServ = new DataOutputStream(authServerSocket.getOutputStream());
             DataInputStream inAuthServ = new DataInputStream(authServerSocket.getInputStream());
             System.out.println("Connected to CA.");
@@ -106,13 +109,14 @@ class Alice{
             outAuthServ.writeUTF("SIGN," + certificate.length +",Alice,null,null");
 
             outAuthServ.write(certificate);
+            System.out.println("Sent the certificate to the Authentication Server");
             String certify = inAuthServ.readUTF();
             String[] certifyArray = certify.split(",");
 
             certificate = inAuthServ.readNBytes(Integer.parseInt(certifyArray[2]));
-            //certificate = SecurityFunctions.decryptWithAsymmetricKey(certificate,publicKeyCA).getBytes();
             System.out.println(new String(certificate));
             if (certifyArray[0].equals("SIGNED")){
+                System.out.println("Signed certificate has been returned");
                 return certificate;
             }
         } catch (Exception e) {
@@ -128,17 +132,13 @@ class Alice{
      * @return true if the certificate is validated.
      */
     private static boolean getPublicKey(byte[] cert, byte[] hashString) throws InvalidKeySpecException, NoSuchProviderException, NoSuchAlgorithmException {
-        //Use CA public key
-        //cert = SecurityFunctions.decryptWithAsymmetricKey(cert.getBytes(),publicKeyCA);
-        //cert = SecurityFunctions.decryptWithAsymmetricKey(cert,publicKeyCA).getBytes();
         String checkHash = SecurityFunctions.hashString(cert);
         String decryptedSignature = SecurityFunctions.decryptWithAsymmetricKey(hashString, publicKeyCA);
-        System.out.println("The hashes are");
-        System.out.println(checkHash);
-        System.out.println(decryptedSignature);
+        System.out.println("The hash has been decrypted");
+
         assert hashString!=null;
         if(checkHash.equals(decryptedSignature)){
-            System.out.println("It works");
+            System.out.println("The decrypted hash matches the public key");
             cert = Base64.getDecoder().decode(cert);
             EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(cert);
             KeyFactory keyFactory = KeyFactory.getInstance("RSA", "BC");
@@ -184,7 +184,6 @@ class Alice{
             System.out.println("The certificate has been verified");
             String nonce = bobHeader[1];
 
-
             //STEP 3 send nonce to Auth Server
             certificate = Base64.getEncoder().encode(publicKey.getEncoded());
             signedCertificate = signCertificate(certificate);
@@ -213,33 +212,6 @@ class Alice{
     private static void startMessaging(Socket socket, DataInputStream in, DataOutputStream out){
         // When we use IPs we will use preset ones
         try{
-            // while() loop for password authentication
-            while (true) {
-                // client enters server password
-                System.out.println("Enter: <Password>");
-                String clientPassword = scanner.nextLine();
-                // << HEADER sent to server to check password
-                String publicKeyString =  new String(Base64.getEncoder().encode(publicKey.getEncoded()));
-                out.writeUTF("CMD;START;" + clientPassword + ";" + publicKeyString + ";null");
-                // >> HEADER received from server detailing if password is correct or not
-                String[] serverHeader = in.readUTF().split(";");
-
-                // check if password is correct or not
-                if (serverHeader[4].equals("success")) {
-                    System.out.println("Password Correct");
-                    //extract Bob's public key
-                    byte [] publicKeyBytes = Base64.getDecoder().decode(serverHeader[1].getBytes());
-                    EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKeyBytes);
-                    KeyFactory keyFactory = KeyFactory.getInstance("RSA", "BC");
-                    Key BobPublicKey1 = keyFactory.generatePublic(publicKeySpec);
-                    if(BobPublicKey.equals(BobPublicKey1)) System.out.println("True");
-                    // password is correct, break out of while() loop
-                    break;
-                }
-                // password is incorrect, repeat loop
-                System.out.println("Password Incorrect");
-            }
-
             //threads for sending and receiving messages/images
             readThread read = new readThread("Bob", socket, in, out, Alice.privateKey, BobPublicKey);
             writeThread write = new writeThread("Bob", scanner, socket, in, out, Alice.privateKey, BobPublicKey);
@@ -251,8 +223,8 @@ class Alice{
             System.out.println("Bye Alice...");
             System.exit(0);
         }catch (Exception e) {
-            System.out.println(e);
             System.out.println("Connection ended main");
+            System.out.println(e);
         }
     }
 }

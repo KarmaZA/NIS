@@ -1,9 +1,7 @@
 import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
@@ -18,16 +16,13 @@ import java.util.concurrent.Executors;
 class Bob {
 	private static ServerSocket serverSocket;
 	//private static final String IP = "localhost";
-	private static Scanner scanner = new Scanner(System.in);
+	private final static Scanner scanner = new Scanner(System.in);
 
 	//Preset master key with Bob
 	private static SecretKey masterBob = null;
 
-	// server password (client must authenticate before accessing server)
-	final private static String password = "1234";
-
 	// hash table to store all file names and passwords
-	private static Hashtable<String, String> fileNames = new Hashtable<String, String>();
+	//private static Hashtable<String, String> fileNames = new Hashtable<String, String>();
 
 	//key is name, the other thing is the password
 	private static final int portNumber = 45554;
@@ -48,6 +43,7 @@ class Bob {
 		try {
 			publicKeyCA = KeyGenerator.getCAPublicKey();
 			Key[] keypair = KeyGenerator.generateKeyPair();
+			assert keypair!=null;
 			publicKey = keypair[0];
 			privateKey = keypair[1];
 		} catch (Exception e) {
@@ -60,9 +56,9 @@ class Bob {
 
 		try {
 			ExecutorService pool = Executors.newFixedThreadPool(20);
-			// server socket continuosly listens for client connections
+			// server socket continuously listens for client connections
 			while (true) {
-				// when a client connects to server socket, the new socket is run in a seperate thread
+				// when a client connects to server socket, the new socket is run in a separate thread
 				pool.execute(new Handler(serverSocket.accept()));
 				System.out.println("new socket");
 			}
@@ -72,10 +68,15 @@ class Bob {
 
 	}
 
+	/**
+	 * Method to generate a certificate from the Authentication server
+	 * @param certificate the public key
+	 * @return Signed Hash of the public key
+	 */
 	private static byte[] signCertificate(byte[] certificate){
 		try {
 
-			System.out.println("Generating a signed certificate.    " + new String(certificate));
+			System.out.println("Generating a signed certificate.");
 			Socket authServerSocket = new Socket("localhost", 45555);
 			DataOutputStream outAuthServ = new DataOutputStream(authServerSocket.getOutputStream());
 			DataInputStream inAuthServ = new DataInputStream(authServerSocket.getInputStream());
@@ -84,14 +85,15 @@ class Bob {
 			certificate = Objects.requireNonNull(SecurityFunctions.encryptWithSharedKey(certificate,masterBob));
 
 			outAuthServ.writeUTF("SIGN," + certificate.length +",Bob,null,null");
+			System.out.println("Sent the certificate to the Authentication Server");
 			outAuthServ.write(certificate);
 			String certify = inAuthServ.readUTF();
 			String[] certifyArray = certify.split(",");
-			//Can Delete
+
 			certificate = inAuthServ.readNBytes(Integer.parseInt(certifyArray[2]));
-			//certificate = SecurityFunctions.decryptWithAsymmetricKey(certificate,publicKeyCA).getBytes();
 
 			if (certifyArray[0].equals("SIGNED")){
+				System.out.println("Signed certificate has been returned");
 				return certificate;
 			}
 		} catch (Exception e) {
@@ -121,18 +123,13 @@ class Bob {
 		}
 
 		private static boolean getPublicKey(byte[] cert, byte[] hashString) throws InvalidKeySpecException, NoSuchProviderException, NoSuchAlgorithmException {
-			//Use CA public key
-			//cert = SecurityFunctions.decryptWithAsymmetricKey(cert.getBytes(),publicKeyCA);
-			//cert = SecurityFunctions.decryptWithAsymmetricKey(cert,publicKeyCA).getBytes();
-			System.out.println("Hash string");
-			System.out.println(hashString.length);
 			String checkHash = SecurityFunctions.hashString(cert);
 			String decryptedSignature = SecurityFunctions.decryptWithAsymmetricKey(hashString, publicKeyCA);
-			System.out.println("The hashes are");
-			System.out.println(checkHash);
-			System.out.println(decryptedSignature);
+			System.out.println("The hash has been decrypted");
+
 			assert hashString!=null;
 			if(checkHash.equals(decryptedSignature)){
+				System.out.println("The decrypted hash matches the public key");
 				System.out.println("It works");
 				cert = Base64.getDecoder().decode(cert);
 				EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(cert);
@@ -195,37 +192,7 @@ class Bob {
 					System.out.println("Invalid certificate");
 					System.exit(1);
 				}
-
-				// initialise client HEADER that will be received
-				String clientAuthHeaderLine;
-				while ((clientAuthHeaderLine = in.readUTF()) != null) { //read in from Alice
-					System.out.println("here");
-					String[] clientAuthHeader = clientAuthHeaderLine.split(";");
-					// check authentication before proceeding
-					if(clientAuthHeader[0].equals("CMD") && clientAuthHeader[1].equals("START")){
-
-						if(clientAuthHeader[2].equals(Bob.password)){
-							System.out.println("Password Correct: " + socket);
-
-							//extract Alice's public key
-							byte [] publicKeyBytes = Base64.getDecoder().decode(clientAuthHeader[3].getBytes());
-							EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKeyBytes);
-							KeyFactory keyFactory = KeyFactory.getInstance("RSA", "BC");
-							Key AlicePublicKey1= keyFactory.generatePublic(publicKeySpec);
-							if(AlicePublicKey1.equals(AlicePublicKey))System.out.println("True");
-							//send Bob's public key to Alice
-							String BobPublicKeyString =  new String(Base64.getEncoder().encode(publicKey.getEncoded()));
-							out.writeUTF("CMD;"+BobPublicKeyString+";null;null;success");
-							Alice.done = false;
-							break;
-						}
-						else{
-							System.out.println("Password Incorrect: " + socket);
-							out.writeUTF("CMD;null;null;null;fail");
-						}
-					}
-				}
-
+				/* ************START MESSAGING ******************/
 				//threads for sending and receiving messages/images
 				readThread read = new readThread("Alice", socket, in, out, Bob.privateKey, AlicePublicKey);
 				writeThread write = new writeThread("Alice", scanner, socket, in, out, Bob.privateKey, AlicePublicKey );
