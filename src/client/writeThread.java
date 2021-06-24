@@ -1,4 +1,3 @@
-import javax.crypto.SecretKey;
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -28,7 +27,7 @@ public class writeThread implements Runnable {
      * @param scanner scanner for user input
      * @param socket connection socket
      * @param in Data input Stream
-     * @param out Data ooutput Stream
+     * @param out Data output Stream
      * @param senderPrivateKey senders private key
      * @param recieverPublicKey receivers public key
      */
@@ -131,9 +130,7 @@ public class writeThread implements Runnable {
             System.out.println("----------");
             System.out.println("File sent: " + clientCommand);
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (NoSuchAlgorithmException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
