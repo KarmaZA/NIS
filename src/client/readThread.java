@@ -1,4 +1,3 @@
-import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -10,10 +9,10 @@ import java.security.Key;
 public class readThread implements Runnable {
 
     private Thread read;
-    private String threadName;
-    private DataInputStream in;
-    private DataOutputStream out;
-    private Socket socket;
+    private final String threadName;
+    private final DataInputStream in;
+    private final DataOutputStream out;
+    private final Socket socket;
     private static Key receiverPrivate;
     public static  Key senderPublic;
 
@@ -111,7 +110,7 @@ public class readThread implements Runnable {
                 System.out.println("logging out..");
                 System.exit(0);
             } catch (IOException e) {
-                System.out.println(e);
+                e.printStackTrace();
             }
         }
     }

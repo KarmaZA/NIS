@@ -174,7 +174,6 @@ class Bob {
 				String requestHeader = in.readUTF();
 				System.out.println(requestHeader);
 				String[] requestHeaderArray = requestHeader.split(",");
-				String nonce = KeyGenerator.nonceGenerator(16);
 				byte[] certificate;
 				if(requestHeaderArray[0].equals("CMD") && requestHeaderArray[1].equals("START") && requestHeaderArray[2].equals("REQCOM")){
 					//Communication request received send back a non

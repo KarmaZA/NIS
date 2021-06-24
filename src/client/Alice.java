@@ -210,7 +210,6 @@ class Alice{
             }
 
             System.out.println("The certificate has been verified");
-            String nonce = bobHeader[1];
 
             //STEP 3 send nonce to Auth Server
             certificate = Base64.getEncoder().encode(publicKey.getEncoded());
@@ -245,14 +244,12 @@ class Alice{
             writeThread write = new writeThread("Bob", scanner, socket, in, out, Alice.privateKey, BobPublicKey);
             read.start();
             write.start();
-            while(done){
-
-            }
+            while(done){}
             System.out.println("Bye Alice...");
             System.exit(0);
         }catch (Exception e) {
             System.out.println("Connection ended main");
-            System.out.println(e);
+            e.printStackTrace();
         }
     }
 }

@@ -1,4 +1,3 @@
-import java.io.File;
 import java.security.*;
 import java.security.spec.EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
@@ -6,22 +5,12 @@ import java.util.Base64;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import javax.crypto.SecretKey;
 import java.security.SecureRandom;
-import java.util.Scanner;
 import javax.crypto.spec.SecretKeySpec;
 
 /** This function will take in two file names as input and save the keys
  to those files.
  */
 class KeyGenerator{
-
-    public static String nonceGenerator(int size){
-        SecureRandom secureRandom = new SecureRandom();
-        StringBuilder stringBuilder = new StringBuilder();
-        for (int i = 0; i < size; i++) {
-            stringBuilder.append(secureRandom.nextInt(10));
-        }
-        return stringBuilder.toString();
-    }
 
     public static Key[] generateKeyPair(){
         try {
