@@ -9,6 +9,7 @@ import java.security.spec.EncodedKeySpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
+import java.util.Calendar;
 import java.util.Objects;
 import java.util.Scanner;
 
@@ -21,6 +22,7 @@ class Alice{
     private static int portUpload = 45554;
 
     private final static String username = "Alice";
+    private static String certificateExpiryDate;
 
     public static Key publicKey;
     private static Key privateKey;
@@ -127,6 +129,8 @@ class Alice{
             certificate = inAuthServ.readNBytes(Integer.parseInt(certifyArray[2]));
             System.out.println(new String(certificate));
             if (certifyArray[0].equals("SIGNED")){
+                certificateExpiryDate = certifyArray[3];
+                System.out.println(certificateExpiryDate);
                 System.out.println("Signed certificate has been returned");
                 return certificate;
             }
@@ -143,7 +147,14 @@ class Alice{
      * @return true if the certificate is validated.
      */
     private static boolean getPublicKey(byte[] cert, byte[] hashString) throws InvalidKeySpecException, NoSuchProviderException, NoSuchAlgorithmException {
-        String checkHash = SecurityFunctions.hashString(cert);
+        Calendar calendar = Calendar.getInstance();
+        String dayOfTheYear = calendar.get(Calendar.DAY_OF_YEAR) + "";
+        if(Integer.parseInt(dayOfTheYear) >= Integer.parseInt(certificateExpiryDate)){
+            return false;
+        }
+
+        byte[] hashToDecrypt = writeThread.joinByteArray(cert, certificateExpiryDate.getBytes());
+        String checkHash = SecurityFunctions.hashString(hashToDecrypt);
         String decryptedSignature = SecurityFunctions.decryptWithAsymmetricKey(hashString, publicKeyCA);
         System.out.println("The hash has been decrypted");
 
@@ -183,6 +194,7 @@ class Alice{
             //If this is a problem make it two lines
             String line = inBob.readUTF();
             String[] bobHeader = line.split(",");
+            certificateExpiryDate = bobHeader[1];
             byte[] certificate = inBob.readNBytes(Integer.parseInt(bobHeader[2]));
             byte[] signedCertificate = inBob.readNBytes(Integer.parseInt(bobHeader[4]));
             System.out.println("Certificate Received");
@@ -203,7 +215,7 @@ class Alice{
 
             System.out.println("The certificate has been signed");
 
-            outBob.writeUTF("CMD," + nonce + "," + certificate.length + "," + signedCertificate.length + ",null");
+            outBob.writeUTF("CMD," + certificateExpiryDate + "," + certificate.length + "," + signedCertificate.length + ",null");
             outBob.write(certificate);
             outBob.write(signedCertificate);
             return true;

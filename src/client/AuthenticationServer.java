@@ -3,7 +3,10 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.Key;
+import java.time.LocalDateTime;
 import java.util.Base64;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -133,12 +136,18 @@ class AuthenticationServer{
             } else {
                 certificate = "unknown".getBytes();
             }
+            Calendar calendar = Calendar.getInstance();
+            calendar.add(Calendar.DAY_OF_YEAR, 1);
+            String dayOfTheYear = calendar.get(Calendar.DAY_OF_YEAR) + "";
+            System.out.println("Tomorrow is " + dayOfTheYear);
+
             System.out.println("Signing the certificate");
+            certificate = writeThread.joinByteArray(certificate, dayOfTheYear.getBytes());
             String keyHash = SecurityFunctions.hashString(certificate);
             byte[] hashToSend =  SecurityFunctions.encryptWithAsymmetricKey(keyHash, privateKey);
 
             assert hashToSend != null;
-            outWrite.writeUTF("SIGNED," + certificate.length + "," + hashToSend.length + ",null,null");
+            outWrite.writeUTF("SIGNED," + certificate.length + "," + hashToSend.length + ","+ dayOfTheYear + ",null");//+ dateString + ",null");
             //outWrite.write(certificate);
             outWrite.write(hashToSend);
             outWrite.close();

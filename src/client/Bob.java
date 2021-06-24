@@ -25,6 +25,7 @@ class Bob {
 	private static final int portNumber = 45554;
 
 	private final static String username = "Bob";
+	private static String certificateExpiryDate;
 
 	//Public private key pair
 	public static Key publicKey;
@@ -87,6 +88,8 @@ class Bob {
 			certificate = inAuthServ.readNBytes(Integer.parseInt(certifyArray[2]));
 
 			if (certifyArray[0].equals("SIGNED")){
+				certificateExpiryDate = certifyArray[3];
+				System.out.println(certificateExpiryDate);
 				System.out.println("Signed certificate has been returned");
 				return certificate;
 			}
@@ -128,7 +131,14 @@ class Bob {
 		}
 
 		private static boolean getPublicKey(byte[] cert, byte[] hashString) throws InvalidKeySpecException, NoSuchProviderException, NoSuchAlgorithmException {
-			String checkHash = SecurityFunctions.hashString(cert);
+			Calendar calendar = Calendar.getInstance();
+			String dayOfTheYear = calendar.get(Calendar.DAY_OF_YEAR) + "";
+			if(Integer.parseInt(dayOfTheYear) >= Integer.parseInt(certificateExpiryDate)){
+				return false;
+			}
+
+			byte[] hashToDecrypt = writeThread.joinByteArray(cert, certificateExpiryDate.getBytes());
+			String checkHash = SecurityFunctions.hashString(hashToDecrypt);
 			String decryptedSignature = SecurityFunctions.decryptWithAsymmetricKey(hashString, publicKeyCA);
 			System.out.println("The hash has been decrypted");
 
@@ -180,7 +190,7 @@ class Bob {
 					assert certificate != null;
 
 					assert signedCertificate != null;
-					out.writeUTF("CMD," + nonce + "," + certificate.length + "," + username + "," + signedCertificate.length);
+					out.writeUTF("CMD," + certificateExpiryDate + "," + certificate.length + "," + username + "," + signedCertificate.length);
 					out.write(certificate);
 					out.write(signedCertificate);
 					System.out.println("Certificate has been sent");
