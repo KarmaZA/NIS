@@ -28,7 +28,7 @@ class Alice{
     private static Key privateKey;
     private static Key BobPublicKey;
     public static Key publicKeyCA;
-    private final static String IP = "localhost";//196.24.167.94";
+    private static String IP = "localhost";//196.24.167.94";
 
     //For two way messaging
     static volatile boolean done = true;
@@ -52,6 +52,11 @@ class Alice{
             //Catch a possible Null Pointer Exception
             System.out.println("Key pair generation failed.");
         }
+
+        System.out.println("Please input the IP of the computer you want to connect with or use 'localhost':");
+        IP = scanner.nextLine();
+
+
         //Connect to socket
         Socket socket = Connect(portUpload);
         //Socket connection failed try new port or quit
