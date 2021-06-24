@@ -17,7 +17,15 @@ public class readThread implements Runnable {
     private static Key receiverPrivate;
     public static  Key senderPublic;
 
-
+    /**
+     * 
+     * @param threadName The name of the thread
+     * @param socket Connection socket
+     * @param in Data input Stream
+     * @param out Data output Stream
+     * @param receiverPrivate Receivers private Key
+     * @param senderPublic Senders public Key
+     */
     public readThread(String threadName, Socket socket, DataInputStream in, DataOutputStream out, Key receiverPrivate, Key senderPublic){
         this.threadName = threadName;
         this.socket  = socket;
