@@ -38,7 +38,8 @@ class Alice{
      * Creates a connection to Bob or requests a new port number if connection fails
      * Calls AuthenticateCommunication() to authenticate the communication with Bob using the AuthenticationServer
      * If authenticated starts the messaging.
-     *
+     * @param args String array to take input into the main method
+     * @throws Exception throws exception in Alice main
      */
     public static void main(String[] args) throws Exception {
         masterAlice = KeyGenerator.genMasterKeyFromString("w10PtdhELmt/ZPzcZjxFdg==");
@@ -82,9 +83,9 @@ class Alice{
     }
 
     /**
-     * method to connect a socket with the port specified in parameters
-     * @param portConnectionNumber the port number the socket will connect through
-     * @return returns the connected socket or null if no connection made
+     * Method to connect a socket with the port specified in parameters
+     * @param portConnectionNumber The port number the socket will connect through
+     * @return returns The connected socket or null if no connection made
      */
     private static Socket Connect(int portConnectionNumber) {
         try {
@@ -97,6 +98,10 @@ class Alice{
         return null;
     }
 
+    /**
+     * Returns the Certificate of Public Key
+     * @throws Exception Throws an exception in getCAPublicKey
+     */
     private static void getCAPublicKey() throws Exception {
         Socket authServerSocket = Connect(45555);
         DataOutputStream out = new DataOutputStream(authServerSocket.getOutputStream());
@@ -149,7 +154,11 @@ class Alice{
      * Method to verify that the connection is to bob. Decrypts the string with the CA public key and makes
      * sure that it says bob who we are trying to talk to.
      * @param cert The encoded String that is signed by the CA with their private key
+     * @param hashString The hashString is the encrypted hash from the CA
      * @return true if the certificate is validated.
+     * @throws InvalidKeySpecException Throws an invalid key spec exception in getPublicKey
+     * @throws NoSuchAlgorithmException Throws a no such algorithm exception in getPublicKey
+     * @throws NoSuchProviderException Throws a no such provider exception in getPublicKey
      */
     private static boolean getPublicKey(byte[] cert, byte[] hashString) throws InvalidKeySpecException, NoSuchProviderException, NoSuchAlgorithmException {
         Calendar calendar = Calendar.getInstance();
@@ -180,6 +189,8 @@ class Alice{
      * Executes the authentication steps with the KDC using master keys and nonces to authenticate the
      * communication session between Alice and Bob and generate a session key. As well as validate that the
      * conversation is indeed between Alice and Bob.
+     * @param inBob Reads in input stream from Bob
+     * @param outBob Sends out datastream to Bob
      * @return true if the authentication is validated
      */
     private static boolean RequestCommunication(DataInputStream inBob, DataOutputStream outBob){
@@ -235,6 +246,8 @@ class Alice{
      * Passes the socket for the communication with Bob. This method will only be called once the communication
      * session has been authenticated.
      * @param socket The socket connected to Bob
+     * @param in Takes in the data stream
+     * @param out Outputs messaging data
      */
     private static void startMessaging(Socket socket, DataInputStream in, DataOutputStream out){
         // When we use IPs we will use preset ones

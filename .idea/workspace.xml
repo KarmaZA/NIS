@@ -1,14 +1,65 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="dc3e1ea2-3b77-47f8-91ba-81d1e6514c54" name="Default Changelist" comment="">
+    <list default="true" id="79a2b376-e93c-4bae-b2a3-79f0ecc118eb" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/SecurityFunctions.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/SecurityFunctions.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/allclasses-index.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/allclasses-index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/allpackages-index.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/allpackages-index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/constant-values.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/constant-values.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/deprecated-list.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/deprecated-list.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/help-doc.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/help-doc.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/index-files/index-1.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/index-files/index-1.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/index-files/index-10.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/index-files/index-10.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/index-files/index-11.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/index-files/index-11.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/index-files/index-2.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/index-files/index-2.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/index-files/index-3.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/index-files/index-3.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/index-files/index-4.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/index-files/index-4.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/index-files/index-5.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/index-files/index-5.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/index-files/index-6.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/index-files/index-6.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/index-files/index-7.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/index-files/index-7.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/index-files/index-8.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/index-files/index-8.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/index-files/index-9.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/index-files/index-9.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/jquery/external/jquery/jquery.js" beforeDir="false" afterPath="$PROJECT_DIR$/docs/jquery/external/jquery/jquery.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/jquery/jquery-3.3.1.js" beforeDir="false" afterPath="$PROJECT_DIR$/docs/jquery/jquery-3.3.1.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/jquery/jquery-migrate-3.0.1.js" beforeDir="false" afterPath="$PROJECT_DIR$/docs/jquery/jquery-migrate-3.0.1.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/jquery/jquery-ui.css" beforeDir="false" afterPath="$PROJECT_DIR$/docs/jquery/jquery-ui.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/jquery/jquery-ui.js" beforeDir="false" afterPath="$PROJECT_DIR$/docs/jquery/jquery-ui.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/jquery/jquery-ui.min.css" beforeDir="false" afterPath="$PROJECT_DIR$/docs/jquery/jquery-ui.min.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/jquery/jquery-ui.min.js" beforeDir="false" afterPath="$PROJECT_DIR$/docs/jquery/jquery-ui.min.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/jquery/jquery-ui.structure.css" beforeDir="false" afterPath="$PROJECT_DIR$/docs/jquery/jquery-ui.structure.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/jquery/jquery-ui.structure.min.css" beforeDir="false" afterPath="$PROJECT_DIR$/docs/jquery/jquery-ui.structure.min.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/jquery/jszip-utils/dist/jszip-utils-ie.js" beforeDir="false" afterPath="$PROJECT_DIR$/docs/jquery/jszip-utils/dist/jszip-utils-ie.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/jquery/jszip-utils/dist/jszip-utils-ie.min.js" beforeDir="false" afterPath="$PROJECT_DIR$/docs/jquery/jszip-utils/dist/jszip-utils-ie.min.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/jquery/jszip-utils/dist/jszip-utils.js" beforeDir="false" afterPath="$PROJECT_DIR$/docs/jquery/jszip-utils/dist/jszip-utils.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/jquery/jszip-utils/dist/jszip-utils.min.js" beforeDir="false" afterPath="$PROJECT_DIR$/docs/jquery/jszip-utils/dist/jszip-utils.min.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/jquery/jszip/dist/jszip.js" beforeDir="false" afterPath="$PROJECT_DIR$/docs/jquery/jszip/dist/jszip.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/jquery/jszip/dist/jszip.min.js" beforeDir="false" afterPath="$PROJECT_DIR$/docs/jquery/jszip/dist/jszip.min.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/member-search-index.js" beforeDir="false" afterPath="$PROJECT_DIR$/docs/member-search-index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/member-search-index.zip" beforeDir="false" afterPath="$PROJECT_DIR$/docs/member-search-index.zip" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/overview-tree.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/overview-tree.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/package-search-index.zip" beforeDir="false" afterPath="$PROJECT_DIR$/docs/package-search-index.zip" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/package-summary.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/package-summary.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/package-tree.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/package-tree.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/readThread.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/readThread.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/type-search-index.js" beforeDir="false" afterPath="$PROJECT_DIR$/docs/type-search-index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/type-search-index.zip" beforeDir="false" afterPath="$PROJECT_DIR$/docs/type-search-index.zip" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/writeThread.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/writeThread.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/NIS/Alice.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/NIS/Alice.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/NIS/AuthenticationServer$RequestHandler.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/NIS/AuthenticationServer$RequestHandler.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/NIS/AuthenticationServer.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/NIS/AuthenticationServer.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/NIS/Bob$Handler.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/NIS/Bob$Handler.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/NIS/KeyGenerator.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/NIS/KeyGenerator.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/NIS/SecurityFunctions.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/NIS/SecurityFunctions.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/NIS/readThread.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/NIS/readThread.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/NIS/writeThread.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/NIS/writeThread.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/output/link.jpeg" beforeDir="false" afterPath="$PROJECT_DIR$/output/link.jpeg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public.txt" beforeDir="false" afterPath="$PROJECT_DIR$/public.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/client/Alice.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/Alice.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/client/AuthenticationServer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/AuthenticationServer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/client/Bob.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/Bob.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/client/KeyGenerator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/KeyGenerator.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/client/readThread.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/readThread.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/client/writeThread.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/writeThread.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -156,17 +207,6 @@
     </key>
   </component>
   <component name="RunManager" selected="Application.Alice">
-    <configuration default="true" type="ArquillianJUnit" factoryName="" nameIsGenerated="true">
-      <option name="arquillianRunConfiguration">
-        <value>
-          <option name="containerStateName" value="" />
-        </value>
-      </option>
-      <option name="TEST_OBJECT" value="class" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="Alice" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="Alice" />
       <module name="NIS" />
@@ -184,6 +224,17 @@
     <configuration name="authServer" type="Application" factoryName="Application">
       <option name="MAIN_CLASS_NAME" value="AuthenticationServer" />
       <module name="NIS" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="ArquillianJUnit" factoryName="" nameIsGenerated="true">
+      <option name="arquillianRunConfiguration">
+        <value>
+          <option name="containerStateName" value="" />
+        </value>
+      </option>
+      <option name="TEST_OBJECT" value="class" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>

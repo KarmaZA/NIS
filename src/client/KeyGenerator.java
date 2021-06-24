@@ -38,7 +38,8 @@ class KeyGenerator{
     }
 
     /**
-     * Public key generator that reads the public.txt file of the CA public key and turns it into a key
+     * Public key generator takes in the Base64 of a public key and returns a Key
+     * @param pubKey Takes in the string of the public key
      * @return The public key of the CA
      * @throws Exception File does not exist or null pointer
      */

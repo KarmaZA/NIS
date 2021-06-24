@@ -23,6 +23,7 @@ class AuthenticationServer{
     /**
      * The main method of the class. Sets up the keys and starts the server listening. then when a connection comes in
      * it authenticates the keys of the session and sets up a session key
+     * @param args Takes in the string parameters for the main function
      */
     public static void main(String[] args) {
         try {
