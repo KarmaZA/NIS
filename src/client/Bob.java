@@ -21,9 +21,6 @@ class Bob {
 	//Preset master key with Bob
 	private static SecretKey masterBob = null;
 
-	// hash table to store all file names and passwords
-	//private static Hashtable<String, String> fileNames = new Hashtable<String, String>();
-
 	//key is name, the other thing is the password
 	private static final int portNumber = 45554;
 
@@ -53,7 +50,6 @@ class Bob {
 		startServer();
 		System.out.println("Bob is bobbing");
 
-
 		try {
 			ExecutorService pool = Executors.newFixedThreadPool(20);
 			// server socket continuously listens for client connections
@@ -65,7 +61,6 @@ class Bob {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
 	}
 
 	/**
@@ -75,7 +70,6 @@ class Bob {
 	 */
 	private static byte[] signCertificate(byte[] certificate){
 		try {
-
 			System.out.println("Generating a signed certificate.");
 			Socket authServerSocket = new Socket("localhost", 45555);
 			DataOutputStream outAuthServ = new DataOutputStream(authServerSocket.getOutputStream());
