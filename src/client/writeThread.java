@@ -22,6 +22,16 @@ public class writeThread implements Runnable {
     private static Key senderPrivateKey;
     private static Key recieverPublicKey;
 
+    /**
+     * 
+     * @param threadName Name of the thread
+     * @param scanner scanner for user input
+     * @param socket connection socket
+     * @param in Data input Stream
+     * @param out Data ooutput Stream
+     * @param senderPrivateKey senders private key
+     * @param recieverPublicKey receivers public key
+     */
     writeThread(String threadName, Scanner scanner, Socket socket, DataInputStream in, DataOutputStream out,  Key senderPrivateKey, Key recieverPublicKey){
         this.threadName = threadName;
         this.scanner = scanner;
@@ -80,8 +90,10 @@ public class writeThread implements Runnable {
         }
     }
     /**
-     * upload file
-     * @param clientCommand file name given as input
+     * 
+     * @param clientCommand String input from client
+     * @param out Output Stream
+     * @param scanner Scanner to take user input
      */
     public static void upload(String clientCommand, DataOutputStream out, Scanner scanner){
         try {
@@ -127,9 +139,9 @@ public class writeThread implements Runnable {
     }
     /**
      *
-     * @param image byte array
-     * @param caption byte array
-     * @return combined byte array
+     * @param image byte array of image
+     * @param caption byte array of caption
+     * @return combined byte array of image and caption
      */
     public static byte[] joinByteArray(byte[] image, byte[] caption){
         return ByteBuffer.allocate(image.length + caption.length)
