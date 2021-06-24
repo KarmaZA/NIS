@@ -53,10 +53,7 @@ class KeyGenerator{
      * @return The public key of the CA
      * @throws Exception File does not exist or null pointer
      */
-    public static Key getCAPublicKey() throws Exception {
-        Security.addProvider(new BouncyCastleProvider());
-        Scanner fileIn = new Scanner(new File("public.txt"));
-        String pubKey = fileIn.nextLine();
+    public static Key getCAPublicKey(String pubKey) throws Exception {
         byte [] cert = Base64.getDecoder().decode(pubKey);
         EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(cert);
         KeyFactory keyFactory = KeyFactory.getInstance("RSA", "BC");

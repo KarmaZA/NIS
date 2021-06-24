@@ -26,7 +26,7 @@ class Alice{
     private static Key privateKey;
     private static Key BobPublicKey;
     public static Key publicKeyCA;
-    //final String IP = "localhost";
+    private final static String IP = "localhost";//196.24.167.94";
 
     //For two way messaging
     static volatile boolean done = true;
@@ -42,7 +42,6 @@ class Alice{
         masterAlice = KeyGenerator.genMasterKeyFromString("w10PtdhELmt/ZPzcZjxFdg==");
         //get keys
         try {
-            publicKeyCA = KeyGenerator.getCAPublicKey();
             Key[] keypair = KeyGenerator.generateKeyPair();
             assert keypair != null;
             publicKey = keypair[0];
@@ -82,13 +81,24 @@ class Alice{
      */
     private static Socket Connect(int portConnectionNumber) {
         try {
-            Socket socket = new Socket("localhost", portConnectionNumber);
+            Socket socket = new Socket(IP, portConnectionNumber);
             System.out.println("Socket on Alice set up");
             return socket;
         } catch (Exception e) {
             System.out.println("I have nothing to connect to :'(");
         }
         return null;
+    }
+
+    private static void getCAPublicKey() throws Exception {
+        Socket authServerSocket = Connect(45555);
+        DataOutputStream out = new DataOutputStream(authServerSocket.getOutputStream());
+        DataInputStream in = new DataInputStream(authServerSocket.getInputStream());
+
+        out.writeUTF("REQKEY,null,null,null,null");
+        int len = (int) in.readLong();
+        byte[] pubKey = in.readNBytes(len);
+        publicKeyCA = KeyGenerator.getCAPublicKey(new String(pubKey));
     }
 
     /**
@@ -102,6 +112,7 @@ class Alice{
             Socket authServerSocket = Connect(45555);
             DataOutputStream outAuthServ = new DataOutputStream(authServerSocket.getOutputStream());
             DataInputStream inAuthServ = new DataInputStream(authServerSocket.getInputStream());
+
             System.out.println("Connected to CA.");
 
             certificate = Objects.requireNonNull(SecurityFunctions.encryptWithSharedKey(certificate,masterAlice));
@@ -157,7 +168,7 @@ class Alice{
      */
     private static boolean RequestCommunication(DataInputStream inBob, DataOutputStream outBob){
         try {
-            publicKeyCA = KeyGenerator.getCAPublicKey();
+            getCAPublicKey();
             //STEP 1 request communication
             System.out.println("Step 1: Request communication");
             //Header to request communication

@@ -95,9 +95,18 @@ class AuthenticationServer{
                     out.close();
                     socket.close();
                 }
+                if(headerArray[0].equals("REQKEY")){
+                    sendPublicKey(out);
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+
+        private static void sendPublicKey(DataOutputStream out) throws IOException {
+            byte[] pubKeyToSend = (Base64.getEncoder().encodeToString(publicKey.getEncoded())).getBytes();
+            out.writeLong(pubKeyToSend.length);
+            out.write(pubKeyToSend);
         }
 
         /**

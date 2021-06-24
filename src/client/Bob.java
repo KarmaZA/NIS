@@ -38,7 +38,6 @@ class Bob {
 	public static void main(String[] args) {
 		masterBob = KeyGenerator.genMasterKeyFromString("055WVjVBB95Yaw6ZhRAWug==");
 		try {
-			publicKeyCA = KeyGenerator.getCAPublicKey();
 			Key[] keypair = KeyGenerator.generateKeyPair();
 			assert keypair!=null;
 			publicKey = keypair[0];
@@ -74,6 +73,7 @@ class Bob {
 			Socket authServerSocket = new Socket("localhost", 45555);
 			DataOutputStream outAuthServ = new DataOutputStream(authServerSocket.getOutputStream());
 			DataInputStream inAuthServ = new DataInputStream(authServerSocket.getInputStream());
+
 			System.out.println("Connected to CA.");
 
 			certificate = Objects.requireNonNull(SecurityFunctions.encryptWithSharedKey(certificate,masterBob));
@@ -105,6 +105,17 @@ class Bob {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private static void getCAPublicKey() throws Exception {
+		Socket authServerSocket = new Socket("localhost", 45555);
+		DataOutputStream out = new DataOutputStream(authServerSocket.getOutputStream());
+		DataInputStream in = new DataInputStream(authServerSocket.getInputStream());
+
+		out.writeUTF("REQKEY,null,null,null,null");
+		int len = (int) in.readLong();
+		byte[] pubKey = in.readNBytes(len);
+		publicKeyCA = KeyGenerator.getCAPublicKey(new String(pubKey));
 	}
 
 
@@ -142,10 +153,11 @@ class Bob {
 		 */
 		@Override
 		public void run() {
+
 			// client connection successful
 			System.out.println("Verifying Alice on: " + socket);
 			try {
-				publicKeyCA = KeyGenerator.getCAPublicKey();
+				Bob.getCAPublicKey();
 				DataInputStream in = new DataInputStream(socket.getInputStream());
 				DataOutputStream out = new DataOutputStream(socket.getOutputStream());
 
