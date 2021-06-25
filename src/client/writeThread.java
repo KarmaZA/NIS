@@ -51,6 +51,7 @@ public class writeThread implements Runnable {
                 if (message.equals("quit")){
                     // << HEADER sent to server to signify a QUIT
                     out.writeUTF("CMD,quit,null,null,null");
+                    out.flush();
                     // close input and output streams
                     in.close();
                     out.close();
@@ -68,17 +69,20 @@ public class writeThread implements Runnable {
                     }
                     //send header for other thread to download
                     out.writeUTF("Auth,I," + fName + ",null, null");
+                    out.flush();
                     upload(fName,out, scanner); //uploads client header and image/caption
                 }else{ //just a normal message
                     //basic messaging
                     out.writeUTF("Auth,M,null,null,null");
                     System.out.println("DEBUG:");
                     System.out.println("----------");
-
+                    out.flush();
 
                     byte[] toSend = SecurityFunctions.PGPFullEncrypt(message.getBytes(),KeyGenerator.genSharedKey(),senderPrivateKey,recieverPublicKey);
                     out.writeLong(toSend.length);
+
                     out.write(toSend, 0, toSend.length);
+                    out.flush();
                     System.out.println("Encrypted message sent to " + this.threadName);
                     System.out.println("----------");
                 }
@@ -114,6 +118,7 @@ public class writeThread implements Runnable {
 
             byte[] myByteArraySecure = SecurityFunctions.PGPFullEncrypt(myByteArray, KeyGenerator.genSharedKey(), senderPrivateKey, recieverPublicKey );
             System.out.println(new String(myByteArraySecure));
+
             System.out.println("ENCRYPTING CAPTION");
             byte[] captionSecure = SecurityFunctions.PGPFullEncrypt(caption.getBytes(), KeyGenerator.genSharedKey(), senderPrivateKey, recieverPublicKey );
 
@@ -123,10 +128,12 @@ public class writeThread implements Runnable {
             out.flush();
             // << PAYLOAD sent to server containing length of byte array to upload
             out.writeLong(myByteArraySecure.length);
+            out.flush();
+            System.out.println("Length of image "+ myByteArraySecure.length);
             out.writeLong(captionSecure.length);
+            out.flush();
             // << PAYLOAD sent to server containing byte array
             out.write(payload, 0, payload.length);
-
             out.flush();
             dis.close();
             System.out.println("----------");
