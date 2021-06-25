@@ -5,6 +5,7 @@ import java.net.Socket;
 import java.io.OutputStream;
 import java.io.FileOutputStream;
 import java.security.Key;
+import java.util.Arrays;
 
 public class readThread implements Runnable {
 
@@ -62,10 +63,17 @@ public class readThread implements Runnable {
                         System.out.println("DECRYPTING IMAGE");
 
                         byte[] buffer = new byte[(int)imgSize];
-                        while (imgSize > 0 && (bytesRead = in.read(buffer, 0, (int) Math.min(buffer.length, imgSize))) != -1) {
+                        System.out.println(buffer.length);
+                        byte[] payload = new byte[(int)(imgSize + capSize)];
+                        in.readFully(payload);
+
+                        /*while (imgSize > 0 && (bytesRead = in.read(buffer, 0, (int) Math.min(buffer.length, imgSize))) != -1) {
 //                            output.write(buffer, 0, bytesRead);
                             imgSize -= bytesRead;
-                        }
+                        }*/
+                        //in.read(buffer,0,(int)imgSize);
+                        buffer = Arrays.copyOfRange(payload,0,(int)imgSize);
+                        System.out.println(buffer.length + " and theasa  " + imgSize);
                         System.out.println("made it");
                         System.out.println(new String(buffer));
                         byte[] decryptedBuffer = SecurityFunctions.PGPFullDecrypt(buffer,receiverPrivate,senderPublic);
@@ -74,7 +82,8 @@ public class readThread implements Runnable {
 
                         System.out.println("DECRYPTING CAPTION");
                         byte[] capBuff = new byte[(int)capSize];
-                        in.read(capBuff, 0, (int)capSize);
+                        capBuff = Arrays.copyOfRange(payload,(int)imgSize,payload.length);
+                        //in.read(capBuff, 0, (int)capSize);
                         byte[] captionDecrypted = SecurityFunctions.PGPFullDecrypt(capBuff,receiverPrivate,senderPublic);
                         String Caption = new String (captionDecrypted);
                         //print file and caption received
@@ -87,6 +96,7 @@ public class readThread implements Runnable {
                     } catch (IOException ex) {
                         System.out.println("Could not download file...");
                         out.writeUTF("CTR,null,null,null,failed");
+                        out.flush();
                     }
                 }
                 else if(clientHeader[0].equals("Auth") && clientHeader[1].equals("M")){ //if receiving a message
