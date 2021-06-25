@@ -221,9 +221,6 @@ public class SecurityFunctions {
 
         cipher.init(Cipher.DECRYPT_MODE, keySpecification, ivSpecification); //we want to decrypt
         byte[] decrypted = cipher.doFinal(toDecrypt); //decrypt the message
-        String decryptedString = new String (decrypted);
-        System.out.println("Decrypted with shared key: " + decryptedString.substring(0,Math.min(decryptedString.length(),40)));
-
         return decrypted;
     }
 
@@ -266,7 +263,7 @@ public class SecurityFunctions {
             cipher.init(Cipher.DECRYPT_MODE, asymmetricKey);
             dectyptedText = cipher.doFinal(cipherText);
             String decryptedString = new String (dectyptedText);
-            System.out.println("Decrypted message with asymmetric key: " + decryptedString.substring(0,Math.min(decryptedString.length(),40)));
+            System.out.println("Decrypted with asymmetric key: " + decryptedString.substring(0,Math.min(decryptedString.length(),40)));
             return decryptedString;
         }
         catch (Exception e) {
