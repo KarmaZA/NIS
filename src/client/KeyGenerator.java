@@ -67,11 +67,8 @@ class KeyGenerator{
      * @return a SecretKey that is a usable shared key
      */
     public static SecretKey genSharedKey(){
-
-        // SecureRandom is expensive to initialize (takes several milliseconds) –
-        // consider keeping the instance around if you are generating many keys.
         SecureRandom random = new SecureRandom();
-        byte[] keyBytes = new byte[16];
+        byte[] keyBytes = new byte[16]; //16 byte key
         random.nextBytes(keyBytes);
         SecretKeySpec sharedKey = new SecretKeySpec(keyBytes, "AES");
 
