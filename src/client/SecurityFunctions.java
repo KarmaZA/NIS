@@ -36,6 +36,8 @@ public class SecurityFunctions {
         System.out.println("Hashing the message for Authentication");
         String hashedMessage = hashString(message);
 
+
+
         //encrypt the hash with Alice's private key
         System.out.println("Encrypting the hash with the sender's private key");
         byte[] encryptedHash = encryptWithAsymmetricKey(hashedMessage,privateKey); //encrypt with private key
@@ -61,6 +63,7 @@ public class SecurityFunctions {
         //decrypt the hash with Alice's public key
         String decryptedHash = decryptWithAsymmetricKey(encryptedHashOnly,senderPublicKey); //decrypt with  public key
         //System.out.println("Hash only is " + new String (decryptedHash));
+        System.out.println("Generating our own hash of the message");
         String hashMessageForComparison = hashString(messageOnly);
         //compare the hash that was encrypted and the original message with the new hash if they match then we ensure confidentiality
 
@@ -186,10 +189,11 @@ public class SecurityFunctions {
             SecretKeySpec keySpecification = new SecretKeySpec(sharedKey.getEncoded(), "AES"); //using AES algorithm
             byte[] IV = KeyGenerator.genIV();
             IvParameterSpec ivSpecification = new IvParameterSpec(IV);
-
+            System.out.println("IV: " + new String(IV));
             cipher.init(Cipher.ENCRYPT_MODE, keySpecification, ivSpecification); //we want to encrypt
             byte[] cipherText = cipher.doFinal(message); //perform encryption
-
+            String cipherTextAsString = new String(cipherText);
+            System.out.println("Encrypted message with shared key: " + cipherTextAsString.substring(0,Math.min(cipherTextAsString.length(),40)));
             return concatenateArrays(IV,cipherText);
         }
         catch (Exception e) {
@@ -216,7 +220,11 @@ public class SecurityFunctions {
         IvParameterSpec ivSpecification = new IvParameterSpec(IV);
 
         cipher.init(Cipher.DECRYPT_MODE, keySpecification, ivSpecification); //we want to decrypt
-        return cipher.doFinal(toDecrypt); //decrypt the message
+        byte[] decrypted = cipher.doFinal(toDecrypt); //decrypt the message
+        String decryptedString = new String (decrypted);
+        System.out.println("Decrypted with shared key: " + decryptedString.substring(0,Math.min(decryptedString.length(),40)));
+
+        return decrypted;
     }
 
 
@@ -232,7 +240,11 @@ public class SecurityFunctions {
             Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
             Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding"); //RSA cipher object
             cipher.init(Cipher.ENCRYPT_MODE, asymmetricKey); //encrypting mode
-            return cipher.doFinal(message.getBytes()); //encrypt
+            byte[] cipherText = cipher.doFinal(message.getBytes()); //encrypt
+            String cipherTextAsString = new String(cipherText);
+            System.out.println("Encrypted message with asymmetric key: " + cipherTextAsString.substring(0,Math.min(cipherTextAsString.length(),40)));
+
+            return cipherText;
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -253,8 +265,9 @@ public class SecurityFunctions {
             Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
             cipher.init(Cipher.DECRYPT_MODE, asymmetricKey);
             dectyptedText = cipher.doFinal(cipherText);
-
-            return new String (dectyptedText);
+            String decryptedString = new String (dectyptedText);
+            System.out.println("Decrypted message with asymmetric key: " + decryptedString.substring(0,Math.min(decryptedString.length(),40)));
+            return decryptedString;
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -273,7 +286,9 @@ public class SecurityFunctions {
     public static String hashString(byte[] message) throws NoSuchAlgorithmException {
         MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
         byte[] hash = messageDigest.digest(message); //ISO or UTF
-        return  new String(Hex.encode(hash));
+        String hashedMessage = new String(Hex.encode(hash));
+        System.out.println("Hash: " + hashedMessage.substring(0,Math.min(hashedMessage.length(),40)));
+        return  hashedMessage;
     }
 
     /**
@@ -283,14 +298,16 @@ public class SecurityFunctions {
      * @throws IOException IOException in compress
      */
     public static byte[] compress(byte[] message) throws IOException { //assuming message is not null
-
         //set up streams
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         GZIPOutputStream gzip = new GZIPOutputStream(out);
         //create compressed version
         gzip.write(message); //write the message to the output stream
         gzip.close();
-        return out.toByteArray();
+        byte[] compressed = out.toByteArray();
+        String compressedAsString = new String(compressed);
+        System.out.println("Compressed: " + compressedAsString.substring(0,Math.min(compressedAsString.length(),40)));
+        return compressed;
     }
 
     /**
@@ -300,10 +317,12 @@ public class SecurityFunctions {
      * @throws IOException IOExpection in decompress
      */
     public static byte[] deCompress (byte[] compressed) throws IOException {
-
         //set up stream and reader
         GZIPInputStream gzipInputStream = new GZIPInputStream(new ByteArrayInputStream(compressed));
-        return gzipInputStream.readAllBytes();
+        byte[] decompressed = gzipInputStream.readAllBytes();
+        String decompressedAsString = new String(decompressed);
+        System.out.println("Decompressed: " + decompressedAsString.substring(0,Math.min(decompressedAsString.length(),40)));
+        return decompressed;
     }
 
 

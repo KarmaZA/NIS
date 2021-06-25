@@ -63,7 +63,7 @@ public class readThread implements Runnable {
                         System.out.println("DECRYPTING IMAGE");
 
                         byte[] buffer = new byte[(int)imgSize];
-                        System.out.println(buffer.length);
+                       // System.out.println("Buffer length: " + buffer.length);
                         byte[] payload = new byte[(int)(imgSize + capSize)];
                         in.readFully(payload);
 
