@@ -73,9 +73,6 @@ public class readThread implements Runnable {
                         }*/
                         //in.read(buffer,0,(int)imgSize);
                         buffer = Arrays.copyOfRange(payload,0,(int)imgSize);
-                        System.out.println(buffer.length + " and theasa  " + imgSize);
-                        System.out.println("made it");
-                        System.out.println(new String(buffer));
                         byte[] decryptedBuffer = SecurityFunctions.PGPFullDecrypt(buffer,receiverPrivate,senderPublic);
                         output.write(decryptedBuffer, 0, decryptedBuffer.length);
                         output.close();

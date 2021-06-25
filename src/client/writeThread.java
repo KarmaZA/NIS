@@ -117,7 +117,6 @@ public class writeThread implements Runnable {
             System.out.println("ENCRYPTING IMAGE");
 
             byte[] myByteArraySecure = SecurityFunctions.PGPFullEncrypt(myByteArray, KeyGenerator.genSharedKey(), senderPrivateKey, recieverPublicKey );
-            System.out.println(new String(myByteArraySecure));
 
             System.out.println("ENCRYPTING CAPTION");
             byte[] captionSecure = SecurityFunctions.PGPFullEncrypt(caption.getBytes(), KeyGenerator.genSharedKey(), senderPrivateKey, recieverPublicKey );
@@ -129,7 +128,6 @@ public class writeThread implements Runnable {
             // << PAYLOAD sent to server containing length of byte array to upload
             out.writeLong(myByteArraySecure.length);
             out.flush();
-            System.out.println("Length of image "+ myByteArraySecure.length);
             out.writeLong(captionSecure.length);
             out.flush();
             // << PAYLOAD sent to server containing byte array

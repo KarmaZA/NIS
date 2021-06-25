@@ -89,7 +89,6 @@ class Bob {
 
 			if (certifyArray[0].equals("SIGNED")){
 				certificateExpiryDate = certifyArray[3];
-				System.out.println(certificateExpiryDate);
 				System.out.println("Signed certificate has been returned");
 				return certificate;
 			}
@@ -145,7 +144,6 @@ class Bob {
 			assert hashString!=null;
 			if(checkHash.equals(decryptedSignature)){
 				System.out.println("The decrypted hash matches the public key");
-				System.out.println("It works");
 				cert = Base64.getDecoder().decode(cert);
 				EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(cert);
 				KeyFactory keyFactory = KeyFactory.getInstance("RSA", "BC");
@@ -207,6 +205,7 @@ class Bob {
 					System.out.println("Invalid certificate");
 					System.exit(1);
 				}
+				System.out.println("Authentication Succeeded");
 				/* ************START MESSAGING ******************/
 				//threads for sending and receiving messages/images
 				readThread read = new readThread("Alice", socket, in, out, Bob.privateKey, AlicePublicKey);

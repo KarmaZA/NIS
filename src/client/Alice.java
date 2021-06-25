@@ -19,7 +19,7 @@ class Alice{
 
 
     private final static Scanner scanner = new Scanner(System.in);
-    private static int portUpload = 45554;
+    private static int portNumber = 45554;
 
     private final static String username = "Alice";
     private static String certificateExpiryDate;
@@ -59,20 +59,20 @@ class Alice{
 
 
         //Connect to socket
-        Socket socket = Connect(portUpload);
+        Socket socket = Connect(portNumber);
         //Socket connection failed try new port or quit
 
         while(socket == null){
-            System.out.println("Port Connection failed please input a new port number (0 to exit):");
-            portUpload = Integer.parseInt(scanner.nextLine());
-            if(portUpload == 0){ System.exit(0);}
-            socket = Connect(portUpload);
+            System.out.println("Please input a valid IP or 'localhost':");
+            IP = scanner.nextLine();
+            socket = Connect(portNumber);
         }
         //Authenticate communication
         DataInputStream in = new DataInputStream(socket.getInputStream());
         DataOutputStream out = new DataOutputStream(socket.getOutputStream());
         boolean authenticated = RequestCommunication(in, out);
         if(authenticated){
+            System.out.println("Authentication Succeeded");
             startMessaging(socket,in, out);
         } else {
             //Authentication failed. Assume it's malicious and end program
@@ -137,10 +137,8 @@ class Alice{
             String[] certifyArray = certify.split(",");
 
             certificate = inAuthServ.readNBytes(Integer.parseInt(certifyArray[2]));
-            System.out.println(new String(certificate));
             if (certifyArray[0].equals("SIGNED")){
                 certificateExpiryDate = certifyArray[3];
-                System.out.println(certificateExpiryDate);
                 System.out.println("Signed certificate has been returned");
                 return certificate;
             }
@@ -197,15 +195,10 @@ class Alice{
         try {
             getCAPublicKey();
             //STEP 1 request communication
-            System.out.println("Step 1: Request communication");
+            System.out.println("Request communication");
             //Header to request communication
             outBob.writeUTF("CMD,START,REQCOM," + username + ",null");
             System.out.println("Request has been sent.");
-
-            //STEP 2 Receive Nonce from Bob
-
-            //toSend = inBob.readLine();
-            System.out.println("Step 2");
 
             //If this is a problem make it two lines
             String line = inBob.readUTF();
