@@ -111,14 +111,16 @@ public class writeThread implements Runnable {
             System.out.println("DEBUG:");
             System.out.println("----------");
             System.out.println("ENCRYPTING IMAGE");
+
             byte[] myByteArraySecure = SecurityFunctions.PGPFullEncrypt(myByteArray, KeyGenerator.genSharedKey(), senderPrivateKey, recieverPublicKey );
+            System.out.println(new String(myByteArraySecure));
             System.out.println("ENCRYPTING CAPTION");
             byte[] captionSecure = SecurityFunctions.PGPFullEncrypt(caption.getBytes(), KeyGenerator.genSharedKey(), senderPrivateKey, recieverPublicKey );
 
 
             byte[] payload = joinByteArray(myByteArraySecure, captionSecure);
 
-
+            out.flush();
             // << PAYLOAD sent to server containing length of byte array to upload
             out.writeLong(myByteArraySecure.length);
             out.writeLong(captionSecure.length);

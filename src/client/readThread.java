@@ -66,6 +66,8 @@ public class readThread implements Runnable {
 //                            output.write(buffer, 0, bytesRead);
                             imgSize -= bytesRead;
                         }
+                        System.out.println("made it");
+                        System.out.println(new String(buffer));
                         byte[] decryptedBuffer = SecurityFunctions.PGPFullDecrypt(buffer,receiverPrivate,senderPublic);
                         output.write(decryptedBuffer, 0, decryptedBuffer.length);
                         output.close();
