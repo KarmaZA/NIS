@@ -15,19 +15,13 @@ import java.util.concurrent.Executors;
 
 class Bob {
 	private static ServerSocket serverSocket;
-	//private static final String IP = "localhost";
 	private final static Scanner scanner = new Scanner(System.in);
-
-	//Preset master key with Bob
-	private static SecretKey masterBob = null;
-
-	//key is name, the other thing is the password
 	private static final int portNumber = 45554;
-
 	private final static String username = "Bob";
+
 	private static String certificateExpiryDate;
 
-	//Public private key pair
+	private static SecretKey masterBob = null;
 	public static Key publicKey;
 	private static Key privateKey;
 	private static Key publicKeyCA;
@@ -76,12 +70,12 @@ class Bob {
 			DataInputStream inAuthServ = new DataInputStream(authServerSocket.getInputStream());
 
 			System.out.println("Connected to CA.");
-
 			certificate = Objects.requireNonNull(SecurityFunctions.encryptWithSharedKey(certificate,masterBob));
 
 			outAuthServ.writeUTF("SIGN," + certificate.length +",Bob,null,null");
 			System.out.println("Sent the certificate to the Authentication Server");
 			outAuthServ.write(certificate);
+
 			String certify = inAuthServ.readUTF();
 			String[] certifyArray = certify.split(",");
 
@@ -133,8 +127,10 @@ class Bob {
 			Calendar calendar = Calendar.getInstance();
 			String dayOfTheYear = calendar.get(Calendar.DAY_OF_YEAR) + "";
 			if(Integer.parseInt(dayOfTheYear) >= Integer.parseInt(certificateExpiryDate)){
+				System.out.println("Certificate Expired");
 				return false;
 			}
+			System.out.println("Certificate has not expired");
 
 			byte[] hashToDecrypt = writeThread.joinByteArray(cert, certificateExpiryDate.getBytes());
 			String checkHash = SecurityFunctions.hashString(hashToDecrypt);
@@ -143,11 +139,12 @@ class Bob {
 
 			assert hashString!=null;
 			if(checkHash.equals(decryptedSignature)){
-				System.out.println("The decrypted hash matches the public key");
+				System.out.println("Signature of CA validated");
 				cert = Base64.getDecoder().decode(cert);
 				EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(cert);
 				KeyFactory keyFactory = KeyFactory.getInstance("RSA", "BC");
 				AlicePublicKey = keyFactory.generatePublic(publicKeySpec);
+				System.out.println("Public key retrieved");
 				return true;
 			} else {
 				return false;
@@ -174,12 +171,10 @@ class Bob {
 				String[] requestHeaderArray = requestHeader.split(",");
 				byte[] certificate;
 				if(requestHeaderArray[0].equals("CMD") && requestHeaderArray[1].equals("START") && requestHeaderArray[2].equals("REQCOM")){
-					//Communication request received send back a non
 					System.out.println("Communication request received from " + requestHeaderArray[3]);
 
-					//generates a certificate from the "CA" (AuthServer)
 					certificate = Base64.getEncoder().encode(publicKey.getEncoded());
-					//System.out.println();
+					System.out.println("Requesting certificate");
 					byte[] signedCertificate = Bob.signCertificate(certificate);
 
 
@@ -197,9 +192,8 @@ class Bob {
 
 				certificate = in.readNBytes(Integer.parseInt(requestHeaderArray[2]));
 				byte[] certSignature = in.readNBytes(Integer.parseInt(requestHeaderArray[3]));
-
-				System.out.println("Extracting Public Key");
 				System.out.println("Certificate Received");
+				System.out.println("Extracting Public Key");
 
 				if(!getPublicKey(certificate, certSignature)){
 					System.out.println("Invalid certificate");
@@ -207,7 +201,6 @@ class Bob {
 				}
 				System.out.println("Authentication Succeeded");
 				/* ************START MESSAGING ******************/
-				//threads for sending and receiving messages/images
 				readThread read = new readThread("Alice", socket, in, out, Bob.privateKey, AlicePublicKey);
 				writeThread write = new writeThread("Alice", scanner, socket, in, out, Bob.privateKey, AlicePublicKey );
 

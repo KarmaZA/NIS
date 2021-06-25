@@ -11,8 +11,6 @@
       <change beforePath="$PROJECT_DIR$/public.txt" beforeDir="false" afterPath="$PROJECT_DIR$/public.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/client/Alice.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/Alice.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/client/Bob.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/Bob.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/client/readThread.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/readThread.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/client/writeThread.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/client/writeThread.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -160,6 +158,17 @@
     </key>
   </component>
   <component name="RunManager" selected="Application.Alice">
+    <configuration default="true" type="ArquillianJUnit" factoryName="" nameIsGenerated="true">
+      <option name="arquillianRunConfiguration">
+        <value>
+          <option name="containerStateName" value="" />
+        </value>
+      </option>
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="Alice" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="Alice" />
       <module name="NIS" />
@@ -177,17 +186,6 @@
     <configuration name="authServer" type="Application" factoryName="Application">
       <option name="MAIN_CLASS_NAME" value="AuthenticationServer" />
       <module name="NIS" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration default="true" type="ArquillianJUnit" factoryName="" nameIsGenerated="true">
-      <option name="arquillianRunConfiguration">
-        <value>
-          <option name="containerStateName" value="" />
-        </value>
-      </option>
-      <option name="TEST_OBJECT" value="class" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>

@@ -14,23 +14,19 @@ import java.util.Objects;
 import java.util.Scanner;
 
 class Alice{
-    //Preset master key with Alice
-    private static SecretKey masterAlice = null;
-
-
     private final static Scanner scanner = new Scanner(System.in);
-    private static int portNumber = 45554;
-
+    private final static int portNumber = 45554;
+    private static String IP = "localhost";
     private final static String username = "Alice";
+
     private static String certificateExpiryDate;
 
     public static Key publicKey;
     private static Key privateKey;
     private static Key BobPublicKey;
     public static Key publicKeyCA;
-    private static String IP = "localhost";//196.24.167.94";
+    private static SecretKey masterAlice = null;
 
-    //For two way messaging
     static volatile boolean done = true;
 
     /**
@@ -53,14 +49,10 @@ class Alice{
             //Catch a possible Null Pointer Exception
             System.out.println("Key pair generation failed.");
         }
-
         System.out.println("Please input the IP of the computer you want to connect with or use 'localhost':");
         IP = scanner.nextLine();
 
-
-        //Connect to socket
         Socket socket = Connect(portNumber);
-        //Socket connection failed try new port or quit
 
         while(socket == null){
             System.out.println("Please input a valid IP or 'localhost':");
@@ -162,8 +154,10 @@ class Alice{
         Calendar calendar = Calendar.getInstance();
         String dayOfTheYear = calendar.get(Calendar.DAY_OF_YEAR) + "";
         if(Integer.parseInt(dayOfTheYear) >= Integer.parseInt(certificateExpiryDate)){
+            System.out.println("Certificate Expired");
             return false;
         }
+        System.out.println("Certificate has not expired");
 
         byte[] hashToDecrypt = writeThread.joinByteArray(cert, certificateExpiryDate.getBytes());
         String checkHash = SecurityFunctions.hashString(hashToDecrypt);
@@ -172,11 +166,12 @@ class Alice{
 
         assert hashString!=null;
         if(checkHash.equals(decryptedSignature)){
-            System.out.println("The decrypted hash matches the public key");
+            System.out.println("Signature of CA validated");
             cert = Base64.getDecoder().decode(cert);
             EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(cert);
             KeyFactory keyFactory = KeyFactory.getInstance("RSA", "BC");
             BobPublicKey = keyFactory.generatePublic(publicKeySpec);
+            System.out.println("Public key retrieved");
             return true;
         } else {
             return false;
@@ -194,13 +189,12 @@ class Alice{
     private static boolean RequestCommunication(DataInputStream inBob, DataOutputStream outBob){
         try {
             getCAPublicKey();
-            //STEP 1 request communication
+            //request communication
             System.out.println("Request communication");
             //Header to request communication
             outBob.writeUTF("CMD,START,REQCOM," + username + ",null");
             System.out.println("Request has been sent.");
 
-            //If this is a problem make it two lines
             String line = inBob.readUTF();
             String[] bobHeader = line.split(",");
             certificateExpiryDate = bobHeader[1];
@@ -214,18 +208,18 @@ class Alice{
             }
 
             System.out.println("The certificate has been verified");
+            System.out.println("Requesting certificate");
 
-            //STEP 3 send nonce to Auth Server
             certificate = Base64.getEncoder().encode(publicKey.getEncoded());
             signedCertificate = signCertificate(certificate);
             if(certificate == null) System.exit(1);
-            //String certificate = "bob";
 
             System.out.println("The certificate has been signed");
 
             outBob.writeUTF("CMD," + certificateExpiryDate + "," + certificate.length + "," + signedCertificate.length + ",null");
             outBob.write(certificate);
             outBob.write(signedCertificate);
+            System.out.println("Certificate sent");
             return true;
 
         } catch (Exception e){
